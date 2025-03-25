@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* styles/globals.css */
+@keyframes flash {
+  0% {
+    color: #ff0000;
+  }
+
+  50% {
+    color: white;
+  }
+
+  100% {
+    color: #ff0000;
+  }
+}
+
+.flash {
+  animation: flash 1s infinite;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:root {
+  --color-main: #2e2e30; /* Dark mode main color */
+  --color-secondary: #454547; /* Dark mode secondary color */
+  --color-dark: #252628; /* Dark mode background color */
+  --color-titles: #ffffff; /* Dark mode titles */
+  --color-labels: #cbd5e1; /* Dark mode labels */
+  --color-icons: white; /* Dark mode labels */
+  /* text colors */
+  --color-twhite: #fff;
+  --color-tbright: #f1f5f9;
+  --color-tmid: #cbd5e1;
+  --color-tdark: #94a3b8;
+  --color-tblack: #475569;
+  --color-tblackAF: #000;
+  /* Accent Colors */
+  --color-primary: #2684ff; /* Primary blue for links and buttons */
+  --color-success: #2ecc71; /* Green for success messages or highlights */
+  --color-warning: #f39c12; /* Amber for warnings or cautions */
+  --color-danger: #e74c3c; /* Red for errors or destructive actions */
+}
+
+.light {
+  /* Main Backgrounds */
+  --color-main: #fafafa; /* Pure white background for light mode */
+  --color-secondary: #e4e5f1; /* Slightly off-white secondary background */
+  --color-dark: #d2d3db; /* Neutral light gray background for cards or sections */
+  --color-darker: #9394a5; /* Neutral light gray background for cards or sections */
+  --color-darkest: #484b6a; /* Neutral light gray background for cards or sections */
+  --color-icons: #475569; /* Dark mode labels */
+
+  /* Text Colors */
+  --color-titles: #2e3a59; /* Dark slate for titles to ensure contrast */
+  --color-labels: #6c757d; /* Muted gray for secondary text and labels */
+
+  /* Text Shades */
+  --color-twhite: #111827; /* Black for the light mode text */
+  --color-tblack: #9ca3af; /* Neutral gray for lighter text emphasis */
+  --color-tdark: #4b5563; /* Slightly darker gray for muted elements */
+  --color-tmid: #374151; /* Medium gray for descriptions */
+  --color-tbright: #1f2937; /* Dark black-gray for emphasized text */
+  --color-tblackAF: #fff; /* Pure dark shade for very strong emphasis */
+
+  /* Accent Colors */
+  --color-primary: #2684ff; /* Primary blue for links and buttons */
+  --color-success: #2ecc71; /* Green for success messages or highlights */
+  --color-warning: #f39c12; /* Amber for warnings or cautions */
+  --color-danger: #e74c3c; /* Red for errors or destructive actions */
+}
+
+.svg-container {
+  color: var(--color-icons); /* SVG will inherit this color for "stroke" */
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Smooth transitions for input focus states */
+input {
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Button animation */
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: radial-gradient(
+      rgb(255 255 255 / 0.1) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+}
