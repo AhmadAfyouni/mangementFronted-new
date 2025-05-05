@@ -41,7 +41,7 @@ const DynamicResponsibilities: React.FC<DynamicResponsibilitiesProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="gap-3">
       <label className="block text-sm font-medium">
         {t("Responsibilities")}
       </label>
@@ -69,10 +69,9 @@ const DynamicResponsibilities: React.FC<DynamicResponsibilitiesProps> = ({
         type="button"
         onClick={handleAddResponsibility}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg 
-          ${
-            isLightMode
-              ? "bg-dark hover:bg-darker text-tblackAF"
-              : "bg-secondary hover:bg-slate-700 text-twhite"
+          ${isLightMode
+            ? "bg-dark hover:bg-darker text-tblackAF"
+            : "bg-secondary hover:bg-slate-700 text-twhite"
           }`}
       >
         <Plus size={20} />

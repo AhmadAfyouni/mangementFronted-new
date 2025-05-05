@@ -130,7 +130,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
       <h3 className="font-semibold text-twhite mb-3">{t("Attachments")}</h3>
 
       <div className="mb-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -142,11 +142,9 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           />
           <label
             htmlFor="task-files"
-            className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${
-              isLightMode ? "bg-secondary text-twhite" : "bg-tblack text-twhite"
-            } hover:bg-secondary transition-colors ${
-              isUploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${isLightMode ? "bg-secondary text-twhite" : "bg-tblack text-twhite"
+              } hover:bg-secondary transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             <Image
               src={PaperClipIcon}
@@ -159,9 +157,9 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           <span className="text-sm text-tdark">
             {urls.length > 0
               ? t("{{count}} files uploaded").replace(
-                  "{{count}}",
-                  urls.length.toString()
-                )
+                "{{count}}",
+                urls.length.toString()
+              )
               : t("No files uploaded")}
           </span>
         </div>
@@ -174,13 +172,12 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
       {uploadingFiles.length > 0 && (
         <div className="mt-3">
           <h4 className="text-sm text-tdark mb-2">{t("Files")}:</h4>
-          <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+          <div className="gap-2 max-h-40 overflow-y-auto pr-2">
             {uploadingFiles.map((file) => (
               <div
                 key={file.id}
-                className={`rounded-md ${
-                  isLightMode ? "bg-light-droppable-fade" : "bg-tblack"
-                }`}
+                className={`rounded-md ${isLightMode ? "bg-light-droppable-fade" : "bg-tblack"
+                  }`}
               >
                 <div className="flex items-center justify-between p-2">
                   <div className="flex items-center gap-2 truncate flex-1">
@@ -209,7 +206,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="text-green-400 text-xs flex items-center">
                         <svg
-                          className="w-4 h-4 mr-1"
+                          className="w-4 h-4 mx-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

@@ -12,6 +12,7 @@ import {
 import userReducer from "./slices/userSlice";
 import wrapperReducer from "./slices/wrapper.slice";
 import themeReducer from "./slices/themeSlice";
+import globalSearchReducer from "./slices/searchSlice";
 
 const persistConfig = {
   key: "root",
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   theme: themeReducer,
   wrapper: wrapperReducer,
+  globalSearch: globalSearchReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

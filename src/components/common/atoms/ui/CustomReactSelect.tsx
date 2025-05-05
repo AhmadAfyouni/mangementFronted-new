@@ -50,8 +50,8 @@ export const CustomReactSelect = <IsMulti extends boolean = false>({
       backgroundColor: state.isFocused
         ? "#374151"
         : state.isSelected
-        ? "#1f2937"
-        : "transparent",
+          ? "#1f2937"
+          : "transparent",
       color: state.isFocused ? "#fff" : isLightMode ? "#111827" : "#fff",
       padding: "8px 12px",
       cursor: "pointer",
@@ -123,7 +123,7 @@ export const CustomReactSelect = <IsMulti extends boolean = false>({
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="gap-1.5">
       {label && (
         <label className="text-sm font-medium text-twhite">{label}</label>
       )}

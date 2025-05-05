@@ -86,15 +86,14 @@ const AddDept = () => {
   return (
     <GridContainer>
       <div
-        className={`${
-          isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-        }  p-8 rounded-xl shadow-lg  w-full  col-span-full  text-twhite`}
+        className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+          }  p-8 rounded-xl shadow-lg  w-full  col-span-full  text-twhite`}
       >
         <h1 className=" text-2xl text-twhite font-bold mb-6">
           {departmentData ? t("Update Department") : t("Create Department")}
         </h1>
         <form
-          className="space-y-4 text-twhite"
+          className="gap-4 text-twhite"
           onSubmit={handleSubmit(() =>
             handleManualSubmit({
               getValues,
@@ -197,9 +196,8 @@ const AddDept = () => {
 
           <button
             type="submit" // Change to "button" to avoid default form submission
-            className={`w-full py-2 mt-4 bg-slate-600  rounded-lg font-bold hover:bg-slate-700 transition duration-300 ${
-              isPendingDepartment ? "opacity-50 cursor-not-allowed" : ""
-            }
+            className={`w-full py-2 mt-4 bg-slate-600  rounded-lg font-bold hover:bg-slate-700 transition duration-300 ${isPendingDepartment ? "opacity-50 cursor-not-allowed" : ""
+              }
               
               ${isLightMode ? " text-tblackAF" : "text-twhite"}
 

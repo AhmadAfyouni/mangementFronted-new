@@ -160,7 +160,7 @@ const AddSubTaskModal: React.FC<{
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="bg-dark rounded-xl shadow-md w-[500px] h-[90%] text-twhite space-y-4 p-6 relative overflow-hidden overflow-y-auto no-scrollbar">
+        <div className="bg-dark rounded-xl shadow-md w-[500px] h-[90%] text-twhite gap-4 p-6 relative overflow-hidden overflow-y-auto no-scrollbar">
           <button
             onClick={onClose}
             className="text-twhite absolute top-4 right-4 text-xl"
@@ -181,9 +181,8 @@ const AddSubTaskModal: React.FC<{
                 <input
                   type="text"
                   {...register("name")}
-                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${
-                    errors.name ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${errors.name ? "border border-red-500" : "border-none"
+                    }`}
                   placeholder={t("Enter task name")}
                 />
 
@@ -201,9 +200,8 @@ const AddSubTaskModal: React.FC<{
                 </label>
                 <textarea
                   {...register("description")}
-                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${
-                    errors.description ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${errors.description ? "border border-red-500" : "border-none"
+                    }`}
                   placeholder={t("Enter task description")}
                 />
                 {errors.description && (
@@ -220,9 +218,8 @@ const AddSubTaskModal: React.FC<{
                 </label>
                 <select
                   {...register("priority")}
-                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${
-                    errors.priority ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${errors.priority ? "border border-red-500" : "border-none"
+                    }`}
                 >
                   <option value="">{t("Select a priority ")}</option>
                   {["HIGH", "MEDIUM", "LOW"].map((priority, index) => (
@@ -246,9 +243,8 @@ const AddSubTaskModal: React.FC<{
                 <input
                   type="date"
                   {...register("due_date")}
-                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${
-                    errors.due_date ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${errors.due_date ? "border border-red-500" : "border-none"
+                    }`}
                 />
                 {errors.due_date && (
                   <p className="text-red-500 mt-1 text-sm">
@@ -264,9 +260,8 @@ const AddSubTaskModal: React.FC<{
                 </label>
                 <select
                   {...register("emp")}
-                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${
-                    errors.emp ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-secondary outline-none rounded-lg ${errors.emp ? "border border-red-500" : "border-none"
+                    }`}
                 >
                   <option value="">{t("Select an employee")}</option>
                   {employees &&
@@ -291,7 +286,7 @@ const AddSubTaskModal: React.FC<{
                 </h3>
 
                 <div className="mb-4">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -304,10 +299,9 @@ const AddSubTaskModal: React.FC<{
                     <label
                       htmlFor="task-files"
                       className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer 
-                        ${
-                          isLightMode
-                            ? "bg-tblack text-twhite"
-                            : "bg-slate-800 text-twhite"
+                        ${isLightMode
+                          ? "bg-tblack text-twhite"
+                          : "bg-slate-800 text-twhite"
                         }
                         hover:bg-slate-700  transition-colors 
                         hover:text-white 
@@ -333,9 +327,9 @@ const AddSubTaskModal: React.FC<{
                     <span className="text-sm text-tdark">
                       {urls.length > 0
                         ? t("{{count}} files uploaded").replace(
-                            "{{count}}",
-                            urls.length.toString()
-                          )
+                          "{{count}}",
+                          urls.length.toString()
+                        )
                         : t("No files uploaded")}
                     </span>
                   </div>
@@ -351,13 +345,12 @@ const AddSubTaskModal: React.FC<{
                 {uploadingFiles.length > 0 && (
                   <div className="mt-3">
                     <h4 className="text-sm text-tdark mb-2">{t("Files")}:</h4>
-                    <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                    <div className="gap-2 max-h-40 overflow-y-auto pr-2">
                       {uploadingFiles.map((file) => (
                         <div
                           key={file.id}
-                          className={`rounded-md ${
-                            isLightMode ? "bg-slate-700" : "bg-slate-800"
-                          }`}
+                          className={`rounded-md ${isLightMode ? "bg-slate-700" : "bg-slate-800"
+                            }`}
                         >
                           <div className="flex items-center justify-between p-2">
                             <div className="flex items-center gap-2 truncate flex-1">
@@ -386,7 +379,7 @@ const AddSubTaskModal: React.FC<{
                               <div className="flex items-center gap-2">
                                 <span className="text-green-400 text-xs flex items-center">
                                   <svg
-                                    className="w-4 h-4 mr-1"
+                                    className="w-4 h-4 mx-1"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -485,11 +478,10 @@ const AddSubTaskModal: React.FC<{
 
               <button
                 type="submit"
-                className={`w-full py-2 mt-4 bg-slate-600 text-twhite rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${
-                  isPending || isUploading
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
+                className={`w-full py-2 mt-4 bg-slate-600 text-twhite rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${isPending || isUploading
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+                  }`}
                 disabled={isPending || isUploading}
               >
                 {isPending ? t("Creating...") : t("Create SubTask")}

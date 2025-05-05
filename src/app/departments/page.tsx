@@ -7,15 +7,18 @@ import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 import DepartmentsContent from "@/components/common/molcules/DepartmentsContent";
 import DepartmentHierarchyTree from "@/components/common/molcules/DepartmentsHierarchyTree";
+import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
 import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
+import { setActiveEntity } from "@/state/slices/searchSlice";
 import { DepartmentType } from "@/types/DepartmentType.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
 const DepartmentsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("table");
@@ -27,6 +30,7 @@ const DepartmentsView: React.FC = () => {
   const canViewSpecificDepartments = usePermissions([
     "department_view_specific",
   ]);
+
   const { data: departments, isLoading } = useCustomQuery<{
     info: DepartmentType[];
     tree: DeptTree[];
@@ -36,6 +40,38 @@ const DepartmentsView: React.FC = () => {
   });
 
   const showSelect = isAdmin || (canViewSpecificDepartments && isPrimary);
+  const dispatch = useDispatch();
+
+  // Set active entity for global search
+  useEffect(() => {
+    dispatch(setActiveEntity('departments'));
+  }, [dispatch]);
+
+  // Search configuration - fixed with proper typing
+  const searchConfig: SearchConfig<DepartmentType> = {
+    searchFields: ['name', 'category', 'goal', 'description', 'mainTasks'] as Array<keyof DepartmentType>,
+    filterOptions: {
+      category: {
+        label: 'Category',
+        options: [
+          { value: 'Administration', label: 'Administration' },
+          { value: 'Technical', label: 'Technical' },
+          { value: 'Business', label: 'Business' }
+        ]
+      }
+    }
+  };
+
+  // Use the global search hook to filter departments
+  const {
+    paginatedData,
+    totalItems,
+    totalPages,
+    currentPage,
+    itemsPerPage,
+    handlePageChange,
+    handleItemsPerPageChange
+  } = useGlobalSearch('departments', departments?.info || [], searchConfig);
 
   return (
     <GridContainer>
@@ -51,7 +87,7 @@ const DepartmentsView: React.FC = () => {
         <div className="flex items-center justify-center gap-5 flex-wrap">
           {showSelect && (
             <select
-              className=" border bg-secondary outline-none border-none text-twhite border-gray-300 rounded-lg px-4 py-2 focus:outline-none transition duration-200"
+              className="border bg-secondary outline-none border-none text-twhite border-gray-300 rounded-lg px-4 py-2 focus:outline-none transition duration-200"
               value={selectedOption}
               onChange={(e) => setSelectedOption(e.target.value)}
             >
@@ -82,10 +118,20 @@ const DepartmentsView: React.FC = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        {activeTab == "table" && departments && departments.info && (
-          <DepartmentsContent departmentsData={departments.info} />
+        {activeTab === "table" && departments && departments.info && (
+          <DepartmentsContent
+            departmentsData={paginatedData}
+            pagination={{
+              currentPage,
+              totalPages,
+              totalItems,
+              itemsPerPage,
+              onPageChange: handlePageChange,
+              onItemsPerPageChange: handleItemsPerPageChange
+            }}
+          />
         )}
-        {activeTab == "tree" && (
+        {activeTab === "tree" && (
           <>
             {departments && departments.tree && (
               <DepartmentHierarchyTree data={departments.tree} width="100%" />

@@ -119,7 +119,7 @@ const StarRating = ({
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-6 gap-6">
               <div className="flex flex-col items-center gap-4">
                 <RatingStars />
                 <span className="text-sm ">
@@ -135,19 +135,17 @@ const StarRating = ({
               <div className="flex justify-end gap-3 px-6 py-4 bg-secondary rounded-b-lg">
                 <button
                   onClick={() => setIsRatingOpen(false)}
-                  className={`px-4 py-2 text-sm font-medium  ${
-                    isLightMode ? "hover:text-white" : ""
-                  } border border-gray-300 rounded-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                  className={`px-4 py-2 text-sm font-medium  ${isLightMode ? "hover:text-white" : ""
+                    } border border-gray-300 rounded-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                 >
                   {t("Cancel")}
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className={`px-4 py-2 text-sm font-medium ${
-                    isLightMode
+                  className={`px-4 py-2 text-sm font-medium ${isLightMode
                       ? "text-white  bg-darkest hover:bg-tblack"
                       : "bg-dark"
-                  }  border border-transparent rounded-md hover:bg-tdark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                    }  border border-transparent rounded-md hover:bg-tdark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                 >
                   {t("Submit")}
                 </button>

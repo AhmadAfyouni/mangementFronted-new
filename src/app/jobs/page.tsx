@@ -7,17 +7,23 @@ import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { setActiveEntity } from "@/state/slices/searchSlice";
 
 const JobTitlesView: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState("get-job-titles");
   const isAdmin = useRolePermissions("admin");
   const { t } = useTranslation();
-
+  const dispatch = useDispatch();
   const canViewSpecific = usePermissions(["job_title_view_specific"]);
-
   const showSelect = isAdmin || canViewSpecific;
+
+  // Set active entity for global search when this page is loaded
+  useEffect(() => {
+    dispatch(setActiveEntity('jobTitles'));
+  }, [dispatch]);
 
   return (
     <GridContainer>

@@ -145,11 +145,10 @@ const TransactionActionModal = ({
 
   return (
     <div
-      className={`fixed inset-0 -top-4 z-50 ${
-        isOpen
+      className={`fixed inset-0 -top-4 z-50 ${isOpen
           ? "opacity-100 pointer-events-auto"
           : "opacity-0 pointer-events-none"
-      } transition-opacity duration-300`}
+        } transition-opacity duration-300`}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
@@ -158,9 +157,8 @@ const TransactionActionModal = ({
       <div className="fixed inset-0 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
           <div
-            className={`bg-secondary rounded-xl p-6 max-w-md w-full transform ${
-              isOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-            } transition-all duration-300`}
+            className={`bg-secondary rounded-xl p-6 max-w-md w-full transform ${isOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              } transition-all duration-300`}
           >
             {/* Title */}
             <div className="flex items-center gap-3 mb-4">
@@ -173,7 +171,7 @@ const TransactionActionModal = ({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="gap-4">
               <div>
                 <label className="block text-sm text-tmid mb-2">
                   {t("Note")}

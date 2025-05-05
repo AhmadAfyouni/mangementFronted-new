@@ -224,15 +224,13 @@ const DeptAdditionalSection = ({
           <div key={field.id} className="flex gap-4 items-center">
             <select
               {...register(`numericOwners.${index}.category` as const)}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              } w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.numericOwners?.[index]?.category
+                } w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border ${errors.numericOwners?.[index]?.category
                   ? "border-high"
                   : "border-border"
-              }`}
+                }`}
             >
               <option value="">{t("Select a Job Category")}</option>
               {availableCategories.map((category, i) => (
@@ -256,11 +254,10 @@ const DeptAdditionalSection = ({
                 valueAsNumber: true,
               })}
               placeholder={t("Count")}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
+                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <Image
               src={XIcon}
@@ -293,15 +290,14 @@ const DeptAdditionalSection = ({
           type="file"
           multiple
           onChange={handleFileChange}
-          className={`    ${
-            isLightMode ? "bg-dark  placeholder:text-tdark " : "bg-secondary"
-          }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg `}
+          className={`    ${isLightMode ? "bg-dark  placeholder:text-tdark " : "bg-secondary"
+            }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg `}
         />
 
         {/* Display loading state for supporting files */}
         {supportingFilesLoading && (
           <div className="flex items-center mt-2 mb-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent mx-2"></div>
             <span className="text-sm text-tmid">{t("Uploading files...")}</span>
           </div>
         )}
@@ -310,9 +306,8 @@ const DeptAdditionalSection = ({
         {supportingFileUrls.map((fileUrl, index) => (
           <div key={`url-${index}`} className="flex gap-4 items-center mt-2">
             <div
-              className={`${
-                isLightMode ? "bg-dark text-white" : "bg-secondary text-white"
-              } px-4 py-2 rounded-l-lg flex-1 flex items-center cursor-pointer`}
+              className={`${isLightMode ? "bg-dark text-white" : "bg-secondary text-white"
+                } px-4 py-2 rounded-l-lg flex-1 flex items-center cursor-pointer`}
             >
               <span className="truncate">{processPublicUrl(fileUrl)}</span>
               <svg
@@ -333,9 +328,8 @@ const DeptAdditionalSection = ({
             <button
               type="button"
               onClick={() => handleRemoveFile(index)}
-              className={`${
-                isLightMode ? "bg-red-500 text-white" : "bg-red-600 text-white"
-              } px-3 py-2 mt-1 rounded-r-lg`}
+              className={`${isLightMode ? "bg-red-500 text-white" : "bg-red-600 text-white"
+                } px-3 py-2 mt-1 rounded-r-lg`}
               title={t("Remove file")}
             >
               <svg
@@ -375,22 +369,20 @@ const DeptAdditionalSection = ({
               type="text"
               {...register(`requiredReports.${index}.name` as const)}
               placeholder={t("Report Name")}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
+                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <div className="relative w-full">
               {!reportEditMode[index] && isValidUrl(field.templateFile) ? (
                 // Show open file button with edit option
                 <div className="flex">
                   <div
-                    className={`${
-                      isLightMode
+                    className={`${isLightMode
                         ? "bg-dark text-white"
                         : "bg-secondary text-white"
-                    } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
+                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
                   >
                     <span className="truncate">
                       {processPublicUrl(field.templateFile)}
@@ -413,11 +405,10 @@ const DeptAdditionalSection = ({
                   <button
                     type="button"
                     onClick={() => switchReportToEditMode(index)}
-                    className={`${
-                      isLightMode
+                    className={`${isLightMode
                         ? "bg-red-500 text-white"
                         : "bg-red-600 text-white"
-                    } px-3 py-2 mt-1 rounded-r-lg`}
+                      } px-3 py-2 mt-1 rounded-r-lg`}
                     title={t("Replace file")}
                   >
                     <svg
@@ -441,13 +432,11 @@ const DeptAdditionalSection = ({
                 <input
                   type="file"
                   placeholder={t("Template File")}
-                  className={`    ${
-                    isLightMode
+                  className={`    ${isLightMode
                       ? "bg-dark  placeholder:text-tdark "
                       : "bg-secondary"
-                  }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${
-                    loadingReportIndex === index ? "opacity-50" : ""
-                  }`}
+                    }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingReportIndex === index ? "opacity-50" : ""
+                    }`}
                   disabled={loadingReportIndex === index}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
@@ -519,21 +508,19 @@ const DeptAdditionalSection = ({
               type="text"
               {...register(`developmentPrograms.${index}.programName` as const)}
               placeholder={t("Program Name")}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
+                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <input
               type="text"
               {...register(`developmentPrograms.${index}.objective` as const)}
               placeholder={t("Objective")}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              } w-full bg-secondary border-none outline-none px-4 py-2 mt-1 rounded-lg border `}
+                } w-full bg-secondary border-none outline-none px-4 py-2 mt-1 rounded-lg border `}
             />
 
             <div className="relative w-full">
@@ -541,11 +528,10 @@ const DeptAdditionalSection = ({
                 // Show open file button with edit option
                 <div className="flex">
                   <div
-                    className={`${
-                      isLightMode
+                    className={`${isLightMode
                         ? "bg-dark text-white"
                         : "bg-secondary text-white"
-                    } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
+                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
                   >
                     <span className="truncate">
                       {processPublicUrl(field.programFile)}
@@ -568,11 +554,10 @@ const DeptAdditionalSection = ({
                   <button
                     type="button"
                     onClick={() => switchProgramToEditMode(index)}
-                    className={`${
-                      isLightMode
+                    className={`${isLightMode
                         ? "bg-red-500 text-white"
                         : "bg-red-600 text-white"
-                    } px-3 py-2 mt-1 rounded-r-lg`}
+                      } px-3 py-2 mt-1 rounded-r-lg`}
                     title={t("Replace file")}
                   >
                     <svg
@@ -596,13 +581,11 @@ const DeptAdditionalSection = ({
                 <input
                   type="file"
                   placeholder={t("Program File")}
-                  className={`    ${
-                    isLightMode
+                  className={`    ${isLightMode
                       ? "bg-dark  placeholder:text-tdark "
                       : "bg-secondary"
-                  }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${
-                    loadingProgramIndex === index ? "opacity-50" : ""
-                  }`}
+                    }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingProgramIndex === index ? "opacity-50" : ""
+                    }`}
                   disabled={loadingProgramIndex === index}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
@@ -648,11 +631,10 @@ const DeptAdditionalSection = ({
             <textarea
               {...register(`developmentPrograms.${index}.notes` as const)}
               placeholder={t("Notes")}
-              className={`    ${
-                isLightMode
+              className={`    ${isLightMode
                   ? "bg-dark  placeholder:text-tdark "
                   : "bg-secondary"
-              }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
+                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
               rows={1}
             />
             <Image

@@ -52,16 +52,15 @@ const ListSection: React.FC<{
                 alt="arrow icon"
                 width={20}
                 height={20}
-                className={`mr-2  transform 
+                className={`mx-2  transform 
                 z-auto
                 ${isLightMode ? `bg-tmid p-1 rounded-md h-[25px] w-[25px]` : ""}
-                ${
-                  isOpen
+                ${isOpen
                     ? "rotate-0"
                     : currentLanguage == "en"
-                    ? "-rotate-90"
-                    : "rotate-90"
-                }`}
+                      ? "-rotate-90"
+                      : "rotate-90"
+                  }`}
               />
               {t(section.name)}
             </span>
@@ -84,11 +83,10 @@ const ListSection: React.FC<{
                 >
                   <ul>
                     <li
-                      className={`px-4 py-2 text-sm ${
-                        isLightMode
+                      className={`px-4 py-2 text-sm ${isLightMode
                           ? `text-tblackAF hover:bg-darkest`
                           : "text-twhite hover:bg-slate-700"
-                      }  cursor-pointer  flex items-center gap-1  `}
+                        }  cursor-pointer  flex items-center gap-1  `}
                       onClick={() => {
                         setIsRenameOpen(true);
                         setIsMenuOpen(false);
@@ -98,11 +96,10 @@ const ListSection: React.FC<{
                       {t("Rename")}
                     </li>
                     <li
-                      className={`px-4 py-2 text-sm ${
-                        isLightMode
+                      className={`px-4 py-2 text-sm ${isLightMode
                           ? `text-tblackAF hover:bg-darkest`
                           : "text-twhite hover:bg-slate-700"
-                      }  cursor-pointer  flex items-center gap-1`}
+                        }  cursor-pointer  flex items-center gap-1`}
                       onClick={() => {
                         console.log("Delete clicked");
                         deleteSection({});

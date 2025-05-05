@@ -27,19 +27,18 @@ const Profile = () => {
   const { selector: info } = useRedux(
     (state: RootState) => state.user.userInfo
   );
-  const {} = useCustomTheme();
+  const { } = useCustomTheme();
   const isAdmin = useRolePermissions("admin");
   const isPrimary = useRolePermissions("primary_user");
   const { currentLanguage, t } = useLanguage();
   const { data: tasksData } = useCustomQuery<ReceiveTaskType[]>({
     queryKey: ["tasks"],
-    url: `/tasks/${
-      isAdmin
+    url: `/tasks/${isAdmin
         ? "get-all-tasks"
         : isPrimary
-        ? "get-my-dept-tasks"
-        : "get-emp-tasks"
-    }`,
+          ? "get-my-dept-tasks"
+          : "get-emp-tasks"
+      }`,
     nestedData: true,
   });
   const currently =
@@ -71,7 +70,7 @@ const Profile = () => {
           </div>
 
           {/* Main Content */}
-          <div className="space-y-6">
+          <div className="gap-6">
             {/* Custom Tabs */}
             <div className="bg-dark rounded-lg p-1">
               <div className="flex justify-between gap-2">
@@ -79,11 +78,10 @@ const Profile = () => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2 px-4 rounded-md transition-all ${
-                      activeTab === tab
+                    className={`flex-1 py-2 px-4 rounded-md transition-all ${activeTab === tab
                         ? "bg-tblack text-white"
                         : "text-slate-400 hover:text-white hover:bg-tblack   "
-                    }`}
+                      }`}
                   >
                     {t(tab.charAt(0).toUpperCase() + tab.slice(1))}
                   </button>
@@ -101,7 +99,7 @@ const Profile = () => {
                       {t("Personal Information")}
                     </h2>
                   </div>
-                  <div className="p-4 space-y-4">
+                  <div className="p-4 gap-4">
                     <PersonalInfoCard
                       icon={Phone}
                       label="Phone"
@@ -137,7 +135,7 @@ const Profile = () => {
                       {t("Work Details")}
                     </h2>
                   </div>
-                  <div className="p-4 space-y-4">
+                  <div className="p-4 gap-4">
                     <PersonalInfoCard
                       icon={Building2}
                       label="Department"

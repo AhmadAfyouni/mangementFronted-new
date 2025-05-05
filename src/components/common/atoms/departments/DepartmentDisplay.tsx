@@ -55,18 +55,17 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
   );
 
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col space-y-4 col-span-12">
+    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
       {/* Enhanced Header with Search */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div className="flex items-center">
           <Building
-            className={`mr-2 ${isLightMode ? "text-tblackAF" : "text-twhite"}`}
+            className={`mx-2 ${isLightMode ? "text-tblackAF" : "text-twhite"}`}
             size={22}
           />
           <h2
-            className={`text-xl font-semibold ${
-              isLightMode ? "text-tblackAF" : "text-twhite"
-            }`}
+            className={`text-xl font-semibold ${isLightMode ? "text-tblackAF" : "text-twhite"
+              }`}
           >
             {t("Departments")}
             <span className="ml-2 text-sm bg-green-500/40 rounded-full px-2 py-0.5 border-2 border-green-500/30">
@@ -75,31 +74,29 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
           </h2>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-green-500 text-green-100"
-                  : isLightMode
+              className={`p-2 rounded-md transition-colors ${viewMode === "grid"
+                ? "bg-green-500 text-green-100"
+                : isLightMode
                   ? "bg-darkest text-tblackAF"
                   : "bg-tblack text-twhite"
-              }`}
+                }`}
               aria-label="Grid View"
             >
               <LayoutGrid size={20} />
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "table"
-                  ? "bg-green-500 text-green-100"
-                  : isLightMode
+              className={`p-2 rounded-md transition-colors ${viewMode === "table"
+                ? "bg-green-500 text-green-100"
+                : isLightMode
                   ? "bg-darkest text-tblackAF"
                   : "bg-tblack text-twhite"
-              }`}
+                }`}
               aria-label="Table View"
             >
               <Table2 size={20} />
@@ -112,7 +109,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
               onClick={onCreateDepartment}
               className="flex items-center px-3 py-2 rounded-full bg-green-500/40 hover:bg-green-500 text-xs font-bold hover:text-green-100 border-2 border-green-500/30 transition-colors"
             >
-              <PlusCircle size={16} className="mr-1" />
+              <PlusCircle size={16} className="mx-1" />
               {t("Add")}
             </button>
           )}
@@ -125,27 +122,24 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
           {filteredDepartments.map((department) => (
             <div
               key={department.id}
-              className={`rounded-lg shadow-md overflow-hidden transition-all duration-200 ${
-                isLightMode
-                  ? "bg-main text-blackAF hover:bg-darker hover:text-tblackAF"
-                  : "bg-main text-twhite hover:bg-slate-700"
-              } group cursor-pointer`}
+              className={`rounded-lg shadow-md overflow-hidden transition-all duration-200 ${isLightMode
+                ? "bg-main text-blackAF hover:bg-darker hover:text-tblackAF"
+                : "bg-main text-twhite hover:bg-slate-700"
+                } group cursor-pointer`}
               onMouseEnter={() => setHoverCard(department.id)}
               onMouseLeave={() => setHoverCard(null)}
               onClick={() => onViewDetails && onViewDetails(department)}
             >
               {/* Card Header */}
               <div
-                className={`p-4 border-b ${
-                  isLightMode ? "border-darkest" : "border-tblack"
-                }`}
+                className={`p-4 border-b ${isLightMode ? "border-darkest" : "border-tblack"
+                  }`}
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <h3
-                      className={`font-semibold text-lg ${
-                        isLightMode ? "text-tblackAF" : "text-twhite"
-                      }`}
+                      className={`font-semibold text-lg ${isLightMode ? "text-tblackAF" : "text-twhite"
+                        }`}
                     >
                       {department.name}
                     </h3>
@@ -154,9 +148,8 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                     </span>
                   </div>
                   <div
-                    className={`flex space-x-2 transition-opacity duration-200 ${
-                      hoverCard === department.id ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`flex gap-2 transition-opacity duration-200 ${hoverCard === department.id ? "opacity-100" : "opacity-0"
+                      }`}
                   >
                     {onEdit && (
                       <button
@@ -200,16 +193,14 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                 {/* Description */}
                 <div className="mb-3">
                   <h4
-                    className={`text-sm font-medium mb-1 ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-sm font-medium mb-1 ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     {t("Description")}
                   </h4>
                   <p
-                    className={`text-sm line-clamp-2 ${
-                      isLightMode ? "text-blackAF" : "text-twhite/80"
-                    }`}
+                    className={`text-sm line-clamp-2 ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                      }`}
                   >
                     {department.description}
                   </p>
@@ -218,16 +209,14 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                 {/* Goal */}
                 <div className="mb-3">
                   <h4
-                    className={`text-sm font-medium mb-1 ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-sm font-medium mb-1 ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     {t("Goal")}
                   </h4>
                   <p
-                    className={`text-sm line-clamp-2 ${
-                      isLightMode ? "text-blackAF" : "text-twhite/80"
-                    }`}
+                    className={`text-sm line-clamp-2 ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                      }`}
                   >
                     {department.goal}
                   </p>
@@ -238,11 +227,10 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                   department.numericOwners.length > 0 && (
                     <div className="mb-3">
                       <h4
-                        className={`text-sm font-medium mb-1 flex items-center ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <Users size={14} className="mr-1" />
+                        <Users size={14} className="mx-1" />
                         {t("Numeric Owners")}
                       </h4>
                       <div className="flex flex-wrap gap-2">
@@ -268,17 +256,15 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                   department.supportingFiles.length > 0 && (
                     <div className="mb-3">
                       <h4
-                        className={`text-sm font-medium mb-1 flex items-center ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <FileText size={14} className="mr-1" />
+                        <FileText size={14} className="mx-1" />
                         {t("Supporting Files")}
                       </h4>
                       <div
-                        className={`flex flex-col gap-1 max-h-20 overflow-y-auto p-2 rounded-md ${
-                          isLightMode ? "bg-darkest/10" : "bg-tblack/30"
-                        }`}
+                        className={`flex flex-col gap-1 max-h-20 overflow-y-auto p-2 rounded-md ${isLightMode ? "bg-darkest/10" : "bg-tblack/30"
+                          }`}
                       >
                         {department.supportingFiles.map((file, idx) => (
                           <div
@@ -286,9 +272,8 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                             className="flex justify-between items-center text-xs"
                           >
                             <span
-                              className={`truncate max-w-[70%] ${
-                                isLightMode ? "text-blackAF" : "text-twhite/80"
-                              }`}
+                              className={`truncate max-w-[70%] ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                                }`}
                             >
                               {file.split("/").pop()}
                             </span>
@@ -307,37 +292,33 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
 
               {/* Card Footer */}
               <div
-                className={`p-4 border-t ${
-                  isLightMode ? "border-darkest" : "border-tblack"
-                }`}
+                className={`p-4 border-t ${isLightMode ? "border-darkest" : "border-tblack"
+                  }`}
               >
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <span
-                      className={`text-xs flex items-center ${
-                        isLightMode ? "text-blackAF" : "text-twhite/80"
-                      }`}
+                      className={`text-xs flex items-center ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                        }`}
                     >
-                      <FileText size={12} className="mr-1" />
+                      <FileText size={12} className="mx-1" />
                       {t("Reports")}: {department.requiredReports?.length || 0}
                     </span>
                     <span
-                      className={`text-xs flex items-center ${
-                        isLightMode ? "text-blackAF" : "text-twhite/80"
-                      }`}
+                      className={`text-xs flex items-center ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                        }`}
                     >
-                      <Briefcase size={12} className="mr-1" />
+                      <Briefcase size={12} className="mx-1" />
                       {t("Programs")}:{" "}
                       {department.developmentPrograms?.length || 0}
                     </span>
                   </div>
                   {department.parent_department && (
                     <div
-                      className={`text-xs flex items-center ${
-                        isLightMode ? "text-blackAF" : "text-twhite/80"
-                      }`}
+                      className={`text-xs flex items-center ${isLightMode ? "text-blackAF" : "text-twhite/80"
+                        }`}
                     >
-                      <Link size={12} className="mr-1" />
+                      <Link size={12} className="mx-1" />
                       <span>{department.parent_department}</span>
                     </div>
                   )}
@@ -352,16 +333,14 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
       {viewMode === "table" && (
         <div className="overflow-x-auto rounded-lg shadow-md">
           <table
-            className={`min-w-full ${
-              isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
-            } rounded-lg shadow-md`}
+            className={`min-w-full ${isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
+              } rounded-lg shadow-md`}
           >
             <thead
-              className={`${
-                isLightMode
-                  ? "bg-darkest text-tblackAF"
-                  : "bg-tblack text-twhite"
-              }`}
+              className={`${isLightMode
+                ? "bg-darkest text-tblackAF"
+                : "bg-tblack text-twhite"
+                }`}
             >
               <tr>
                 <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
@@ -374,15 +353,15 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                   {t("Description")}
                 </th>
                 <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
-                  <Users size={14} className="inline mr-1" />
+                  <Users size={14} className="inline mx-1" />
                   {t("Owners")}
                 </th>
                 <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
-                  <FileText size={14} className="inline mr-1" />
+                  <FileText size={14} className="inline mx-1" />
                   {t("Reports")}
                 </th>
                 <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
-                  <Briefcase size={14} className="inline mr-1" />
+                  <Briefcase size={14} className="inline mx-1" />
                   {t("Programs")}
                 </th>
                 <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
@@ -394,18 +373,17 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
               {filteredDepartments.map((department) => (
                 <tr
                   key={department.id}
-                  className={`${
-                    isLightMode
-                      ? "hover:bg-darker text-blackAF hover:text-tblackAF"
-                      : "hover:bg-slate-700 text-twhite"
-                  } group transition-colors cursor-pointer`}
+                  className={`${isLightMode
+                    ? "hover:bg-darker text-blackAF hover:text-tblackAF"
+                    : "hover:bg-slate-700 text-twhite"
+                    } group transition-colors cursor-pointer`}
                   onClick={() => onViewDetails && onViewDetails(department)}
                 >
                   <td className="py-3 px-4 text-center">
                     <div className="font-medium">{department.name}</div>
                     {department.parent_department && (
                       <div className="text-xs mt-1 flex items-center justify-center opacity-70">
-                        <Link size={10} className="mr-1" />
+                        <Link size={10} className="mx-1" />
                         {department.parent_department}
                       </div>
                     )}
@@ -487,9 +465,8 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
       {/* Empty State */}
       {filteredDepartments.length === 0 && (
         <div
-          className={`p-8 rounded-lg text-center ${
-            isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
-          } shadow-md`}
+          className={`p-8 rounded-lg text-center ${isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
+            } shadow-md`}
         >
           <div className="flex flex-col items-center justify-center">
             <AlertCircle size={40} className="mb-4 text-red-500/70" />
@@ -515,7 +492,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                 onClick={onCreateDepartment}
                 className="px-4 py-2 rounded-md bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30 text-sm font-medium"
               >
-                <PlusCircle size={16} className="inline mr-2" />
+                <PlusCircle size={16} className="inline mx-2" />
                 {t("Add Department")}
               </button>
             )}

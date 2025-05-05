@@ -29,13 +29,12 @@ const ProjectsContent = () => {
   const { isLightMode } = useCustomTheme();
   const { data: projects, isLoading } = useCustomQuery<ProjectType[]>({
     queryKey: ["projects"],
-    url: `/projects/${
-      isAdmin
-        ? "get-all-projects"
-        : isPrimary
+    url: `/projects/${isAdmin
+      ? "get-all-projects"
+      : isPrimary
         ? "get-manager-project"
         : "get-emp-project"
-    }`,
+      }`,
   });
 
   const handleEditClick = (project: ProjectType, e: React.MouseEvent) => {
@@ -53,7 +52,7 @@ const ProjectsContent = () => {
   }
 
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col space-y-4 col-span-12">
+    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
       <div className="overflow-x-auto rounded-lg shadow-md">
         {!projects || projects.length === 0 ? (
           <>
@@ -65,11 +64,10 @@ const ProjectsContent = () => {
           <>
             <table className="min-w-full bg-main text-twhite rounded-lg shadow-md">
               <thead
-                className={`${
-                  isLightMode
-                    ? "bg-darkest text-tblackAF"
-                    : "bg-tblack text-twhite"
-                }`}
+                className={`${isLightMode
+                  ? "bg-darkest text-tblackAF"
+                  : "bg-tblack text-twhite"
+                  }`}
               >
                 <tr>
                   <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
@@ -97,23 +95,20 @@ const ProjectsContent = () => {
                   projects.map((project, index) => (
                     <tr
                       key={index}
-                      className={`${
-                        isLightMode
-                          ? "hover:bg-darker text-blackAF"
-                          : "hover:bg-slate-700 text-twhite"
-                      } group transition-colors`}
+                      className={`${isLightMode
+                        ? "hover:bg-darker text-blackAF"
+                        : "hover:bg-slate-700 text-twhite"
+                        } group transition-colors`}
                     >
                       <td
-                        className={`py-3 px-4 text-center ${
-                          isLightMode ? "group-hover:text-tblackAF" : ""
-                        }`}
+                        className={`py-3 px-4 text-center ${isLightMode ? "group-hover:text-tblackAF" : ""
+                          }`}
                       >
                         {project.name}
                       </td>
                       <td
-                        className={`py-3 px-4 text-center ${
-                          isLightMode ? "group-hover:text-tblackAF" : ""
-                        }`}
+                        className={`py-3 px-4 text-center ${isLightMode ? "group-hover:text-tblackAF" : ""
+                          }`}
                       >
                         {project.description}
                       </td>
@@ -124,7 +119,7 @@ const ProjectsContent = () => {
                           </div>
                         ) : (
                           <div
-                            className="flex justify-center -space-x-4"
+                            className="flex justify-center -gap-4"
                             dir="ltr"
                           >
                             {project.departments
@@ -132,9 +127,8 @@ const ProjectsContent = () => {
                               .map((dept, index) => (
                                 <div
                                   key={index}
-                                  className={`${
-                                    collabColors[index % collabColors.length]
-                                  } cursor-pointer rounded-full bg-dark px-4 py-2 flex items-center justify-center text-sm font-bold`}
+                                  className={`${collabColors[index % collabColors.length]
+                                    } cursor-pointer rounded-full bg-dark px-4 py-2 flex items-center justify-center text-sm font-bold`}
                                   title={dept.name}
                                 >
                                   {dept.name
@@ -168,9 +162,8 @@ const ProjectsContent = () => {
                       </td>
                       <td>
                         <div
-                          className={`border-2 border-yellow-500/30 bg-dark py-1 px-3 w-fit mx-auto rounded-lg text-sm font-bold ${
-                            isDueSoon(project.endDate) ? "flash" : ""
-                          }`}
+                          className={`border-2 border-yellow-500/30 bg-dark py-1 px-3 w-fit mx-auto rounded-lg text-sm font-bold ${isDueSoon(project.endDate) ? "flash" : ""
+                            }`}
                         >
                           {formatDate(
                             project.endDate,

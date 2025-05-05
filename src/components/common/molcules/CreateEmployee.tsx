@@ -129,16 +129,15 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
         <h1 className="text-center text-2xl font-bold mb-6">
           {employeeData ? "Update Employee" : "Create Employee"}
         </h1>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Name Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">Name</label>
             <input
               type="text"
               {...register("name")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter employee name"
             />
             {errors.name && (
@@ -153,9 +152,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
             <input
               type="date"
               {...register("dob")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.dob ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.dob ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter date of birth"
             />
             {errors.dob && (
@@ -170,9 +168,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
             <input
               type="text"
               {...register("phone")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.phone ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.phone ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter phone number"
             />
             {errors.phone && (
@@ -189,9 +186,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
             <input
               type="email"
               {...register("email")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter email"
             />
             {errors.email && (
@@ -209,9 +205,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
               <input
                 type="text"
                 {...register("password")}
-                className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter Password"
               />
               {errors.password && (
@@ -229,9 +224,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
             <input
               type="text"
               {...register("address")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.address ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.address ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter address"
             />
             {errors.address && (
@@ -244,9 +238,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
 
           <select
             {...register("department_id")}
-            className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-              errors.department_id ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+              }`}
           >
             <option value="">Select a department</option>
             {departments &&
@@ -264,9 +257,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
 
           <select
             {...register("job_id")}
-            className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-              errors.department_id ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+              }`}
           >
             <option value="">Select a job title</option>
             {jobs &&
@@ -282,9 +274,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${
-              isPendingEmployee ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${isPendingEmployee ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingEmployee}
           >
             {isPendingEmployee
@@ -292,17 +283,16 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
                 ? "Updating..."
                 : "Creating..."
               : employeeData
-              ? "Update Employee"
-              : "Create Employee"}
+                ? "Update Employee"
+                : "Create Employee"}
           </button>
           {/* Feedback Message */}
           {feedbackMessage && (
             <p
-              className={`mt-2 text-center ${
-                feedbackMessage.includes("successfully")
+              className={`mt-2 text-center ${feedbackMessage.includes("successfully")
                   ? "text-green-500"
                   : "text-red-500"
-              }`}
+                }`}
             >
               {feedbackMessage}
             </p>

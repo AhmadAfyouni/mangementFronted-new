@@ -27,24 +27,69 @@
 }
 
 :root {
+  /* Main Backgrounds */
   --color-main: #2e2e30; /* Dark mode main color */
   --color-secondary: #454547; /* Dark mode secondary color */
   --color-dark: #252628; /* Dark mode background color */
+  --color-darker: #1e1e20; /* Even darker shade */
+  --color-darkest: #151517; /* Darkest shade */
+
+  /* Text Colors */
   --color-titles: #ffffff; /* Dark mode titles */
   --color-labels: #cbd5e1; /* Dark mode labels */
   --color-icons: white; /* Dark mode labels */
-  /* text colors */
+
+  /* Text Shades */
   --color-twhite: #fff;
   --color-tbright: #f1f5f9;
   --color-tmid: #cbd5e1;
   --color-tdark: #94a3b8;
   --color-tblack: #475569;
   --color-tblackAF: #000;
-  /* Accent Colors */
+
+  /* Primary Color - Blue */
+  --color-primary-100: #e6f2ff;
+  --color-primary-200: #bddaff;
+  --color-primary-300: #94c2ff;
+  --color-primary-400: #5ba0ff;
   --color-primary: #2684ff; /* Primary blue for links and buttons */
+  --color-primary-600: #206adb;
+  --color-primary-700: #1a51b8;
+  --color-primary-800: #133b94;
+  --color-primary-900: #0d2671;
+
+  /* Success Color - Green */
+  --color-success-100: #e8f8f0;
+  --color-success-200: #c8eeda;
+  --color-success-300: #a7e3c4;
+  --color-success-400: #6ad6a3;
   --color-success: #2ecc71; /* Green for success messages or highlights */
+  --color-success-600: #27ae60;
+  --color-success-700: #208e4e;
+  --color-success-800: #186e3c;
+  --color-success-900: #104e2a;
+
+  /* Warning Color - Amber */
+  --color-warning-100: #fef5e7;
+  --color-warning-200: #fdebd0;
+  --color-warning-300: #fcdbb8;
+  --color-warning-400: #f9c88a;
   --color-warning: #f39c12; /* Amber for warnings or cautions */
+  --color-warning-600: #d68910;
+  --color-warning-700: #b9770e;
+  --color-warning-800: #976311;
+  --color-warning-900: #6b470b;
+
+  /* Danger Color - Red */
+  --color-danger-100: #fdeaea;
+  --color-danger-200: #f7bcbc;
+  --color-danger-300: #f18e8e;
+  --color-danger-400: #ec6161;
   --color-danger: #e74c3c; /* Red for errors or destructive actions */
+  --color-danger-600: #c43e2f;
+  --color-danger-700: #a03327;
+  --color-danger-800: #7c271e;
+  --color-danger-900: #581b15;
 }
 
 .light {

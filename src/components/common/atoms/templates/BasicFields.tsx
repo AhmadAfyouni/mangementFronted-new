@@ -218,8 +218,8 @@ const BasicFields: React.FC<{
     })) || [];
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
+    <div className="gap-6">
+      <div className="gap-4">
         <CustomInput
           label={t("Transaction Name")}
           name="name"
@@ -248,7 +248,7 @@ const BasicFields: React.FC<{
         />
 
         {/* Approval Track Section */}
-        <div className="space-y-4">
+        <div className="gap-4">
           <div className="p-4 bg-dark rounded-lg">
             <CustomReactSelect
               label={t("Select Approval Track Departments")}
@@ -296,7 +296,7 @@ const BasicFields: React.FC<{
         </div>
 
         {/* Execution Section */}
-        <div className="space-y-4">
+        <div className="gap-4">
           <div className="p-4 bg-dark rounded-lg">
             <CustomReactSelect
               label={t("Execution Departments")}

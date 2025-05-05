@@ -164,7 +164,7 @@ const Templates = () => {
 
     if (isLoading) {
       return (
-        <div className="bg-secondary rounded-xl p-6 space-y-6">
+        <div className="bg-secondary rounded-xl p-6 gap-6">
           {[...Array(3)].map((_, i) => (
             <TemplateLoadingSkeleton key={`loading-${i}`} />
           ))}

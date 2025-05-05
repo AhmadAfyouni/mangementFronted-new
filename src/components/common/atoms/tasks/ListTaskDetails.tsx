@@ -206,7 +206,7 @@ const ListTaskDetails: React.FC<{
         onClick={handleBackdropClick}
       />
 
-      <div className="bg-secondary rounded-xl shadow-md w-[400px] sm:w-[500px] text-twhite space-y-4 fixed top-[10px] right-[10px] bottom-[10px] z-50 p-6 cursor-default overflow-auto ">
+      <div className="bg-secondary rounded-xl shadow-md w-[400px] sm:w-[500px] text-twhite gap-4 fixed top-[10px] right-[10px] bottom-[10px] z-50 p-6 cursor-default overflow-auto ">
         <div
           onClick={handleBackdropClick}
           className="text-twhite absolute top-4 right-4 text-xl cursor-pointer"
@@ -218,11 +218,10 @@ const ListTaskDetails: React.FC<{
         {/* Assignee and Due Date */}
         <div className="flex gap-4 items-center">
           <div className="text-twhite text-sm">{t("Assignee")}</div>
-          <div className="flex items-center space-x-2" dir="ltr">
+          <div className="flex items-center gap-2" dir="ltr">
             <span
-              className={`bg-blue-600 rounded-full h-8 w-8 flex items-center justify-center ${
-                isLightMode ? "text-tblackAF" : "text-twhite"
-              }  font-semibold`}
+              className={`bg-blue-600 rounded-full h-8 w-8 flex items-center justify-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                }  font-semibold`}
             >
               {task?.assignee.name.charAt(0).toUpperCase()}
             </span>
@@ -232,14 +231,13 @@ const ListTaskDetails: React.FC<{
         <div className="flex gap-4 items-center">
           <div className="text-twhite text-sm">{t("Due Date")}</div>
           <div
-            className="flex items-center space-x-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => calRef.current?.showPicker()}
             dir="ltr"
           >
             <div
-              className={`border ${
-                task?.is_over_due ? "border-red-500" : "border-green-500"
-              } rounded-full p-2`}
+              className={`border ${task?.is_over_due ? "border-red-500" : "border-green-500"
+                } rounded-full p-2`}
             >
               <Image
                 src={task?.is_over_due ? CalendarRedIcon : CalendarIcon}
@@ -255,9 +253,8 @@ const ListTaskDetails: React.FC<{
               className="pointer-events-none absolute opacity-0 bg-main"
             />
             <p
-              className={`flex space-x-4 ${
-                task?.is_over_due ? "text-red-500" : "text-green-600"
-              } ${isDueSoon(calendar!) ? "flash" : ""}`}
+              className={`flex gap-4 ${task?.is_over_due ? "text-red-500" : "text-green-600"
+                } ${isDueSoon(calendar!) ? "flash" : ""}`}
             >
               {formatDate(calendar!, currentLanguage as "ar" | "en")}
             </p>
@@ -265,38 +262,34 @@ const ListTaskDetails: React.FC<{
         </div>
         {/* Parent task */}
         <div
-          className={`relative flex items-center  justify-between gap-5 w-full  ${
-            isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-          }  rounded px-3 py-2`}
+          className={`relative flex items-center  justify-between gap-5 w-full  ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+            }  rounded px-3 py-2`}
         >
           <span>{t("Parent Task")}</span>
           <span
-            className={`  px-2 py-1 rounded text-xs cursor-pointer ${
-              isLightMode
-                ? "bg-darkest text-tblackAF"
-                : "bg-yellow-500 text-dark"
-            } `}
+            className={`  px-2 py-1 rounded text-xs cursor-pointer ${isLightMode
+              ? "bg-darkest text-tblackAF"
+              : "bg-yellow-500 text-dark"
+              } `}
           >
             {task?.parent_task
               ? allTasks &&
-                allTasks.find(
-                  (singleTask) => singleTask.id == task?.parent_task
-                )?.name
+              allTasks.find(
+                (singleTask) => singleTask.id == task?.parent_task
+              )?.name
               : t("No Parent Task")}
           </span>
         </div>
         {/* Assigned Emp  */}
         {task && task.emp && (
           <div
-            className={`relative flex items-center   gap-5 w-fit ${
-              isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-            } rounded px-3 py-2`}
+            className={`relative flex items-center   gap-5 w-fit ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+              } rounded px-3 py-2`}
           >
             <span className="text-nowrap">{t("Assigned Emp")}</span>
             <div
-              className={`  ${
-                isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-              } text-twhite py-2 px-3 w-fit mx-auto rounded-md  text-sm font-semibold text-center`}
+              className={`  ${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+                } text-twhite py-2 px-3 w-fit mx-auto rounded-md  text-sm font-semibold text-center`}
             >
               {task.emp.name + " - " + task.emp.job.title}
             </div>
@@ -305,24 +298,21 @@ const ListTaskDetails: React.FC<{
         {/* Priority Dropdown */}
         <div
           ref={priorityRef}
-          className={`relative flex items-center justify-between w-full ${
-            isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-          } rounded px-3 py-2`}
+          className={`relative flex items-center justify-between w-full ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+            } rounded px-3 py-2`}
         >
           <span>{t("Priority")}</span>
           <span
-            className={`${getPriorityColor(selectedPriority!)} ${
-              isLightMode ? "text-twhite" : "text-tblackAF"
-            } px-2 py-1 rounded text-xs cursor-pointer`}
+            className={`${getPriorityColor(selectedPriority!)} ${isLightMode ? "text-twhite" : "text-tblackAF"
+              } px-2 py-1 rounded text-xs cursor-pointer`}
             onClick={() => setPriorityMenuOpen(!isPriorityMenuOpen)}
           >
             {t(selectedPriority)}
           </span>
           {userId == task?.assignee._id && isPriorityMenuOpen && (
             <div
-              className={`absolute top-1/2 mt-1 ${
-                getDir() == "rtl" ? "left-10" : "right-10 "
-              } bg-dark text-twhite rounded-md shadow-lg p-2 z-10 backdrop-blur-sm min-w-[120px]`}
+              className={`absolute top-1/2 mt-1 ${getDir() == "rtl" ? "left-10" : "right-10 "
+                } bg-dark text-twhite rounded-md shadow-lg p-2 z-10 backdrop-blur-sm min-w-[120px]`}
             >
               {priorityOptions.map((option) => (
                 <div
@@ -331,11 +321,10 @@ const ListTaskDetails: React.FC<{
                     setSelectedPriority(option);
                     setPriorityMenuOpen(false);
                   }}
-                  className={`px-4 py-2 rounded-md ${
-                    isLightMode
-                      ? "hover:bg-darkest hover:text-tblackAF"
-                      : "hover:bg-gray-500"
-                  } cursor-pointer text-center`}
+                  className={`px-4 py-2 rounded-md ${isLightMode
+                    ? "hover:bg-darkest hover:text-tblackAF"
+                    : "hover:bg-gray-500"
+                    } cursor-pointer text-center`}
                 >
                   {t(option)}
                 </div>
@@ -346,9 +335,8 @@ const ListTaskDetails: React.FC<{
         {/* Status Dropdown */}
         <div
           ref={statusRef}
-          className={`relative flex items-center justify-between w-full ${
-            isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-          } rounded px-3 py-2`}
+          className={`relative flex items-center justify-between w-full ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+            } rounded px-3 py-2`}
         >
           <span>{t("Status")}</span>
           <span
@@ -362,9 +350,8 @@ const ListTaskDetails: React.FC<{
           </span>
           {isStatusMenuOpen && (
             <div
-              className={`absolute top-1/2 mt-1 ${
-                getDir() == "rtl" ? "left-10" : "right-10 "
-              }  bg-dark  text-twhite w-40 rounded-md shadow-lg p-2 z-10 backdrop-blur-sm`}
+              className={`absolute top-1/2 mt-1 ${getDir() == "rtl" ? "left-10" : "right-10 "
+                }  bg-dark  text-twhite w-40 rounded-md shadow-lg p-2 z-10 backdrop-blur-sm`}
             >
               {statusOptions.map((option) => (
                 <div
@@ -401,9 +388,8 @@ const ListTaskDetails: React.FC<{
         {/* time tracking */}
         <div
           ref={statusRef}
-          className={`relative flex items-center justify-between gap-2 w-full ${
-            isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-          } rounded px-3 py-2`}
+          className={`relative flex items-center justify-between gap-2 w-full ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+            } rounded px-3 py-2`}
         >
           <span>{t("Session Time")}</span>
           <span className="bg-dark text-twhite px-2 py-1 rounded text-xs cursor-pointer">
@@ -413,9 +399,8 @@ const ListTaskDetails: React.FC<{
         {userId == task?.emp.id && (
           <div
             ref={statusRef}
-            className={`relative flex items-center justify-between gap-2 w-full ${
-              isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
-            } rounded px-3 py-2`}
+            className={`relative flex items-center justify-between gap-2 w-full ${isLightMode ? "bg-darker text-tblackAF" : "bg-tblack"
+              } rounded px-3 py-2`}
           >
             <span>{t("Time Actions")}</span>
 
@@ -489,18 +474,16 @@ const ListTaskDetails: React.FC<{
           <label className="font-bold my-2 block">{t("Task Files")}</label>
 
           <div
-            className={`${
-              isLightMode ? "bg-droppable-fade" : "bg-droppable-fade"
-            } shadow-md p-4 rounded-lg text-tmid space-y-2`}
+            className={`${isLightMode ? "bg-droppable-fade" : "bg-droppable-fade"
+              } shadow-md p-4 rounded-lg text-tmid gap-2`}
           >
             {task?.files && task.files.length > 0 ? (
-              <div className="space-y-3">
+              <div className="gap-3">
                 {task.files.map((file, index) => (
                   <div
                     key={index}
-                    className={`flex items-center justify-between p-2 rounded-md ${
-                      isLightMode ? "bg-darkest" : "bg-tblack"
-                    }`}
+                    className={`flex items-center justify-between p-2 rounded-md ${isLightMode ? "bg-darkest" : "bg-tblack"
+                      }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       <svg
@@ -531,7 +514,7 @@ const ListTaskDetails: React.FC<{
                     >
                       {isLoadingFile === file ? (
                         <svg
-                          className="animate-spin h-4 w-4 mr-1"
+                          className="animate-spin h-4 w-4 mx-1"
                           viewBox="0 0 24 24"
                         >
                           <circle
@@ -551,7 +534,7 @@ const ListTaskDetails: React.FC<{
                         </svg>
                       ) : (
                         <svg
-                          className="h-4 w-4 mr-1"
+                          className="h-4 w-4 mx-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -581,9 +564,8 @@ const ListTaskDetails: React.FC<{
         <label className="font-bold my-2 block">{t("SubTasks")}</label>
 
         <div
-          className={` ${
-            isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-          }  shadow-md p-4 rounded-lg text-tmid space-y-2  `}
+          className={` ${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+            }  shadow-md p-4 rounded-lg text-tmid gap-2  `}
         >
           {task && task.subTasks && task.subTasks.length > 0 ? (
             task.subTasks.map((sub, index) => (
@@ -593,9 +575,8 @@ const ListTaskDetails: React.FC<{
                   alt="subtasks icon"
                   width={15}
                   height={15}
-                  className={`text-twhite ${
-                    isLightMode ? `bg-tmid p-1 rounded-md w-5 h-5` : ""
-                  }`}
+                  className={`text-twhite ${isLightMode ? `bg-tmid p-1 rounded-md w-5 h-5` : ""
+                    }`}
                 />
                 <p className="text-tbright">{sub.name}</p>
               </div>
@@ -607,9 +588,8 @@ const ListTaskDetails: React.FC<{
 
         {(isAdmin || isPrimary) && (
           <button
-            className={`${
-              isLightMode ? "bg-darkest text-white" : "bg-gray-700"
-            }  text-twhite py-2 px-4 rounded-lg flex items-center space-x-2`}
+            className={`${isLightMode ? "bg-darkest text-white" : "bg-gray-700"
+              }  text-twhite py-2 px-4 rounded-lg flex items-center gap-2`}
             onClick={() => setIsModalOpen(true)}
           >
             <span>{t("Add subtask")}</span>
@@ -641,9 +621,8 @@ const ListTaskDetails: React.FC<{
                 />
                 <label
                   htmlFor="attach-file"
-                  className={`cursor-pointer flex gap-1 ${
-                    isSubmitting ? "opacity-50" : ""
-                  }`}
+                  className={`cursor-pointer flex gap-1 ${isSubmitting ? "opacity-50" : ""
+                    }`}
                 >
                   <Image
                     src={PaperClipIcon}
@@ -658,7 +637,7 @@ const ListTaskDetails: React.FC<{
               {/* Display attached file with remove button */}
               {attachedFile && (
                 <div className="flex items-center bg-dark rounded-md px-2 py-1 max-w-[180px]">
-                  <span className="text-sm text-tmid truncate mr-2">
+                  <span className="text-sm text-tmid truncate mx-2">
                     {attachedFile.name}
                   </span>
                   <button
@@ -669,9 +648,8 @@ const ListTaskDetails: React.FC<{
                       }
                     }}
                     disabled={isSubmitting}
-                    className={`text-red-400 hover:text-red-300 ${
-                      isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`text-red-400 hover:text-red-300 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                     title={t("Remove file")}
                   >
                     <svg
@@ -695,16 +673,15 @@ const ListTaskDetails: React.FC<{
               <button
                 onClick={handleSendComment}
                 disabled={!comment.trim() || isSubmitting}
-                className={`bg-dark text-twhite px-3 py-1 rounded-md hover:bg-secondary gap-1 flex items-center ${
-                  !comment.trim() || isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
+                className={`bg-dark text-twhite px-3 py-1 rounded-md hover:bg-secondary gap-1 flex items-center ${!comment.trim() || isSubmitting
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+                  }`}
               >
                 {isSubmitting ? (
                   <>
                     <svg
-                      className="animate-spin h-4 w-4 mr-1"
+                      className="animate-spin h-4 w-4 mx-1"
                       viewBox="0 0 24 24"
                     >
                       <circle
@@ -740,14 +717,13 @@ const ListTaskDetails: React.FC<{
           </div>
 
           <div
-            className={`${
-              isLightMode ? "bg-droppable-fade" : "bg-droppable-fade"
-            } shadow-md p-4 rounded-lg text-tmid space-y-2`}
+            className={`${isLightMode ? "bg-droppable-fade" : "bg-droppable-fade"
+              } shadow-md p-4 rounded-lg text-tmid gap-2`}
           >
             {comments.length > 0 ? (
               comments.map((comment, index) => (
                 <div key={index} className="flex gap-2 mb-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-tbright font-bold rounded-full flex items-center justify-center mr-4 text-dark">
+                  <div className="flex-shrink-0 w-10 h-10 bg-tbright font-bold rounded-full flex items-center justify-center mx-4 text-dark">
                     {comment.author.name.slice(0, 1)}
                   </div>
                   <div className="flex-1">
@@ -781,7 +757,7 @@ const ListTaskDetails: React.FC<{
                           >
                             {isLoadingFile === file ? (
                               <svg
-                                className="animate-spin h-4 w-4 mr-2"
+                                className="animate-spin h-4 w-4 mx-2"
                                 viewBox="0 0 24 24"
                               >
                                 <circle
@@ -801,7 +777,7 @@ const ListTaskDetails: React.FC<{
                               </svg>
                             ) : (
                               <svg
-                                className="h-4 w-4 mr-2"
+                                className="h-4 w-4 mx-2"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"

@@ -33,7 +33,7 @@
 //   return (
 //     <GridContainer>
 //       <header className="flex justify-between items-center flex-col gap-[15px] sm:flex-row col-span-4 sm:col-span-12 bg-white py-[24px] ">
-//         <div className="flex items-center space-x-3">
+//         <div className="flex items-center gap-3">
 //           <div
 //             className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 cursor-pointer ml-3"
 //             onClick={() => router.push("/home")}
@@ -55,7 +55,7 @@
 //           </div>
 //         </div>
 
-//         <div className="flex items-center space-x-3">
+//         <div className="flex items-center gap-3">
 //           <div className="relative p-2 bg-blue-100 rounded-full hover:bg-blue-200 cursor-pointer ml-3">
 //             <FaBell className="text-[#1b1a40]" />
 //             <span className="absolute top-0 right-0 h-2 w-2 bg-green-500 rounded-full"></span>

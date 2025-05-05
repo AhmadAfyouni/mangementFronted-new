@@ -85,15 +85,14 @@ const AddTask: React.FC = () => {
   return (
     <GridContainer>
       <div
-        className={`${
-          isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-        }  p-8 rounded-xl shadow-lg  w-full  col-span-full`}
+        className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+          }  p-8 rounded-xl shadow-lg  w-full  col-span-full`}
       >
         <h1 className={`text-center text-2xl text-twhite font-bold mb-6`}>
           {t("Create Task")}
         </h1>
         <form
-          className="space-y-4 text-twhite "
+          className="gap-4 text-twhite "
           onSubmit={handleSubmit(handleFormSubmit)}
         >
           {/* Fixed Section */}
@@ -140,11 +139,9 @@ const AddTask: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-slate-600 ${
-              isLightMode ? " text-tblackAF" : "text-twhite"
-            } rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${
-              isPending ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-slate-600 ${isLightMode ? " text-tblackAF" : "text-twhite"
+              } rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${isPending ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPending}
           >
             {
@@ -158,11 +155,10 @@ const AddTask: React.FC = () => {
           {/* Feedback Message */}
           {feedbackMessage && (
             <p
-              className={`mt-2 text-center ${
-                feedbackMessage.includes("successfully")
+              className={`mt-2 text-center ${feedbackMessage.includes("successfully")
                   ? "text-green-500"
                   : "text-red-500"
-              }`}
+                }`}
             >
               {feedbackMessage}
             </p>

@@ -93,8 +93,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     taskData.priority == "HIGH"
       ? "bg-red-100  text-red-600"
       : taskData.priority == "MEDIUM"
-      ? "bg-yellow-100  text-yellow-600"
-      : "bg-green-100  text-green-600";
+        ? "bg-yellow-100  text-yellow-600"
+        : "bg-green-100  text-green-600";
 
   return (
     <Modal
@@ -124,7 +124,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         </button>
 
         <div className="flex justify-between items-center my-5">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <span className=" text-lg font-bold">{t("Task Details")}</span>
           </div>
           <div className="flex gap-2">
@@ -139,8 +139,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               {taskData.priority == "HIGH"
                 ? t("High")
                 : taskData.priority == "MEDIUM"
-                ? t("Medium")
-                : t("Low")}
+                  ? t("Medium")
+                  : t("Low")}
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
         {/* <div className="mb-6">
           <label className="font-bold mb-2 block">{t("Members")}</label>
-          <div className="flex items-center space-x-2 mt-2">
+          <div className="flex items-center gap-2 mt-2">
             {taskData.emp ? (
               <div className="w-8 h-8 rounded-full bg-[#1b1a40] text-twhite flex items-center justify-center text-sm font-bold">
                 {taskData.emp.name.charAt(0).toUpperCase()}
@@ -222,7 +222,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   htmlFor="attach-file"
                   className="cursor-pointer flex gap-1"
                 >
-                  {/* <FaPaperclip className="inline mr-1" />*/}
+                  {/* <FaPaperclip className="inline mx-1" />*/}
                   <Image
                     src={PaperClipIcon}
                     alt="paperclip icon"
@@ -242,7 +242,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 onClick={handleSendComment}
                 className="bg-dark text-twhite px-3 py-1 rounded-md hover:bg-secondary gap-1 flex items-center"
               >
-                {/* <FaPaperPlane className="mr-1" />  */}
+                {/* <FaPaperPlane className="mx-1" />  */}
                 <Image
                   src={PaperPlaneIcon}
                   alt="paper plane icon"
@@ -255,7 +255,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
 
           <label className="font-bold my-2 block">{t("Comments")}</label>
-          <div className="bg-main border shadow-md p-4 rounded-lg text-tblack space-y-2  ">
+          <div className="bg-main border shadow-md p-4 rounded-lg text-tblack gap-2  ">
             {comments.length > 0 ? (
               comments.map((comment, index) => (
                 // <div key={comment.id} className="bg-white p-2 rounded-md mb-2">
@@ -267,7 +267,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 //       {comment.files.map((file, index) => (
                 //         <div
                 //           key={index}
-                //           className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mr-2 mb-1"
+                //           className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mx-2 mb-1"
                 //         >
                 //           <a
                 //             href={file}
@@ -283,7 +283,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 //   )}
                 // </div>
                 <div key={index} className="flex gap-2 mb-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-slate-300 font-bold rounded-full flex items-center justify-center mr-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-slate-300 font-bold rounded-full flex items-center justify-center mx-4">
                     {comment.author.name.slice(0, 1)}
                   </div>
                   <div>
@@ -306,7 +306,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         {comment.files.map((file, idx) => (
                           <div
                             key={idx}
-                            className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mr-2 mb-1"
+                            className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mx-2 mb-1"
                           >
                             {file}
                           </div>

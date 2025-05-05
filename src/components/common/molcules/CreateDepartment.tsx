@@ -130,7 +130,7 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
         <h1 className="text-center text-2xl font-bold mb-6">
           {departmentData ? t("Update Department") : t("Create Department")}
         </h1>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="block text-sm font-medium">
               {t("Department Name")}
@@ -138,9 +138,8 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
             <input
               type="text"
               {...register("name")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.name ? "border-high" : "border-border"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${errors.name ? "border-high" : "border-border"
+                }`}
               placeholder={t("Enter department name")}
             />
             {errors.name && (
@@ -153,9 +152,8 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
             </label>
             <textarea
               {...register("description")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.description ? "border-high" : "border-border"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${errors.description ? "border-high" : "border-border"
+                }`}
               placeholder={t("Enter department description")}
               rows={4}
             />
@@ -171,9 +169,8 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
             </label>
             <select
               {...register("parent_department_id")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.parent_department_id ? "border-high" : "border-border"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${errors.parent_department_id ? "border-high" : "border-border"
+                }`}
             >
               <option value="">{t("Select a parent department")}</option>
               {departments &&
@@ -192,9 +189,8 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
 
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-[#413d99] text-twhite rounded-lg font-bold hover:bg-opacity-90 transition duration-200 ${
-              isPendingDepartment ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-[#413d99] text-twhite rounded-lg font-bold hover:bg-opacity-90 transition duration-200 ${isPendingDepartment ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingDepartment}
           >
             {isPendingDepartment
@@ -202,8 +198,8 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
                 ? t("Updating...")
                 : t("Creating...")
               : departmentData
-              ? t("Update Department")
-              : t("Create Department")}
+                ? t("Update Department")
+                : t("Create Department")}
           </button>
           {isErrorDepartment && (
             <p className="text-red-500 mt-2 text-center">

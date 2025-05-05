@@ -43,7 +43,7 @@ export const PermissionsSection = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="gap-6">
       {/* Permissions Mode Toggle */}
       <div
         className={`
@@ -65,15 +65,14 @@ export const PermissionsSection = ({
               }}
               className={`
                   px-4 py-2 rounded-lg transition-all duration-200
-                  ${
-                    permissionsMode === mode
-                      ? isLightMode
-                        ? "bg-darker text-white shadow-lg"
-                        : "bg-secondary text-white shadow-lg"
-                      : isLightMode
-                      ? "bg-darker/10 hover:bg-darker/20 text-tblack"
-                      : "bg-dark/40 hover:bg-dark/60 text-tmid"
-                  }
+                  ${permissionsMode === mode
+                  ? isLightMode
+                    ? "bg-darker text-white shadow-lg"
+                    : "bg-secondary text-white shadow-lg"
+                  : isLightMode
+                    ? "bg-darker/10 hover:bg-darker/20 text-tblack"
+                    : "bg-dark/40 hover:bg-dark/60 text-tmid"
+                }
                 `}
             >
               {t(mode.charAt(0).toUpperCase() + mode.slice(1))}
@@ -84,7 +83,7 @@ export const PermissionsSection = ({
 
       {/* Permissions Selection */}
       {permissionsMode === "custom" && (
-        <div className="space-y-6">
+        <div className="gap-6">
           {Object.entries(permissionCategories).map(
             ([category, permissions]) => (
               <div
@@ -112,12 +111,11 @@ export const PermissionsSection = ({
                       className={`
                         p-3 rounded-lg cursor-pointer
                         flex items-center gap-3 transition-all duration-200
-                        ${
-                          permissionsSelected.includes(permission.value)
-                            ? isLightMode
-                              ? "bg-darker text-white shadow-md"
-                              : "bg-secondary  text-white"
-                            : isLightMode
+                        ${permissionsSelected.includes(permission.value)
+                          ? isLightMode
+                            ? "bg-darker text-white shadow-md"
+                            : "bg-secondary  text-white"
+                          : isLightMode
                             ? "bg-darker/10 hover:bg-darker/20 text-tblack"
                             : "bg-dark/40 hover:bg-dark/60 text-tmid"
                         }
@@ -128,13 +126,12 @@ export const PermissionsSection = ({
                         w-5 h-5 rounded-full border-2
                         flex items-center justify-center
                         transition-all duration-200
-                        ${
-                          permissionsSelected.includes(permission.value)
+                        ${permissionsSelected.includes(permission.value)
                             ? isLightMode
                               ? " bg-secondary"
                               : " bg-primary"
                             : "border-current bg-transparent"
-                        }
+                          }
                       `}
                       >
                         {permissionsSelected.includes(permission.value) && (

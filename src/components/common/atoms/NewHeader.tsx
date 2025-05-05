@@ -1,4 +1,11 @@
 "use client";
+// Add TypeScript declaration for our window property
+declare global {
+  interface Window {
+    searchTimeout: ReturnType<typeof setTimeout> | undefined;
+  }
+}
+
 import {
   DarkModeIcon,
   LangIcon,
@@ -18,6 +25,9 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import RouteWrapper from "./ui/RouteWrapper";
 import Notification from "./ui/Notification";
+import { setSearchQuery, EntityType } from "@/state/slices/searchSlice";
+import { useCallback, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 const NewHeader = ({
   setIsExpanded,
@@ -28,9 +38,32 @@ const NewHeader = ({
   const userInitial = user ? user.name.charAt(0).toUpperCase() : "G";
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  // Get active entity from Redux store
+  const activeEntity = useSelector((state: RootState) => state.globalSearch.activeEntity);
+  const searchQueries = useSelector((state: RootState) => state.globalSearch.queries);
+  const pathname = usePathname();
+
+  // Determine current entity based on path
+  useEffect(() => {
+    // Auto-detect entity based on current path
+    if (pathname.includes("/departments")) {
+      // If we're on the departments page, set active entity to departments
+      if (activeEntity !== "departments") {
+        dispatch(setSearchQuery({ entity: "departments", query: searchText }));
+      }
+    } else if (pathname.includes("/employees")) {
+      // Set other entity types based on URL
+      if (activeEntity !== "employees") {
+        dispatch(setSearchQuery({ entity: "employees", query: searchText }));
+      }
+    }
+  }, [pathname]);
 
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
   const { isLightMode, toggleThemes } = useCustomTheme();
   const { toggleLanguage, getDir } = useLanguage();
   const { setSnackbarConfig } = useMokkBar();
@@ -39,6 +72,44 @@ const NewHeader = ({
   const toggleMobileSearch = () => setIsMobileSearchOpen(!isMobileSearchOpen);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+
+  // Initialize search input with current value from Redux store
+  useEffect(() => {
+    setSearchText(searchQueries[activeEntity] || "");
+  }, [activeEntity, searchQueries]);
+
+  // Create our own debounce implementation without lodash
+  const debouncedSearch = useCallback(
+    (entity: EntityType, query: string) => {
+      if (window.searchTimeout) {
+        clearTimeout(window.searchTimeout);
+      }
+      window.searchTimeout = setTimeout(() => {
+        dispatch(setSearchQuery({ entity, query }));
+      }, 300);
+    },
+    [dispatch]
+  );
+
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchText(query);
+    debouncedSearch(activeEntity, query);
+  };
+
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(setSearchQuery({ entity: activeEntity, query: searchText }));
+
+    // If not already on the correct page, navigate to the search results page
+    if (activeEntity === "departments" && !pathname.includes("/departments")) {
+      router.push("/departments");
+    } else if (activeEntity === "employees" && !pathname.includes("/employees")) {
+      router.push("/employees");
+    }
+  };
 
   // Function to close the profile dropdown
   const closeDropdown = () => {
@@ -76,9 +147,8 @@ const NewHeader = ({
   return (
     <>
       <div
-        className={`${
-          isLightMode ? "bg-darkest" : "bg-main"
-        } fixed top-0 right-0 left-0 py-2 px-[2%] flex justify-between items-center border-b border-slate-600 z-20`}
+        className={`${isLightMode ? "bg-darkest" : "bg-main"
+          } fixed top-0 right-0 left-0 py-2 px-[2%] flex justify-between items-center border-b border-slate-600 z-20`}
       >
         {/* Menu Button */}
         <div className="group relative">
@@ -95,7 +165,8 @@ const NewHeader = ({
         </div>
 
         {/* Search Bar - Hidden on Mobile */}
-        <div
+        <form
+          onSubmit={handleSearchSubmit}
           className={`hidden md:flex items-center rounded-lg overflow-hidden transform transition-all duration-200 ease-out
             ${isLightMode ? "bg-darker" : "bg-tblack"}
             w-[30%] group hover:shadow-lg`}
@@ -114,8 +185,10 @@ const NewHeader = ({
             type="text"
             className="bg-transparent placeholder-white py-2 px-1 outline-none border-none text-twhite w-full transition-all duration-200"
             placeholder={t("Search")}
+            value={searchText}
+            onChange={handleSearchChange}
           />
-        </div>
+        </form>
 
         {/* Actions Group */}
         <div className="flex items-center gap-2 md:gap-4">
@@ -211,10 +284,9 @@ const NewHeader = ({
                     px-4 py-3
                     cursor-pointer
                     transition-colors duration-200
-                    ${
-                      isLightMode
-                        ? "hover:bg-darkest hover:text-tblackAF"
-                        : "hover:bg-tblack"
+                    ${isLightMode
+                      ? "hover:bg-darkest hover:text-tblackAF"
+                      : "hover:bg-tblack"
                     }
                   `}
                 >
@@ -233,10 +305,9 @@ const NewHeader = ({
                     px-4 py-3
                     cursor-pointer
                     transition-colors duration-200
-                    ${
-                      isLightMode
-                        ? "hover:bg-darkest hover:text-tblackAF"
-                        : "hover:bg-tblack"
+                    ${isLightMode
+                      ? "hover:bg-darkest hover:text-tblackAF"
+                      : "hover:bg-tblack"
                     }
                   `}
                 >
@@ -261,11 +332,10 @@ const NewHeader = ({
                   px-4 py-3
                   cursor-pointer
                   transition-colors duration-200
-                  ${
-                    isLightMode
+                  ${isLightMode
                       ? "hover:bg-darkest hover:text-tblackAF"
                       : "hover:bg-tblack"
-                  }
+                    }
                   `}
                 >
                   {t("Logout")}
@@ -284,7 +354,8 @@ const NewHeader = ({
             border-b border-slate-600
             animate-in fade-in slide-in-from-top duration-200`}
         >
-          <div
+          <form
+            onSubmit={handleSearchSubmit}
             className={`flex items-center rounded-lg overflow-hidden
               ${isLightMode ? "bg-darker" : "bg-tblack"}
               w-full`}
@@ -304,8 +375,10 @@ const NewHeader = ({
               className="bg-transparent placeholder-white py-2 px-1 outline-none border-none text-twhite w-full"
               placeholder={t("Search")}
               autoFocus
+              value={searchText}
+              onChange={handleSearchChange}
             />
-          </div>
+          </form>
         </div>
       )}
     </>
