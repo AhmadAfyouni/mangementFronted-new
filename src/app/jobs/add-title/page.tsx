@@ -103,7 +103,7 @@ const AddJobTitle: React.FC = () => {
           {jobTitleData ? t("Update Job Title") : t("Create Job Title")}
         </h1>
         <form
-          className="space-y-4"
+          className="gap-4"
           onSubmit={handleSubmit(async (data) => {
             console.log({
               ...data,
@@ -194,9 +194,8 @@ const AddJobTitle: React.FC = () => {
             type="submit"
             className={`w-full py-2 mt-4 bg-slate-600 
               ${isLightMode ? " text-tblackAF" : "text-twhite"}
-            rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${
-              isPendingJobTitle ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${isPendingJobTitle ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingJobTitle}
           >
             {

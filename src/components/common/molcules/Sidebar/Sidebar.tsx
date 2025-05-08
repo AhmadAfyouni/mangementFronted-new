@@ -32,13 +32,13 @@ const Sidebar = ({
   // Get visible items based on permissions
   const visibleItems = userPermissions
     ? sidebarItems.filter(
-        (item) =>
-          isAdmin ||
-          item.requiredPermissions.length === 0 ||
-          item.requiredPermissions.some((permission) =>
-            userPermissions.includes(permission)
-          )
-      )
+      (item) =>
+        isAdmin ||
+        item.requiredPermissions.length === 0 ||
+        item.requiredPermissions.some((permission) =>
+          userPermissions.includes(permission)
+        )
+    )
     : [];
 
   // Initialize selected tab with validation
@@ -85,10 +85,9 @@ const Sidebar = ({
     <>
       <div
         className={`
-          ${
-            isExpanded
-              ? "fixed inset-0 bg-slate-600/10 backdrop-blur-sm z-10"
-              : ""
+          ${isExpanded
+            ? "fixed inset-0 bg-slate-600/10 backdrop-blur-sm z-10"
+            : ""
           }
           ${isMobile ? "touch-none" : ""}
         `}
@@ -99,24 +98,20 @@ const Sidebar = ({
             shadow-md p-5 fixed transition-all duration-300 ease-in-out
             border-r border-slate-600
             ${isLightMode ? "bg-darkest" : "bg-main"}
-            ${
-              isMobile
-                ? `top-0 h-full ${isExpanded ? "left-0" : "-left-full"}`
-                : `top-[50px] bottom-0 left-0`
+            ${isMobile
+              ? `top-0 h-full ${isExpanded ? "left-0" : "-left-full"}`
+              : `top-[50px] bottom-0 left-0`
             }
-            ${
-              !isMobile &&
-              (isExpanded ? "w-[240px] mr-5" : "w-[92px] transform origin-left")
+            ${!isMobile &&
+            (isExpanded ? "w-[240px] mx-5" : "w-[92px] transform origin-left")
             }
           `}
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className={`sidebar flex flex-col space-y-4 ${
-              isMobile && isExpanded ? "py-16" : "py-4"
-            } transition-all duration-300 ${
-              !isMobile && !isExpanded ? "opacity-90" : "opacity-100"
-            }`}
+            className={`sidebar flex flex-col gap-4 ${isMobile && isExpanded ? "py-16" : "py-4"
+              } transition-all duration-300 ${!isMobile && !isExpanded ? "opacity-90" : "opacity-100"
+              }`}
           >
             {visibleItems.map((item, index) => (
               <RouteWrapper
@@ -134,7 +129,7 @@ const Sidebar = ({
                         pathname == item.path ||
                         pathname.split("/")[1] == item.path.split("/")[1]
                       }
-                      onClick={() => {}}
+                      onClick={() => { }}
                     />
                   </Tooltip>
                 ) : (
@@ -146,7 +141,7 @@ const Sidebar = ({
                       pathname == item.path ||
                       pathname.split("/")[1] == item.path.split("/")[1]
                     }
-                    onClick={() => {}}
+                    onClick={() => { }}
                   />
                 )}
               </RouteWrapper>

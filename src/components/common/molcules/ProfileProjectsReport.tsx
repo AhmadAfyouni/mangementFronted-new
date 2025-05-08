@@ -29,7 +29,7 @@ const ProfileProjectsReport = ({
         {items[0].name}
       </div>
     ) : (
-      <div className="flex justify-center -space-x-2 sm:-space-x-4" dir="ltr">
+      <div className="flex justify-center -gap-2 sm:-gap-4" dir="ltr">
         {items.slice(0, 3).map((item, index) => (
           <div
             key={type === "members" ? item.id : index}
@@ -76,7 +76,7 @@ const ProfileProjectsReport = ({
         {t("My Projects")}
       </div>
 
-      <div className="w-full space-y-3 ">
+      <div className="w-full gap-3 ">
         {projects?.map((project, index) => (
           <RouteWrapper key={index} href={"/projects/details/" + project._id}>
             <div
@@ -86,9 +86,8 @@ const ProfileProjectsReport = ({
               group gap-3 sm:gap-0  mt-1"
             >
               <div
-                className={`sm:w-[40%] text-center sm:text-start group-hover:${
-                  isLightMode ? "text-tblackAF" : "text-twhite"
-                }
+                className={`sm:w-[40%] text-center sm:text-start group-hover:${isLightMode ? "text-tblackAF" : "text-twhite"
+                  }
                 text-sm sm:text-base font-medium py-1 sm:py-3 px-2 sm:px-4`}
               >
                 {project.name}

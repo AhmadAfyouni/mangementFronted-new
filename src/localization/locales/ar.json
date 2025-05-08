@@ -528,6 +528,67 @@
     "End Time": "وقت الانتهاء",
     "Session": "جلسة",
     "No time logs recorded": "لم يتم تسجيل أي سجلات وقت",
-    "Session Time": "وقت الجلسة"
+    "Session Time": "وقت الجلسة",
+
+    "welcome": "مرحبًا بك في لوحة التحكم",
+    "welcome_subtitle": "إليك نظرة عامة على مهامك وأنشطتك",
+
+    "total": "إجمالي المهام",
+    "pending": "قيد الانتظار",
+    "in_progress": "قيد التنفيذ",
+    "completed": "مكتملة",
+    "task": "مهمة",
+
+    "time_tracker": "متتبع الوقت",
+    "worked_hours": "ساعات العمل",
+    "break_time": "وقت الاستراحة",
+    "overtime_hours": "ساعات العمل الإضافية",
+    "working_hours": "ساعات العمل",
+    "this_year": "هذا العام",
+    "daily_timeline": "الجدول الزمني اليومي",
+    "total_working_time": "إجمالي وقت العمل",
+    "total_break_time": "إجمالي وقت الاستراحة",
+    "no_timeline_entries": "لا توجد إدخالات في الجدول الزمني لهذا اليوم",
+
+    "select_date": "اختر تاريخًا",
+    "no_events": "لا توجد أحداث لهذا التاريخ",
+    "add_event": "إضافة حدث",
+    "today": "اليوم",
+    "yesterday": "أمس",
+
+    "daily_tasks": "المهام اليومية",
+    "no_daily_tasks": "لا توجد مهام يومية لهذا اليوم",
+    "loading": "جار التحميل",
+    "view_all": "عرض الكل",
+    "in": "دخول",
+    "out": "خروج",
+
+    "projects": "المشاريع",
+    "this_week": "هذا الأسبوع",
+
+    "messages": "الرسائل",
+    "new": "جديدة",
+    "uploaded_assets": "لقد قمت بتحميل الأصول لمشروع لوحة التحكم",
+    "meeting_schedule": "هل يمكننا تحديد موعد لمناقشة التصميم الجديد؟",
+    "deadline_confirmation": "للتأكيد - هل الموعد النهائي لا يزال يوم الجمعة؟",
+    "feedback_review": "لقد راجعت ملاحظاتك وقمت بإجراء التغييرات",
+    "font_issues": "نواجه مشكلات في عرض الخط في متصفح سفاري",
+    "view_all_messages": "عرض جميع الرسائل",
+
+    "my_tasks": "مهامي",
+    "view_all_tasks": "عرض جميع المهام",
+    "no_tasks_found": "لم يتم العثور على مهام",
+    "loading_tasks": "جار تحميل مهامك...",
+    "try_different_filter": "جرب تصفية مختلفة",
+    "no_tasks_message": "ليس لديك أي مهام مسندة بعد",
+    "no_tasks_match_filter": "لا توجد مهام تطابق التصفية المحددة",
+    "no_tasks_available": "لا توجد مهام متاحة",
+    "status": "الحالة",
+    "progress": "التقدم",
+    "activity": "النشاط",
+
+    "recent_activity": "النشاط الأخير",
+    "view_all_activity": "عرض كل النشاط",
+    "no_recent_activity": "لا يوجد نشاط حديث"
   }
 }

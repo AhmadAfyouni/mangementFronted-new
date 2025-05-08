@@ -17,30 +17,27 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
     <Droppable droppableId={columnId}>
       {(provided) => (
         <div
-          className={` ${
-            isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-          }  rounded-xl  p-4 flex flex-col space-y-4 col-span-3`}
+          className={` ${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+            }  rounded-xl  p-4 flex flex-col gap-4 col-span-3`}
           ref={provided.innerRef}
           {...provided.droppableProps}
         >
           <div className="flex items-center justify-between mb-2">
             <h2
-              className={`text-lg font-bold  ${
-                isLightMode ? "text-darkest" : "text-twhite"
-              }`}
+              className={`text-lg font-bold  ${isLightMode ? "text-darkest" : "text-twhite"
+                }`}
             >
               {t(title)}
             </h2>
             <div
-              className={`  ${
-                isLightMode ? "text-darkest" : "text-twhite"
-              } bg-main  px-2 rounded-xl w-10 text-center shadow-md py-0.5 text-sm font-bold`}
+              className={`  ${isLightMode ? "text-darkest" : "text-twhite"
+                } bg-main  px-2 rounded-xl w-10 text-center shadow-md py-0.5 text-sm font-bold`}
             >
               {taskCount}
             </div>
           </div>
 
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col gap-3">
             {tasks.map((task, index) => (
               <TaskCard
                 task={task}
@@ -55,12 +52,11 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
             ))}
 
             <div
-              onClick={() => {}}
-              className={`rounded-xl shadow-md p-4 h-20 w-full border-dashed !text-lg ${
-                isLightMode
+              onClick={() => { }}
+              className={`rounded-xl shadow-md p-4 h-20 w-full border-dashed !text-lg ${isLightMode
                   ? "border-tblack text-tdark "
                   : "border-tblack text-tblack"
-              }  border-2 text-center content-center  font-bold  cursor-pointer`}
+                }  border-2 text-center content-center  font-bold  cursor-pointer`}
             >
               {t("Drop Here")}
             </div>

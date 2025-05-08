@@ -32,7 +32,7 @@ const DragAndDropContainer = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex space-x-4">
+      <div className="flex gap-4">
         {Object.keys(items).map((columnId) => (
           <DropColumn
             key={columnId}

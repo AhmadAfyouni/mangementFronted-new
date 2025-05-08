@@ -126,7 +126,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
         <h1 className="text-center text-2xl font-bold mb-6">
           {taskData ? "Update Task" : "Create Task"}
         </h1>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="block text-tdark text-sm font-medium">
               {t("Task Name")}
@@ -134,9 +134,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             <input
               type="text"
               {...register("name")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter task name")}
             />
 
@@ -152,9 +151,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             </label>
             <textarea
               {...register("description")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.description ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.description ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter task description")}
             />
             {errors.description && (
@@ -172,9 +170,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             <input
               type="number"
               {...register("priority")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.priority ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.priority ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter priority")}
             />
             {errors.priority && (
@@ -191,9 +188,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             </label>
             <select
               {...register("emp")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.emp ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.emp ? "border-red-500" : "border-gray-300"
+                }`}
               disabled={isEmployeeDisabled} // Disable based on selection
             >
               <option value="">{t("Select an employee (optional)")}</option>
@@ -216,9 +212,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             </label>
             <select
               {...register("department_id")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.department_id ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+                }`}
               disabled={isDepartmentDisabled}
             >
               <option value="">{t("Select a department (optional)")}</option>
@@ -242,9 +237,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
             <input
               type="date"
               {...register("due_date")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                errors.due_date ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.due_date ? "border-red-500" : "border-gray-300"
+                }`}
             />
             {errors.due_date && (
               <p className="text-red-500 mt-1 text-sm">
@@ -256,9 +250,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
           {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${
-              isPending ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${isPending ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPending}
           >
             {isPending
@@ -266,17 +259,16 @@ const CreateTask: React.FC<CreateTaskProps> = ({
                 ? t("Updating...")
                 : t("Creating...")
               : taskData
-              ? t("Update Task")
-              : t("Create Task")}
+                ? t("Update Task")
+                : t("Create Task")}
           </button>
 
           {feedbackMessage && (
             <p
-              className={`mt-2 text-center ${
-                feedbackMessage.includes("successfully")
+              className={`mt-2 text-center ${feedbackMessage.includes("successfully")
                   ? "text-green-500"
                   : "text-red-500"
-              }`}
+                }`}
             >
               {feedbackMessage}
             </p>

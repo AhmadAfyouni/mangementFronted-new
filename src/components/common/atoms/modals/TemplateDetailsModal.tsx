@@ -179,7 +179,7 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 pt-0 space-y-6 overflow-y-auto max-h-[calc(90vh-12rem)]">
+        <div className="p-6 pt-0 gap-6 overflow-y-auto max-h-[calc(90vh-12rem)]">
           {/* Approval Track */}
           <div>
             <h3 className="text-sm font-medium text-twhite mb-4 flex items-center gap-2">
@@ -230,7 +230,7 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
               </svg>
               {t("Execution Departments")}
             </h3>
-            <div className="bg-main rounded-lg p-4 space-y-4">
+            <div className="bg-main rounded-lg p-4 gap-4">
               {template.departments_execution_ids.map((dept, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-dark shrink-0 mt-1.5" />
@@ -258,7 +258,7 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
               </svg>
               {t("Archive Departments")}
             </h3>
-            <div className="bg-main rounded-lg p-4 space-y-4">
+            <div className="bg-main rounded-lg p-4 gap-4">
               {template.departments_archive.map((dept, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-dark shrink-0 mt-1.5" />

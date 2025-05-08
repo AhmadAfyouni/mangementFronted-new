@@ -62,18 +62,16 @@ export const TimeLogSection: React.FC<{
       </div>
 
       <div
-        className={`${
-          isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-        } shadow-md p-4 rounded-lg text-tmid space-y-2`}
+        className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+          } shadow-md p-4 rounded-lg text-tmid gap-2`}
       >
         <div className="flex justify-between items-center mb-3">
           <span className="text-tbright font-medium">
             {t("Total Time Spent")}
           </span>
           <span
-            className={`${
-              isLightMode ? "bg-darkest text-white " : "bg-dark text-twhite"
-            } px-3 py-1 rounded-md font-medium`}
+            className={`${isLightMode ? "bg-darkest text-white " : "bg-dark text-twhite"
+              } px-3 py-1 rounded-md font-medium`}
           >
             {formatTime(totalTime)}
           </span>
@@ -101,22 +99,20 @@ export const TimeLogSection: React.FC<{
                   return (
                     <div
                       key={log._id || index}
-                      className={`grid grid-cols-4 gap-2 py-2 text-xs ${
-                        index % 2 === 0
+                      className={`grid grid-cols-4 gap-2 py-2 text-xs ${index % 2 === 0
                           ? isLightMode
                             ? "bg-darker bg-opacity-30"
                             : "bg-tblack bg-opacity-30"
                           : ""
-                      }`}
+                        }`}
                     >
                       <div className="break-words">{startFormatted}</div>
                       <div className="break-words">{endFormatted}</div>
                       <div className="break-words">{durationFormatted}</div>
                       <div className="text-right">
                         <span
-                          className={`${
-                            isLightMode ? "bg-dark" : "bg-gray-700"
-                          } text-twhite px-2 py-1 rounded-md text-xs`}
+                          className={`${isLightMode ? "bg-dark" : "bg-gray-700"
+                            } text-twhite px-2 py-1 rounded-md text-xs`}
                         >
                           {t("Session")} {timeLogs.length - index}
                         </span>

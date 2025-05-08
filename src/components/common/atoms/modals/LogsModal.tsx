@@ -185,7 +185,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ logs, isOpen, onClose }) => {
               <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-700/50" />
 
               {/* Logs */}
-              <div className="space-y-6">
+              <div className="gap-6">
                 {logs.map((log, index) => (
                   <div key={index} className="relative pl-12">
                     {/* Timeline dot with action icon */}

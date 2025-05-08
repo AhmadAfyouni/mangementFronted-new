@@ -121,7 +121,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             {messages &&
               messages.map((message, index) => (
                 <div key={index} className="flex mb-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 text-twhite rounded-full flex items-center justify-center mr-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-yellow-500 text-twhite rounded-full flex items-center justify-center mx-4">
                     {message.emp.charAt(0)}
                   </div>
                   <div>
@@ -137,7 +137,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                         {message.files.map((file, idx) => (
                           <div
                             key={idx}
-                            className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mr-2 my-1"
+                            className="bg-gray-200 text-tblack p-1 px-2 rounded-md inline-block mx-2 my-1"
                           >
                             {file}
                           </div>
@@ -150,7 +150,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div
-            className="bg-dark  flex items-center my-4 space-x-3 absolute bottom-0 w-[90%] p-2 border-none outline-none text-twhite rounded-md resize-none focus:outline-none"
+            className="bg-dark  flex items-center my-4 gap-3 absolute bottom-0 w-[90%] p-2 border-none outline-none text-twhite rounded-md resize-none focus:outline-none"
             dir={getDir()}
           >
             <input
@@ -163,9 +163,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
             <label
               htmlFor="file-upload"
-              className={` ${
-                isLightMode ? "bg-darkest" : " bg-main"
-              } p-2 rounded-md cursor-pointer`}
+              className={` ${isLightMode ? "bg-darkest" : " bg-main"
+                } p-2 rounded-md cursor-pointer`}
             >
               {/* <FaPaperclip className="text-tmid hover:text-tblack" /> */}
               <Image
@@ -190,9 +189,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
             <button
               onClick={handleSendMessage}
-              className={` ${
-                isLightMode ? "bg-darkest" : " bg-main"
-              } p-2 rounded-md text-twhite`}
+              className={` ${isLightMode ? "bg-darkest" : " bg-main"
+                } p-2 rounded-md text-twhite`}
             >
               {/* <FaPaperPlane /> */}
               <Image

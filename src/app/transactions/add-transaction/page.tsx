@@ -264,7 +264,7 @@ const NewTransaction = () => {
           <h2 className="text-2xl font-semibold mb-2">{template.name}</h2>
           <p className="text-tmid mb-4">{template.description}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="gap-2">
               <p className="text-sm text-tmid">
                 <span className="font-medium text-twhite">{t("Type")}: </span>
                 {template.type}
@@ -276,7 +276,7 @@ const NewTransaction = () => {
                 {template.duration.value} {t(template.duration.unit)}
               </p>
             </div>
-            <div className="space-y-2">
+            <div className="gap-2">
               {startDate && (
                 <p className="text-sm text-tmid" dir={getDir()}>
                   <span className="font-medium text-twhite">
@@ -400,7 +400,7 @@ const NewTransaction = () => {
                           }
                         }}
                         disabled={fileStatuses[field.name]?.isUploading}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-dark file:text-twhite hover:file:bg-dark/90"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200 file:mx-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-dark file:text-twhite hover:file:bg-dark/90"
                       />
                       {fileStatuses[field.name]?.isUploading && (
                         <div className="mt-2">
@@ -445,11 +445,10 @@ const NewTransaction = () => {
         <button
           type="submit"
           disabled={isPending || isRestartPending || isUploadingFiles}
-          className={`mt-8 w-full bg-dark hover:bg-dark/90 text-twhite px-6 py-3 rounded-lg transition duration-200 font-medium ${
-            isPending || isRestartPending || isUploadingFiles
-              ? "opacity-70 cursor-not-allowed"
-              : ""
-          }`}
+          className={`mt-8 w-full bg-dark hover:bg-dark/90 text-twhite px-6 py-3 rounded-lg transition duration-200 font-medium ${isPending || isRestartPending || isUploadingFiles
+            ? "opacity-70 cursor-not-allowed"
+            : ""
+            }`}
         >
           <PendingLogic
             isPending={isPending || isRestartPending || isUploadingFiles}

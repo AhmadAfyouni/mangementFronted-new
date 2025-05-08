@@ -60,7 +60,7 @@ const NewTemplate: React.FC = () => {
           {t("New Template")}
         </h1>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="gap-4">
         <BasicFields formData={formData} setFormData={setFormData} />
         <TransactionFields
           transactionFields={formData.transactionFields}

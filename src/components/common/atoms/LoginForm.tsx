@@ -85,9 +85,8 @@ const LoginForm = ({ setIsModalOpen, setEmpId }: LoginFormProps) => {
           <input
             type="email"
             {...register("email")}
-            className={`flex-1 py-3 outline-none ${
-              errors.email ? "border-red-500" : "border-gray-200"
-            }`}
+            className={`flex-1 py-3 outline-none ${errors.email ? "border-red-500" : "border-gray-200"
+              }`}
             placeholder={t("Email")}
           />
         </div>
@@ -105,9 +104,8 @@ const LoginForm = ({ setIsModalOpen, setEmpId }: LoginFormProps) => {
           <input
             type={showPassword ? "text" : "password"}
             {...register("password")}
-            className={`flex-1 py-3 outline-none ${
-              errors.password ? "border-red-500" : "border-gray-200"
-            }`}
+            className={`flex-1 py-3 outline-none ${errors.password ? "border-red-500" : "border-gray-200"
+              }`}
             placeholder={t("Password")}
           />
           <button

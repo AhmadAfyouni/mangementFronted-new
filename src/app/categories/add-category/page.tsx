@@ -113,7 +113,7 @@ const AddJobCategory: React.FC = () => {
             : t("Create Job Category")}
         </h1>
         <form
-          className="space-y-4 "
+          className="gap-4 "
           onSubmit={handleSubmit(async (data: JobCategoryFormInputs) => {
             addJobCategory(data);
           })}
@@ -200,9 +200,8 @@ const AddJobCategory: React.FC = () => {
             
                         ${isLightMode ? " text-tblackAF" : "text-twhite"}
 
-            rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${
-              isPendingJobCategory ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${isPendingJobCategory ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingJobCategory}
           >
             {

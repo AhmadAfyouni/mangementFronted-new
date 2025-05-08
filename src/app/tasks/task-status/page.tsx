@@ -69,7 +69,7 @@ const TaskStatusesView: React.FC = () => {
                 >
                   <td className="py-3 px-4">{taskStatus.name}</td>
                   <td className="py-3 px-4">{taskStatus.description}</td>
-                  <td className="py-3 px-4 flex space-x-2">
+                  <td className="py-3 px-4 flex gap-2">
                     <EditIcon
                       className="cursor-pointer text-[#1b1a40]"
                       onClick={() =>

@@ -46,17 +46,17 @@ const TransactionFields: React.FC<TransactionFieldsProps> = ({
     const newFields = transactionFields.map((item, i) =>
       i === index
         ? {
-            ...item,
-            [field]:
-              field === "type" ? (value as TransactionField["type"]) : value,
-          }
+          ...item,
+          [field]:
+            field === "type" ? (value as TransactionField["type"]) : value,
+        }
         : item
     );
     setTransactionFields(newFields);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="gap-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-twhite">
           {t("Transactions Fields")}
@@ -65,7 +65,7 @@ const TransactionFields: React.FC<TransactionFieldsProps> = ({
           {t("Add Field")}
         </CustomButton>
       </div>
-      <div className="space-y-4">
+      <div className="gap-4">
         {transactionFields.map((field, index) => (
           <div
             key={index}

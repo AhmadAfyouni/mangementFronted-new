@@ -520,6 +520,67 @@
     "End Time": "End Time",
     "Session": "Session",
     "No time logs recorded": "No time logs recorded",
-    "Session Time": "Session Time"
+    "Session Time": "Session Time",
+
+    "welcome": "Welcome to your dashboard",
+    "welcome_subtitle": "Here's an overview of your tasks and activities",
+
+    "total": "Total Tasks",
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "task": "Task",
+
+    "time_tracker": "Time Tracker",
+    "worked_hours": "Worked Hours",
+    "break_time": "Break Time",
+    "overtime_hours": "Overtime Hours",
+    "working_hours": "Working Hours",
+    "this_year": "This Year",
+    "daily_timeline": "Daily Timeline",
+    "total_working_time": "Total Working Time",
+    "total_break_time": "Total Break Time",
+    "no_timeline_entries": "No timeline entries for today",
+
+    "select_date": "Select a date",
+    "no_events": "No events for this date",
+    "add_event": "Add Event",
+    "today": "Today",
+    "yesterday": "Yesterday",
+
+    "daily_tasks": "Daily Tasks",
+    "no_daily_tasks": "No daily tasks for today",
+    "loading": "Loading",
+    "view_all": "View All",
+    "in": "In",
+    "out": "Out",
+
+    "projects": "Projects",
+    "this_week": "This Week",
+
+    "messages": "Messages",
+    "new": "new",
+    "uploaded_assets": "I've uploaded the assets for the dashboard project",
+    "meeting_schedule": "Can we schedule a meeting to discuss the new design?",
+    "deadline_confirmation": "Just confirming - is the deadline still Friday?",
+    "feedback_review": "I've reviewed your feedback and made the changes",
+    "font_issues": "We're having issues with the font rendering in Safari",
+    "view_all_messages": "View All Messages",
+
+    "my_tasks": "My Tasks",
+    "view_all_tasks": "View All Tasks",
+    "no_tasks_found": "No tasks found",
+    "loading_tasks": "Loading your tasks...",
+    "try_different_filter": "Try a different filter",
+    "no_tasks_message": "You don't have any tasks assigned yet",
+    "no_tasks_match_filter": "No tasks match the selected filter",
+    "no_tasks_available": "No tasks available",
+    "status": "Status",
+    "progress": "Progress",
+    "activity": "Activity",
+
+    "recent_activity": "Recent Activity",
+    "view_all_activity": "View All Activity",
+    "no_recent_activity": "No recent activity"
   }
 }

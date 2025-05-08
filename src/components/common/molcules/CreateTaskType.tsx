@@ -69,7 +69,7 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
           {taskTypeData ? "Update Task Type" : "Create Task Type"}
         </h1>
         <form
-          className="space-y-4"
+          className="gap-4"
           onSubmit={handleSubmit(async (data: TaskTypeFormInputs) => {
             addTaskType({
               name: data.name,
@@ -84,9 +84,8 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
             <input
               type="text"
               {...register("name")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter task type name"
             />
             {errors.name && (
@@ -99,9 +98,8 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
             </label>
             <textarea
               {...register("description")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${
-                errors.description ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.description ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter description"
               rows={3}
             />
@@ -114,9 +112,8 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
 
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${
-              isPendingTaskType ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${isPendingTaskType ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingTaskType}
           >
             {isPendingTaskType
@@ -124,8 +121,8 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
                 ? "Updating..."
                 : "Creating..."
               : taskTypeData
-              ? "Update Task Type"
-              : "Create Task Type"}
+                ? "Update Task Type"
+                : "Create Task Type"}
           </button>
           {isErrorTaskType && (
             <p className="text-red-500 mt-2 text-center">

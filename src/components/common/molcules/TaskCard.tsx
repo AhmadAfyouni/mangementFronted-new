@@ -20,11 +20,10 @@ const TaskCard: React.FC<TaskCardProps> = ({ taskId, index, title, task }) => {
       <Draggable draggableId={taskId} index={index}>
         {(provided) => (
           <div
-            className={`${isLightMode ? "bg-main " : "bg-dark"}   ${
-              currentLanguage == "en" ? "border-l-2" : "border-r-2"
-            } ${getPriorityBorderColor(
-              task.priority
-            )} rounded-lg shadow-md p-4`}
+            className={`${isLightMode ? "bg-main " : "bg-dark"}   ${currentLanguage == "en" ? "border-l-2" : "border-r-2"
+              } ${getPriorityBorderColor(
+                task.priority
+              )} rounded-lg shadow-md p-4`}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
@@ -33,9 +32,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ taskId, index, title, task }) => {
             <h3 className="text-lg font-bold text-tmid mb-4">{title}</h3>
             <div className="flex justify-between items-center">
               <div
-                className={`flex space-x-4 ${
-                  task.is_over_due ? "text-red-500" : "text-tdark"
-                } ${isDueSoon(task.due_date) ? "flash" : ""}`}
+                className={`flex gap-4 ${task.is_over_due ? "text-red-500" : "text-tdark"
+                  } ${isDueSoon(task.due_date) ? "flash" : ""}`}
               >
                 {formatDate(task.due_date, currentLanguage as "en" | "ar")}
               </div>

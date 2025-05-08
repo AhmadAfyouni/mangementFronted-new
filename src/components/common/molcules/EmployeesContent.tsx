@@ -25,16 +25,15 @@ const EmployeesContent: React.FC<{
   );
 
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col space-y-4 col-span-12 ">
+    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12 ">
       {employeesData && employeesData.length > 0 ? (
         <div className="overflow-x-auto rounded-lg shadow-md">
           <table className="min-w-full bg-main rounded-lg text-twhite shadow-md">
             <thead
-              className={` ${
-                isLightMode
+              className={` ${isLightMode
                   ? "bg-darkest text-tblackAF"
                   : "bg-tblack text-twhite"
-              }  `}
+                }  `}
             >
               <tr>
                 <th className=" text-center py-3 px-4 uppercase font-semibold text-sm">
@@ -69,11 +68,10 @@ const EmployeesContent: React.FC<{
               {employeesData.map((employee) => (
                 <tr
                   key={employee.id}
-                  className={` ${
-                    isLightMode
+                  className={` ${isLightMode
                       ? "hover:bg-darker text-blackAF hover:text-tblackAF"
                       : "hover:bg-slate-700 text-twhite"
-                  }  group transition-colors`}
+                    }  group transition-colors`}
                 >
                   <td className="text-center py-3 px-4">
                     {employee.name + " - " + employee.job.title}

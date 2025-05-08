@@ -22,9 +22,8 @@ const AddSectionModal: React.FC<{
   const { mutate: addSection, isPending: isPendingSection } = useCreateMutation(
     {
       endpoint: sectionData ? `/sections/${sectionData._id}` : "/sections",
-      onSuccessMessage: `Section ${
-        sectionData ? "updated" : "added"
-      } successfully!`,
+      onSuccessMessage: `Section ${sectionData ? "updated" : "added"
+        } successfully!`,
       invalidateQueryKeys: ["sections"],
       onSuccessFn() {
         setSection("");
@@ -37,7 +36,7 @@ const AddSectionModal: React.FC<{
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-dark rounded-xl shadow-md w-[400px] text-twhite space-y-4 p-6 relative">
+        <div className="bg-dark rounded-xl shadow-md w-[400px] text-twhite gap-4 p-6 relative">
           <button
             onClick={onClose}
             className="text-twhite absolute top-4 right-4 text-xl"
@@ -49,11 +48,10 @@ const AddSectionModal: React.FC<{
               <input
                 type="text"
                 placeholder={t("Section Name")}
-                className={`${
-                  isLightMode
+                className={`${isLightMode
                     ? "bg-darker placeholder:text-tblackAF text-tblackAF"
                     : "bg-transparent"
-                }  outline-none border rounded-lg px-4 py-2`}
+                  }  outline-none border rounded-lg px-4 py-2`}
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   setSection(event.target.value)
                 }
@@ -68,11 +66,10 @@ const AddSectionModal: React.FC<{
                 })
               }
               className={`border border-slate-300 px-2 py-1 rounded-md w-fit text-xs flex items-center justify-center gap-1 cursor-pointer
-              ${
-                isLightMode
+              ${isLightMode
                   ? "bg-darkest text-tblackAF hover:bg-tmid"
                   : "hover:bg-main"
-              }
+                }
                mx-auto mt-4`}
             >
               <Image src={CheckIcon} alt="check icon" height={20} width={20} />
@@ -81,8 +78,8 @@ const AddSectionModal: React.FC<{
                   ? t("Updating Section ...")
                   : t("Adding Section ...")
                 : sectionData
-                ? t("Update Section")
-                : t("Add Section")}
+                  ? t("Update Section")
+                  : t("Add Section")}
             </div>
           </div>
         </div>

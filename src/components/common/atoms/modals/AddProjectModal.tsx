@@ -39,7 +39,7 @@ const AddProjectModal: React.FC<{
     url: `/department/${
       // isAdmin || isPrimary ? "get-departments" : "view"
       "get-level-one"
-    }`,
+      }`,
   });
 
   const { mutate: addOrUpdateProject, isPending } = useCreateMutation({
@@ -87,7 +87,7 @@ const AddProjectModal: React.FC<{
         onClick={onClose}
       >
         <div
-          className="bg-secondary rounded-xl shadow-md w-[400px] text-twhite space-y-4 p-6 relative"
+          className="bg-secondary rounded-xl shadow-md w-[400px] text-twhite gap-4 p-6 relative"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -113,9 +113,8 @@ const AddProjectModal: React.FC<{
                 <input
                   type="text"
                   {...register("name")}
-                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${
-                    errors.name ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${errors.name ? "border border-red-500" : "border-none"
+                    }`}
                   placeholder={t("Enter project name")}
                 />
                 {errors.name && (
@@ -132,9 +131,8 @@ const AddProjectModal: React.FC<{
                 </label>
                 <textarea
                   {...register("description")}
-                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${
-                    errors.description ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${errors.description ? "border border-red-500" : "border-none"
+                    }`}
                   placeholder={t("Enter project description")}
                 />
                 {errors.description && (
@@ -152,9 +150,8 @@ const AddProjectModal: React.FC<{
                 <input
                   type="date"
                   {...register("startDate")}
-                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${
-                    errors.startDate ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${errors.startDate ? "border border-red-500" : "border-none"
+                    }`}
                 />
                 {errors.startDate && (
                   <p className="text-red-500 mt-1 text-sm">
@@ -171,9 +168,8 @@ const AddProjectModal: React.FC<{
                 <input
                   type="date"
                   {...register("endDate")}
-                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${
-                    errors.endDate ? "border border-red-500" : "border-none"
-                  }`}
+                  className={`w-full px-4 py-2 mt-1 bg-main text-tmid outline-none rounded-lg ${errors.endDate ? "border border-red-500" : "border-none"
+                    }`}
                 />
                 {errors.endDate && (
                   <p className="text-red-500 mt-1 text-sm">
@@ -193,14 +189,14 @@ const AddProjectModal: React.FC<{
                     value={selectedDepartments.map((id) => ({
                       value: id,
                       label:
-                        departments?.find((dept) => dept.id === id)?.name || "",
+                        departments && departments.find((dept) => dept.id === id)?.name || "",
                     }))}
                     options={
                       departments && departments.length > 0
                         ? departments.map((dept) => ({
-                            value: dept.id,
-                            label: dept.name,
-                          }))
+                          value: dept.id,
+                          label: dept.name,
+                        }))
                         : []
                     }
                     onChange={(selectedOptions) => {
@@ -217,13 +213,11 @@ const AddProjectModal: React.FC<{
 
               <button
                 type="submit"
-                className={`w-full py-2 mt-4 ${
-                  isLightMode
-                    ? " bg-darkest text-tblackAF"
-                    : " bg-tblack text-twhite"
-                } rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${
-                  isPending ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full py-2 mt-4 ${isLightMode
+                  ? " bg-darkest text-tblackAF"
+                  : " bg-tblack text-twhite"
+                  } rounded-lg font-bold hover:bg-slate-700 transition duration-200 ${isPending ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={isPending}
               >
                 {isPending ? t("Processing...") : t("Submit")}

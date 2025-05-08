@@ -294,15 +294,14 @@ const AddEmp: React.FC = () => {
   return (
     <GridContainer>
       <div
-        className={`${
-          isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
-        }  p-8 rounded-xl shadow-lg  w-full  col-span-full  text-twhite`}
+        className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"
+          }  p-8 rounded-xl shadow-lg  w-full  col-span-full  text-twhite`}
       >
         <h1 className="text-center text-2xl font-bold mb-6">
           {employeeData ? t("Update Employee") : t("Create Employee")}
         </h1>
         <form
-          className="space-y-4"
+          className="gap-4"
           onSubmit={handleSubmit(onSubmit)}
           encType="multipart/form-data"
         >
@@ -311,13 +310,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("name")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter employee name")}
             />
             {errors.name && (
@@ -330,13 +327,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("email")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter Employee Email")}
             />
             {errors.email && (
@@ -350,13 +345,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("phone")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.phone ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.phone ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter Employee phone")}
             />
             {errors.phone && (
@@ -375,13 +368,11 @@ const AddEmp: React.FC = () => {
               disabled={!!employeeData}
               type="text"
               {...register("password")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.password ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={
                 employeeData
                   ? t("Can't Update Employee Password")
@@ -403,13 +394,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("national_id")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.national_id ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.national_id ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter national ID")}
             />
             {errors.national_id && (
@@ -424,13 +413,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("address")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.address ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.address ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter Address")}
             />
             {errors.address && (
@@ -447,13 +434,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("emergency_contact")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.address ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.address ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter Address")}
             />
             {errors.address && (
@@ -470,13 +455,11 @@ const AddEmp: React.FC = () => {
             <input
               type="date"
               {...register("dob")}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${
-                errors.dob ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${errors.dob ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter employment date")}
             />
             {errors.dob && (
@@ -490,13 +473,11 @@ const AddEmp: React.FC = () => {
             <select
               {...register("gender")}
               defaultValue={employeeData && employeeData.gender}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg   placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.gender ? "border-high" : "border-border"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg   placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${errors.gender ? "border-high" : "border-border"
+                }`}
             >
               <option value="">{t("Select a gender")}</option>
               {["male", "female", "undefined"].map((gender, index: number) => (
@@ -520,13 +501,11 @@ const AddEmp: React.FC = () => {
             <select
               {...register("marital_status")}
               value={getValues("marital_status") || ""} // Changed from defaultValue to value
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg   placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${
-                errors.marital_status ? "border-high" : "border-border"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg   placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent border ${errors.marital_status ? "border-high" : "border-border"
+                }`}
             >
               <option value="">{t("Select a marital status")}</option>
               {[t("single"), t("married")].map((status, index: number) => (
@@ -550,13 +529,11 @@ const AddEmp: React.FC = () => {
             <input
               type="date"
               {...register("employment_date")}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${
-                errors.employment_date ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${errors.employment_date ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter employment date")}
             />
             {errors.employment_date && (
@@ -574,13 +551,11 @@ const AddEmp: React.FC = () => {
             <input
               type="number"
               {...register("base_salary")}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${
-                errors.base_salary ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${errors.base_salary ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter base salary")}
             />
             {errors.base_salary && (
@@ -597,13 +572,11 @@ const AddEmp: React.FC = () => {
             <select
               disabled={!!employeeData}
               {...register("department_id")}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${
-                errors.department_id ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+                }`}
               onChange={(e) => {
                 setValue("department_id", e.target.value);
                 setSelectedDept(e.target.value);
@@ -632,13 +605,11 @@ const AddEmp: React.FC = () => {
             <select
               disabled={!!employeeData}
               {...register("job_id")}
-              className={`w-full ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${
-                errors.job_id ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none px-4 py-2 mt-1 rounded-lg border ${errors.job_id ? "border-red-500" : "border-gray-300"
+                }`}
               onChange={(e) => setValue("job_id", e.target.value)}
             >
               <option value="">{t("Select a job title")}</option>
@@ -669,13 +640,11 @@ const AddEmp: React.FC = () => {
             <input
               type="text"
               {...register("job_tasks")}
-              className={`w-full  ${
-                isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
-              }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${
-                errors.job_tasks ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full  ${isLightMode
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
+                }  outline-none border-none   px-4 py-2 mt-1 rounded-lg border ${errors.job_tasks ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder={t("Enter job tasks")}
             />
             {errors.job_tasks && (
@@ -695,11 +664,10 @@ const AddEmp: React.FC = () => {
                 onClick={() =>
                   appendLegalDocument({ name: "", validity: "", file: null })
                 }
-                className={`px-3 py-1.5 rounded-md ${
-                  isLightMode
-                    ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    : "bg-blue-900/30 text-blue-400 hover:bg-blue-800/40"
-                } text-sm flex items-center gap-1 transition-colors`}
+                className={`px-3 py-1.5 rounded-md ${isLightMode
+                  ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                  : "bg-blue-900/30 text-blue-400 hover:bg-blue-800/40"
+                  } text-sm flex items-center gap-1 transition-colors`}
               >
                 <svg
                   className="w-4 h-4"
@@ -720,22 +688,20 @@ const AddEmp: React.FC = () => {
 
             {legalDocumentFields.length === 0 ? (
               <div
-                className={`text-center py-6 ${
-                  isLightMode ? "text-gray-500" : "text-gray-400"
-                }`}
+                className={`text-center py-6 ${isLightMode ? "text-gray-500" : "text-gray-400"
+                  }`}
               >
                 {t("No legal documents added yet")}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="gap-4">
                 {legalDocumentFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className={`p-4 rounded-lg ${
-                      isLightMode
-                        ? "bg-gray-50 border border-gray-200"
-                        : "bg-dark border border-gray-700"
-                    }`}
+                    className={`p-4 rounded-lg ${isLightMode
+                      ? "bg-gray-50 border border-gray-200"
+                      : "bg-dark border border-gray-700"
+                      }`}
                   >
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="font-medium">
@@ -747,11 +713,10 @@ const AddEmp: React.FC = () => {
                           removeLegalDocument(index);
                           reset(getValues());
                         }}
-                        className={`p-1.5 rounded-full ${
-                          isLightMode
-                            ? "text-red-500 hover:bg-red-50"
-                            : "text-red-400 hover:bg-red-900/20"
-                        }`}
+                        className={`p-1.5 rounded-full ${isLightMode
+                          ? "text-red-500 hover:bg-red-50"
+                          : "text-red-400 hover:bg-red-900/20"
+                          }`}
                       >
                         <svg
                           className="w-4 h-4"
@@ -780,11 +745,10 @@ const AddEmp: React.FC = () => {
                             `legal_documents.${index}.name` as const
                           )}
                           placeholder={t("Enter document name")}
-                          className={`w-full px-4 py-2 rounded-lg ${
-                            isLightMode
-                              ? "bg-white border border-gray-300"
-                              : "bg-main border border-gray-600"
-                          } outline-none focus:ring-2 focus:ring-blue-500`}
+                          className={`w-full px-4 py-2 rounded-lg ${isLightMode
+                            ? "bg-white border border-gray-300"
+                            : "bg-main border border-gray-600"
+                            } outline-none focus:ring-2 focus:ring-blue-500`}
                         />
                       </div>
 
@@ -797,11 +761,10 @@ const AddEmp: React.FC = () => {
                           {...register(
                             `legal_documents.${index}.validity` as const
                           )}
-                          className={`w-full px-4 py-2 rounded-lg ${
-                            isLightMode
-                              ? "bg-white border border-gray-300"
-                              : "bg-main border border-gray-600"
-                          } outline-none focus:ring-2 focus:ring-blue-500`}
+                          className={`w-full px-4 py-2 rounded-lg ${isLightMode
+                            ? "bg-white border border-gray-300"
+                            : "bg-main border border-gray-600"
+                            } outline-none focus:ring-2 focus:ring-blue-500`}
                         />
                       </div>
 
@@ -841,11 +804,10 @@ const AddEmp: React.FC = () => {
                     file: null,
                   })
                 }
-                className={`px-3 py-1.5 rounded-md ${
-                  isLightMode
-                    ? "bg-green-100 text-green-600 hover:bg-green-200"
-                    : "bg-green-900/30 text-green-400 hover:bg-green-800/40"
-                } text-sm flex items-center gap-1 transition-colors`}
+                className={`px-3 py-1.5 rounded-md ${isLightMode
+                  ? "bg-green-100 text-green-600 hover:bg-green-200"
+                  : "bg-green-900/30 text-green-400 hover:bg-green-800/40"
+                  } text-sm flex items-center gap-1 transition-colors`}
               >
                 <svg
                   className="w-4 h-4"
@@ -866,22 +828,20 @@ const AddEmp: React.FC = () => {
 
             {certificationFields.length === 0 ? (
               <div
-                className={`text-center py-6 ${
-                  isLightMode ? "text-gray-500" : "text-gray-400"
-                }`}
+                className={`text-center py-6 ${isLightMode ? "text-gray-500" : "text-gray-400"
+                  }`}
               >
                 {t("No certifications added yet")}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="gap-4">
                 {certificationFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className={`p-4 rounded-lg ${
-                      isLightMode
-                        ? "bg-gray-50 border border-gray-200"
-                        : "bg-dark border border-gray-700"
-                    }`}
+                    className={`p-4 rounded-lg ${isLightMode
+                      ? "bg-gray-50 border border-gray-200"
+                      : "bg-dark border border-gray-700"
+                      }`}
                   >
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="font-medium">
@@ -893,11 +853,10 @@ const AddEmp: React.FC = () => {
                           removeCertification(index);
                           reset(getValues());
                         }}
-                        className={`p-1.5 rounded-full ${
-                          isLightMode
-                            ? "text-red-500 hover:bg-red-50"
-                            : "text-red-400 hover:bg-red-900/20"
-                        }`}
+                        className={`p-1.5 rounded-full ${isLightMode
+                          ? "text-red-500 hover:bg-red-50"
+                          : "text-red-400 hover:bg-red-900/20"
+                          }`}
                       >
                         <svg
                           className="w-4 h-4"
@@ -926,11 +885,10 @@ const AddEmp: React.FC = () => {
                             `certifications.${index}.certificate_name` as const
                           )}
                           placeholder={t("Enter certificate name")}
-                          className={`w-full px-4 py-2 rounded-lg ${
-                            isLightMode
-                              ? "bg-white border border-gray-300"
-                              : "bg-main border border-gray-600"
-                          } outline-none focus:ring-2 focus:ring-blue-500`}
+                          className={`w-full px-4 py-2 rounded-lg ${isLightMode
+                            ? "bg-white border border-gray-300"
+                            : "bg-main border border-gray-600"
+                            } outline-none focus:ring-2 focus:ring-blue-500`}
                         />
                       </div>
 
@@ -941,11 +899,10 @@ const AddEmp: React.FC = () => {
                         <input
                           type="date"
                           {...register(`certifications.${index}.date` as const)}
-                          className={`w-full px-4 py-2 rounded-lg ${
-                            isLightMode
-                              ? "bg-white border border-gray-300"
-                              : "bg-main border border-gray-600"
-                          } outline-none focus:ring-2 focus:ring-blue-500`}
+                          className={`w-full px-4 py-2 rounded-lg ${isLightMode
+                            ? "bg-white border border-gray-300"
+                            : "bg-main border border-gray-600"
+                            } outline-none focus:ring-2 focus:ring-blue-500`}
                         />
                       </div>
 
@@ -959,11 +916,10 @@ const AddEmp: React.FC = () => {
                             `certifications.${index}.grade` as const
                           )}
                           placeholder={t("Enter grade or score")}
-                          className={`w-full px-4 py-2 rounded-lg ${
-                            isLightMode
-                              ? "bg-white border border-gray-300"
-                              : "bg-main border border-gray-600"
-                          } outline-none focus:ring-2 focus:ring-blue-500`}
+                          className={`w-full px-4 py-2 rounded-lg ${isLightMode
+                            ? "bg-white border border-gray-300"
+                            : "bg-main border border-gray-600"
+                            } outline-none focus:ring-2 focus:ring-blue-500`}
                         />
                       </div>
 
@@ -1013,21 +969,19 @@ const AddEmp: React.FC = () => {
                   type="text"
                   {...register(`allowances.${index}.allowance_type` as const)}
                   placeholder={t("Allowance Type")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
                 <input
                   type="number"
                   {...register(`allowances.${index}.amount` as const)}
                   placeholder={t("Amount")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
               </div>
               <button
@@ -1061,21 +1015,19 @@ const AddEmp: React.FC = () => {
                   type="text"
                   {...register(`incentives.${index}.description` as const)}
                   placeholder={t("Description")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
                 <input
                   type="number"
                   {...register(`incentives.${index}.amount` as const)}
                   placeholder={t("Amount")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
               </div>
               <button
@@ -1111,11 +1063,10 @@ const AddEmp: React.FC = () => {
                   type="text"
                   {...register(`bank_accounts.${index}.bank_name` as const)}
                   placeholder={t("Bank Name")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
                 <input
                   type="text"
@@ -1123,11 +1074,10 @@ const AddEmp: React.FC = () => {
                     `bank_accounts.${index}.account_number` as const
                   )}
                   placeholder={t("Account Number")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
               </div>
               <button
@@ -1167,29 +1117,26 @@ const AddEmp: React.FC = () => {
                   type="text"
                   {...register(`evaluations.${index}.evaluation_type` as const)}
                   placeholder={t("Evaluation Type")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
                 <textarea
                   {...register(`evaluations.${index}.description` as const)}
                   placeholder={t("Description")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
                 <textarea
                   {...register(`evaluations.${index}.plan` as const)}
                   placeholder={t("Plan")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${
-                    isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
-                  }  outline-none border-none`}
+                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
+                    }  outline-none border-none`}
                 />
               </div>
               <button
@@ -1331,32 +1278,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
     <div className="mt-2">
       {isUploading ? (
         <div
-          className={`w-full px-4 py-3 rounded-lg ${
-            isLightMode
-              ? "bg-dark border border-blue-400"
-              : "bg-secondary border border-blue-600"
-          }`}
+          className={`w-full px-4 py-3 rounded-lg ${isLightMode
+            ? "bg-dark border border-blue-400"
+            : "bg-secondary border border-blue-600"
+            }`}
         >
           <div className="flex items-center justify-between mb-1">
             <span
-              className={`text-xs ${
-                isLightMode ? "text-blue-600" : "text-blue-400"
-              }`}
+              className={`text-xs ${isLightMode ? "text-blue-600" : "text-blue-400"
+                }`}
             >
               {t("Uploading file...")}
             </span>
             <span
-              className={`text-xs ${
-                isLightMode ? "text-blue-600" : "text-blue-400"
-              }`}
+              className={`text-xs ${isLightMode ? "text-blue-600" : "text-blue-400"
+                }`}
             >
               {uploadProgress}%
             </span>
           </div>
           <div
-            className={`w-full h-1.5 rounded-full ${
-              isLightMode ? "bg-gray-200" : "bg-gray-700"
-            }`}
+            className={`w-full h-1.5 rounded-full ${isLightMode ? "bg-gray-200" : "bg-gray-700"
+              }`}
           >
             <div
               className="h-full rounded-full bg-blue-500 transition-all duration-200"
@@ -1366,20 +1309,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       ) : (
         <div
-          className={`w-full px-4 py-3 rounded-lg border ${
-            fileName ? "border-solid" : "border-dashed border-3"
-          } 
-            ${
-              fileName
-                ? isLightMode
-                  ? "border-green-400 bg-green-50"
-                  : "border-green-700 bg-green-900/20"
-                : isLightMode
+          className={`w-full px-4 py-3 rounded-lg border ${fileName ? "border-solid" : "border-dashed border-3"
+            } 
+            ${fileName
+              ? isLightMode
+                ? "border-green-400 bg-green-50"
+                : "border-green-700 bg-green-900/20"
+              : isLightMode
                 ? "border-gray-300 bg-gray-50"
                 : "border-gray-700 bg-main"
             } 
-            flex items-center cursor-pointer transition-colors hover:${
-              isLightMode ? "bg-gray-100" : "bg-gray-700/30"
+            flex items-center cursor-pointer transition-colors hover:${isLightMode ? "bg-gray-100" : "bg-gray-700/30"
             }`}
           onClick={() =>
             document.getElementById(`fileInput-${fieldName}-${index}`)?.click()
@@ -1388,9 +1328,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           {fileName ? (
             <>
               <svg
-                className={`w-4 h-4 mr-2 ${
-                  isLightMode ? "text-green-500" : "text-green-400"
-                }`}
+                className={`w-4 h-4 mx-2 ${isLightMode ? "text-green-500" : "text-green-400"
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1403,9 +1342,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 ></path>
               </svg>
               <span
-                className={`text-sm truncate flex-1 ${
-                  isLightMode ? "text-gray-700" : "text-gray-300"
-                }`}
+                className={`text-sm truncate flex-1 ${isLightMode ? "text-gray-700" : "text-gray-300"
+                  }`}
               >
                 {fileName.substring(fileName.lastIndexOf("/") + 1)}
               </span>
@@ -1413,11 +1351,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
               <button
                 type="button"
                 onClick={handleClearFile}
-                className={`ml-2 p-1 rounded-full ${
-                  isLightMode
-                    ? "text-red-500 hover:bg-red-50"
-                    : "text-red-400 hover:bg-red-900/20"
-                }`}
+                className={`ml-2 p-1 rounded-full ${isLightMode
+                  ? "text-red-500 hover:bg-red-50"
+                  : "text-red-400 hover:bg-red-900/20"
+                  }`}
                 title={t("Remove file")}
               >
                 <svg
@@ -1438,9 +1375,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           ) : (
             <>
               <svg
-                className={`w-4 h-4 mr-2 ${
-                  isLightMode ? "text-gray-400" : "text-gray-500"
-                }`}
+                className={`w-4 h-4 mx-2 ${isLightMode ? "text-gray-400" : "text-gray-500"
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1453,9 +1389,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 ></path>
               </svg>
               <span
-                className={`text-sm ${
-                  isLightMode ? "text-gray-500" : "text-gray-400"
-                }`}
+                className={`text-sm ${isLightMode ? "text-gray-500" : "text-gray-400"
+                  }`}
               >
                 {t("Click to upload file")}
               </span>

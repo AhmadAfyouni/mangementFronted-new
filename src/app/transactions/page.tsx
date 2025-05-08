@@ -294,23 +294,23 @@ const Transactions = () => {
     viewType === "my"
       ? isMyTransLoading
       : viewType === "department"
-      ? isDeptLoading
-      : viewType === "admin"
-      ? isAdminLoading
-      : viewType === "archive"
-      ? isArchiveLoading
-      : isExecutionLoading;
+        ? isDeptLoading
+        : viewType === "admin"
+          ? isAdminLoading
+          : viewType === "archive"
+            ? isArchiveLoading
+            : isExecutionLoading;
 
   const isError =
     viewType === "my"
       ? isMyTransError
       : viewType === "department"
-      ? isDeptError
-      : viewType === "admin"
-      ? isAdminError
-      : viewType === "archive"
-      ? isArchiveError
-      : isExecutionError;
+        ? isDeptError
+        : viewType === "admin"
+          ? isAdminError
+          : viewType === "archive"
+            ? isArchiveError
+            : isExecutionError;
 
   const renderStatusTabs = () => {
     const currentTabs = statusTabs[viewType];
@@ -322,10 +322,9 @@ const Transactions = () => {
             onClick={() => handleStatusChange(tab.value)}
             className={`
               px-4 py-2 rounded-lg transition-colors duration-200
-              ${
-                selectedStatus === tab.value
-                  ? "bg-secondary text-twhite"
-                  : "text-tmid hover:bg-secondary/50"
+              ${selectedStatus === tab.value
+                ? "bg-secondary text-twhite"
+                : "text-tmid hover:bg-secondary/50"
               }
               flex items-center gap-2 text-sm font-medium
             `}
@@ -347,7 +346,7 @@ const Transactions = () => {
 
     if (isLoading) {
       return (
-        <div className="space-y-4">
+        <div className="gap-4">
           {[...Array(3)].map((_, i) => (
             <TransactionLoadingSkeleton key={`loading-${i}`} />
           ))}
@@ -360,7 +359,7 @@ const Transactions = () => {
     }
 
     return (
-      <div className="space-y-4">
+      <div className="gap-4">
         {filteredTransactions.map((transaction) => {
           const isChecking =
             viewType === "archive" ||
@@ -384,7 +383,7 @@ const Transactions = () => {
 
   return (
     <GridContainer>
-      <div className="col-span-full space-y-6">
+      <div className="col-span-full gap-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl font-bold text-twhite">

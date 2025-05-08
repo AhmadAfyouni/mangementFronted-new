@@ -73,66 +73,59 @@ Main Tasks: ${department.mainTasks}
         </span>
 
         <div
-          className={`inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full ${
-            isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
-          }`}
+          className={`inline-block align-bottom rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full ${isLightMode ? "bg-main text-blackAF" : "bg-main text-twhite"
+            }`}
         >
           {/* Enhanced Modal Header */}
           <div
-            className={`px-6 py-4 border-b ${
-              isLightMode ? "border-darkest" : "border-tblack"
-            } flex justify-between items-center
-            bg-gradient-to-r ${
-              isLightMode
+            className={`px-6 py-4 border-b ${isLightMode ? "border-darkest" : "border-tblack"
+              } flex justify-between items-center
+            bg-gradient-to-r ${isLightMode
                 ? "from-darkest to-darkest"
                 : "to-dark from-transparent"
-            }`}
+              }`}
           >
             <div className="flex items-center">
               <Building
-                className={`mr-2 ${
-                  isLightMode ? "text-green-500" : "text-green-400"
-                }`}
+                className={`mx-2 ${isLightMode ? "text-green-500" : "text-green-400"
+                  }`}
                 size={22}
               />
               <div>
                 <h3
-                  className={`text-xl font-semibold ${
-                    isLightMode ? "text-tblackAF" : "text-twhite"
-                  }`}
+                  className={`text-xl font-semibold ${isLightMode ? "text-tblackAF" : "text-twhite"
+                    }`}
                 >
                   {department.name}
                 </h3>
                 <div className="mt-1 flex items-center">
-                  <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-green-500/40 border-2 border-green-500/30 mr-2">
+                  <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-green-500/40 border-2 border-green-500/30 mx-2">
                     {department.category}
                   </span>
                   <span className="text-xs flex items-center opacity-70">
-                    <Clock size={12} className="mr-1" />
+                    <Clock size={12} className="mx-1" />
                     {t("Last updated")} 2 {t("days ago")}
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleCopyInfo}
-                className={`p-2 rounded-full ${
-                  isLightMode
-                    ? "bg-darkest hover:bg-darkest text-tblackAF"
-                    : "bg-dark hover:bg-dark text-twhite"
-                } transition-colors`}
+                className={`p-2 rounded-full ${isLightMode
+                  ? "bg-darkest hover:bg-darkest text-tblackAF"
+                  : "bg-dark hover:bg-dark text-twhite"
+                  } transition-colors`}
                 title={t("Copy department info")}
               >
                 <Copy size={18} />
               </button>
               <button
                 onClick={onClose}
-                className={`p-2 rounded-full ${
-                  isLightMode
-                    ? "bg-darkest hover:bg-darkest text-tblackAF"
-                    : "bg-dark hover:bg-dark text-twhite"
-                } transition-colors`}
+                className={`p-2 rounded-full ${isLightMode
+                  ? "bg-darkest hover:bg-darkest text-tblackAF"
+                  : "bg-dark hover:bg-dark text-twhite"
+                  } transition-colors`}
               >
                 <X size={18} />
               </button>
@@ -147,38 +140,32 @@ Main Tasks: ${department.mainTasks}
                 {/* Basic Info */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <Info
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-blue-500" : "text-blue-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                        }`}
                     />
                     {t("Basic Information")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     <div className="mb-3">
                       <div
-                        className={`text-sm font-medium mb-1 flex items-center ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <Tag size={14} className="mr-1" />
+                        <Tag size={14} className="mx-1" />
                         {t("Category")}
                       </div>
                       <div
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-500/40 border-2 border-green-500/30">
                           {department.category}
@@ -187,50 +174,44 @@ Main Tasks: ${department.mainTasks}
                     </div>
                     <div className="mb-3">
                       <div
-                        className={`text-sm font-medium mb-1 ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("Description")}
                       </div>
                       <div
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {department.description}
                       </div>
                     </div>
                     <div className="mb-3">
                       <div
-                        className={`text-sm font-medium mb-1 flex items-center ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <Target size={14} className="mr-1" />
+                        <Target size={14} className="mx-1" />
                         {t("Goal")}
                       </div>
                       <div
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {department.goal}
                       </div>
                     </div>
                     <div>
                       <div
-                        className={`text-sm font-medium mb-1 flex items-center ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium mb-1 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <ClipboardList size={14} className="mr-1" />
+                        <ClipboardList size={14} className="mx-1" />
                         {t("Main Tasks")}
                       </div>
                       <div
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {department.mainTasks}
                       </div>
@@ -241,27 +222,23 @@ Main Tasks: ${department.mainTasks}
                 {/* Numeric Owners - Enhanced with visual indicators */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <Users
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-blue-500" : "text-blue-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                        }`}
                     />
                     {t("Numeric Owners")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     {department.numericOwners &&
-                    department.numericOwners.length > 0 ? (
+                      department.numericOwners.length > 0 ? (
                       <div className="grid grid-cols-2 gap-3">
                         {department.numericOwners.map((owner, idx) => (
                           <div
@@ -269,18 +246,16 @@ Main Tasks: ${department.mainTasks}
                             className="flex flex-col p-3 rounded-lg bg-green-500/30 border-2 border-green-500/20"
                           >
                             <span
-                              className={`text-sm font-medium ${
-                                isLightMode ? "text-tblackAF" : "text-twhite"
-                              }`}
+                              className={`text-sm font-medium ${isLightMode ? "text-tblackAF" : "text-twhite"
+                                }`}
                             >
                               {owner.category}
                             </span>
                             <span
-                              className={`text-lg font-semibold mt-1 ${
-                                isLightMode
-                                  ? "text-green-600"
-                                  : "text-green-400"
-                              }`}
+                              className={`text-lg font-semibold mt-1 ${isLightMode
+                                ? "text-green-600"
+                                : "text-green-400"
+                                }`}
                             >
                               {owner.count}
                             </span>
@@ -289,9 +264,8 @@ Main Tasks: ${department.mainTasks}
                       </div>
                     ) : (
                       <p
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("No numeric owners defined.")}
                       </p>
@@ -302,49 +276,42 @@ Main Tasks: ${department.mainTasks}
                 {/* Supporting Files - Enhanced with better file indicators */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <FileBox
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-blue-500" : "text-blue-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                        }`}
                     />
                     {t("Supporting Files")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     {department.supportingFiles &&
-                    department.supportingFiles.length > 0 ? (
-                      <div className="space-y-2">
+                      department.supportingFiles.length > 0 ? (
+                      <div className="gap-2">
                         {department.supportingFiles.map((file, idx) => (
                           <div
                             key={idx}
-                            className={`py-2 px-3 flex justify-between items-center rounded-lg ${
-                              isLightMode ? "hover:bg-darkest" : "hover:bg-dark"
-                            } transition-colors group`}
+                            className={`py-2 px-3 flex justify-between items-center rounded-lg ${isLightMode ? "hover:bg-darkest" : "hover:bg-dark"
+                              } transition-colors group`}
                           >
                             <span
-                              className={`text-sm truncate max-w-[80%] ${
-                                isLightMode ? "text-tblackAF" : "text-twhite"
-                              }`}
+                              className={`text-sm truncate max-w-[80%] ${isLightMode ? "text-tblackAF" : "text-twhite"
+                                }`}
                             >
                               {file.split("/").pop()}
                             </span>
                             <button
                               onClick={() => handleFileDownload(file)}
-                              className={`p-2 rounded-full ${
-                                isLightMode
-                                  ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
-                                  : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
-                              } border border-blue-500/30 opacity-80 group-hover:opacity-100 transition-opacity`}
+                              className={`p-2 rounded-full ${isLightMode
+                                ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
+                                : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
+                                } border border-blue-500/30 opacity-80 group-hover:opacity-100 transition-opacity`}
                             >
                               <Download size={14} />
                             </button>
@@ -353,9 +320,8 @@ Main Tasks: ${department.mainTasks}
                       </div>
                     ) : (
                       <p
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("No supporting files uploaded.")}
                       </p>
@@ -369,30 +335,25 @@ Main Tasks: ${department.mainTasks}
                 {/* Status Card - New Section */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <CheckCircle
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-green-500" : "text-green-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-green-500" : "text-green-400"
+                        }`}
                     />
                     {t("Status")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`text-sm font-medium ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("Current Status")}
                       </span>
@@ -402,34 +363,30 @@ Main Tasks: ${department.mainTasks}
                     </div>
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`text-sm font-medium ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <Calendar size={14} className="inline mr-1" />
+                        <Calendar size={14} className="inline mx-1" />
                         {t("Created Date")}
                       </span>
                       <span
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         01/01/2023
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span
-                        className={`text-sm font-medium ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm font-medium ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
-                        <User size={14} className="inline mr-1" />
+                        <User size={14} className="inline mx-1" />
                         {t("Created By")}
                       </span>
                       <span
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         Admin User
                       </span>
@@ -441,36 +398,30 @@ Main Tasks: ${department.mainTasks}
                 {department.parent_department && (
                   <div className="mb-6">
                     <h4
-                      className={`text-md font-medium mb-3 flex items-center ${
-                        isLightMode ? "text-tblackAF" : "text-twhite"
-                      }`}
+                      className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                        }`}
                     >
                       <Link
                         size={16}
-                        className={`mr-2 ${
-                          isLightMode ? "text-blue-500" : "text-blue-400"
-                        }`}
+                        className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                          }`}
                       />
                       {t("Parent Department")}
                     </h4>
                     <div
-                      className={`rounded-lg p-4 ${
-                        isLightMode ? "bg-darkest" : "bg-dark"
-                      } border ${
-                        isLightMode ? "border-darkest" : "border-tblack"
-                      }`}
+                      className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                        } border ${isLightMode ? "border-darkest" : "border-tblack"
+                        }`}
                     >
                       <div
-                        className={`flex items-center justify-between ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`flex items-center justify-between ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         <div className="flex items-center">
                           <Building
                             size={16}
-                            className={`mr-2 ${
-                              isLightMode ? "text-green-500" : "text-green-400"
-                            }`}
+                            className={`mx-2 ${isLightMode ? "text-green-500" : "text-green-400"
+                              }`}
                           />
                           <div>
                             <div className="font-medium">
@@ -482,11 +433,10 @@ Main Tasks: ${department.mainTasks}
                           </div>
                         </div>
                         <button
-                          className={`p-2 rounded-full ${
-                            isLightMode
-                              ? "bg-darkest hover:bg-darkest"
-                              : "bg-dark hover:bg-dark"
-                          }`}
+                          className={`p-2 rounded-full ${isLightMode
+                            ? "bg-darkest hover:bg-darkest"
+                            : "bg-dark hover:bg-dark"
+                            }`}
                         >
                           <ExternalLink size={16} />
                         </button>
@@ -498,42 +448,36 @@ Main Tasks: ${department.mainTasks}
                 {/* Required Reports - Enhanced styling */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <FileText
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-blue-500" : "text-blue-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                        }`}
                     />
                     {t("Required Reports")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     {department.requiredReports &&
-                    department.requiredReports.length > 0 ? (
-                      <div className="space-y-3">
+                      department.requiredReports.length > 0 ? (
+                      <div className="gap-3">
                         {department.requiredReports.map((report, idx) => (
                           <div
                             key={idx}
-                            className={`p-3 rounded-lg ${
-                              isLightMode
-                                ? "border border-darkest bg-darkest"
-                                : "border border-tblack bg-dark"
-                            }`}
+                            className={`p-3 rounded-lg ${isLightMode
+                              ? "border border-darkest bg-darkest"
+                              : "border border-tblack bg-dark"
+                              }`}
                           >
                             <div className="flex justify-between items-start">
                               <div
-                                className={`text-sm font-medium ${
-                                  isLightMode ? "text-tblackAF" : "text-twhite"
-                                }`}
+                                className={`text-sm font-medium ${isLightMode ? "text-tblackAF" : "text-twhite"
+                                  }`}
                               >
                                 {report.name}
                               </div>
@@ -542,24 +486,22 @@ Main Tasks: ${department.mainTasks}
                                   onClick={() =>
                                     handleFileDownload(report.templateFile)
                                   }
-                                  className={`p-2 rounded-full ${
-                                    isLightMode
-                                      ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
-                                      : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
-                                  } border border-blue-500/30`}
+                                  className={`p-2 rounded-full ${isLightMode
+                                    ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
+                                    : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
+                                    } border border-blue-500/30`}
                                 >
                                   <Download size={14} />
                                 </button>
                               )}
                             </div>
                             <div
-                              className={`text-xs mt-2 ${
-                                isLightMode ? "text-tblackAF" : "text-twhite"
-                              }`}
+                              className={`text-xs mt-2 ${isLightMode ? "text-tblackAF" : "text-twhite"
+                                }`}
                             >
                               {report.templateFile ? (
                                 <span className="flex items-center">
-                                  <FileText size={12} className="mr-1" />
+                                  <FileText size={12} className="mx-1" />
                                   {report.templateFile.split("/").pop()}
                                 </span>
                               ) : (
@@ -571,9 +513,8 @@ Main Tasks: ${department.mainTasks}
                       </div>
                     ) : (
                       <p
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("No required reports defined.")}
                       </p>
@@ -584,56 +525,49 @@ Main Tasks: ${department.mainTasks}
                 {/* Development Programs - Enhanced styling */}
                 <div className="mb-6">
                   <h4
-                    className={`text-md font-medium mb-3 flex items-center ${
-                      isLightMode ? "text-tblackAF" : "text-twhite"
-                    }`}
+                    className={`text-md font-medium mb-3 flex items-center ${isLightMode ? "text-tblackAF" : "text-twhite"
+                      }`}
                   >
                     <Briefcase
                       size={16}
-                      className={`mr-2 ${
-                        isLightMode ? "text-blue-500" : "text-blue-400"
-                      }`}
+                      className={`mx-2 ${isLightMode ? "text-blue-500" : "text-blue-400"
+                        }`}
                     />
                     {t("Development Programs")}
                   </h4>
                   <div
-                    className={`rounded-lg p-4 ${
-                      isLightMode ? "bg-darkest" : "bg-dark"
-                    } border ${
-                      isLightMode ? "border-darkest" : "border-tblack"
-                    }`}
+                    className={`rounded-lg p-4 ${isLightMode ? "bg-darkest" : "bg-dark"
+                      } border ${isLightMode ? "border-darkest" : "border-tblack"
+                      }`}
                   >
                     {department.developmentPrograms &&
-                    department.developmentPrograms.length > 0 ? (
-                      <div className="space-y-4">
+                      department.developmentPrograms.length > 0 ? (
+                      <div className="gap-4">
                         {department.developmentPrograms.map((program, idx) => (
                           <div
                             key={idx}
-                            className={`p-3 rounded-lg ${
-                              isLightMode
-                                ? "border border-darkest bg-darkest"
-                                : "border border-tblack bg-dark"
-                            }`}
+                            className={`p-3 rounded-lg ${isLightMode
+                              ? "border border-darkest bg-darkest"
+                              : "border border-tblack bg-dark"
+                              }`}
                           >
                             <div className="flex justify-between items-start">
                               <div>
                                 <div
-                                  className={`text-sm font-medium ${
-                                    isLightMode
-                                      ? "text-tblackAF"
-                                      : "text-twhite"
-                                  }`}
+                                  className={`text-sm font-medium ${isLightMode
+                                    ? "text-tblackAF"
+                                    : "text-twhite"
+                                    }`}
                                 >
                                   {program.programName}
                                 </div>
                                 <div
-                                  className={`text-xs mt-1 flex items-center ${
-                                    isLightMode
-                                      ? "text-tblackAF"
-                                      : "text-twhite"
-                                  }`}
+                                  className={`text-xs mt-1 flex items-center ${isLightMode
+                                    ? "text-tblackAF"
+                                    : "text-twhite"
+                                    }`}
                                 >
-                                  <Target size={12} className="mr-1" />
+                                  <Target size={12} className="mx-1" />
                                   {t("Objective")}: {program.objective}
                                 </div>
                               </div>
@@ -642,11 +576,10 @@ Main Tasks: ${department.mainTasks}
                                   onClick={() =>
                                     handleFileDownload(program.programFile)
                                   }
-                                  className={`p-2 rounded-full ${
-                                    isLightMode
-                                      ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
-                                      : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
-                                  } border border-blue-500/30`}
+                                  className={`p-2 rounded-full ${isLightMode
+                                    ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
+                                    : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
+                                    } border border-blue-500/30`}
                                 >
                                   <Download size={14} />
                                 </button>
@@ -654,26 +587,23 @@ Main Tasks: ${department.mainTasks}
                             </div>
                             {program.notes && (
                               <div
-                                className={`mt-2 p-2 rounded ${
-                                  isLightMode ? "bg-darkest" : "bg-dark"
-                                } text-xs`}
+                                className={`mt-2 p-2 rounded ${isLightMode ? "bg-darkest" : "bg-dark"
+                                  } text-xs`}
                               >
                                 <div
-                                  className={`font-medium mb-1 flex items-center ${
-                                    isLightMode
-                                      ? "text-tblackAF"
-                                      : "text-twhite"
-                                  }`}
+                                  className={`font-medium mb-1 flex items-center ${isLightMode
+                                    ? "text-tblackAF"
+                                    : "text-twhite"
+                                    }`}
                                 >
-                                  <Info size={12} className="mr-1" />
+                                  <Info size={12} className="mx-1" />
                                   {t("Notes")}:
                                 </div>
                                 <div
-                                  className={`${
-                                    isLightMode
-                                      ? "text-tblackAF"
-                                      : "text-twhite"
-                                  }`}
+                                  className={`${isLightMode
+                                    ? "text-tblackAF"
+                                    : "text-twhite"
+                                    }`}
                                 >
                                   {program.notes}
                                 </div>
@@ -684,9 +614,8 @@ Main Tasks: ${department.mainTasks}
                       </div>
                     ) : (
                       <p
-                        className={`text-sm ${
-                          isLightMode ? "text-tblackAF" : "text-twhite"
-                        }`}
+                        className={`text-sm ${isLightMode ? "text-tblackAF" : "text-twhite"
+                          }`}
                       >
                         {t("No development programs defined.")}
                       </p>
@@ -699,31 +628,28 @@ Main Tasks: ${department.mainTasks}
 
           {/* Enhanced Modal Footer */}
           <div
-            className={`px-6 py-4 border-t ${
-              isLightMode ? "border-darkest" : "border-tblack"
-            } 
-            bg-gradient-to-r ${
-              isLightMode
+            className={`px-6 py-4 border-t ${isLightMode ? "border-darkest" : "border-tblack"
+              } 
+            bg-gradient-to-r ${isLightMode
                 ? "from-darkest to-transparent"
                 : "to-dark from-transparent"
-            }
+              }
             flex justify-between items-center`}
           >
             <button
               onClick={onClose}
-              className={`px-4 py-2 rounded-full flex items-center ${
-                isLightMode
-                  ? "bg-darkest hover:bg-darkest text-tblackAF"
-                  : "bg-dark hover:bg-dark text-twhite"
-              } transition-colors`}
+              className={`px-4 py-2 rounded-full flex items-center ${isLightMode
+                ? "bg-darkest hover:bg-darkest text-tblackAF"
+                : "bg-dark hover:bg-dark text-twhite"
+                } transition-colors`}
             >
-              <ArrowLeft size={16} className="mr-2" />
+              <ArrowLeft size={16} className="mx-2" />
               {t("Back to Departments")}
             </button>
 
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <button className="px-4 py-2 rounded-full bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30 text-sm font-bold">
-                <Edit size={16} className="inline mr-2" />
+                <Edit size={16} className="inline mx-2" />
                 {t("Edit Department")}
               </button>
             </div>

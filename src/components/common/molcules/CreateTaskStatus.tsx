@@ -78,7 +78,7 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
           {taskStatusData ? "Update Task Status" : "Create Task Status"}
         </h1>
         <form
-          className="space-y-4"
+          className="gap-4"
           onSubmit={handleSubmit(async (data: TaskStatusFormInputs) => {
             addTaskStatus({
               name: data.name,
@@ -93,9 +93,8 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
             <input
               type="text"
               {...register("name")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter task status name"
             />
             {errors.name && (
@@ -108,9 +107,8 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
             </label>
             <textarea
               {...register("description")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${
-                errors.description ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.description ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Enter description"
               rows={3}
             />
@@ -123,9 +121,8 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
 
           <button
             type="submit"
-            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${
-              isPendingTaskStatus ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full py-2 mt-4 bg-blue-600 text-twhite rounded-lg font-bold hover:bg-blue-700 transition duration-200 ${isPendingTaskStatus ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isPendingTaskStatus}
           >
             {isPendingTaskStatus
@@ -133,8 +130,8 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
                 ? "Updating..."
                 : "Creating..."
               : taskStatusData
-              ? "Update Task Status"
-              : "Create Task Status"}
+                ? "Update Task Status"
+                : "Create Task Status"}
           </button>
           {isErrorTaskStatus && (
             <p className="text-red-500 mt-2 text-center">
