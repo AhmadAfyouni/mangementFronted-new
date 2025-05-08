@@ -1,6 +1,6 @@
 import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
-import { CheckCircle, ChevronDown, Clock, MessageSquare, MoreHorizontal, Play, Plus, Upload } from "lucide-react";
+import { CheckCircle, Clock, MessageSquare, Play, Plus, Upload } from "lucide-react";
 
 export interface RecentActivity {
     id: string;
@@ -132,7 +132,7 @@ const RecentActivity: React.FC = () => {
                                 {date}
                             </h3>
                             <div className="space-y-6">
-                                {dateActivities.map((activity, index) => (
+                                {dateActivities.map((activity) => (
                                     <div key={activity.id} className="flex group">
                                         {/* Icon */}
                                         <div className="mx-4 flex-shrink-0 relative">

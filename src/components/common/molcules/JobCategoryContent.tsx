@@ -103,7 +103,7 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
   // Configure search if we need to handle our own pagination
   const searchConfig: SearchConfig<JobCategoryType> = {
     searchFields: ['name', 'description', 'required_education', 'required_experience'] as Array<keyof JobCategoryType>,
-    customFilterFn: (item, filters) => {
+    customFilterFn: (item,) => {
       // If item has required_skills array, search in them too
       if (searchQuery && item.required_skills && item.required_skills.length > 0) {
         const matchInSkills = item.required_skills.some(skill =>
@@ -142,7 +142,7 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
 
     // Calculate start and end page numbers to show
     let startPage = Math.max(1, currentPagination.currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(currentPagination.totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(currentPagination.totalPages, startPage + maxVisiblePages - 1);
 
     // Adjust if we're near the end
     if (endPage - startPage + 1 < maxVisiblePages) {

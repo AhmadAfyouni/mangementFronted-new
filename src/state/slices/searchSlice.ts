@@ -149,7 +149,7 @@ const globalSearchSlice = createSlice({
         },
 
         // Reset the entire search state
-        resetAllSearch(state) {
+        resetAllSearch() {
             return initialState;
         },
     },

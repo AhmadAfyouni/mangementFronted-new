@@ -225,8 +225,8 @@ const DeptAdditionalSection = ({
             <select
               {...register(`numericOwners.${index}.category` as const)}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 } w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border ${errors.numericOwners?.[index]?.category
                   ? "border-high"
                   : "border-border"
@@ -255,8 +255,8 @@ const DeptAdditionalSection = ({
               })}
               placeholder={t("Count")}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <Image
@@ -370,8 +370,8 @@ const DeptAdditionalSection = ({
               {...register(`requiredReports.${index}.name` as const)}
               placeholder={t("Report Name")}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <div className="relative w-full">
@@ -380,8 +380,8 @@ const DeptAdditionalSection = ({
                 <div className="flex">
                   <div
                     className={`${isLightMode
-                        ? "bg-dark text-white"
-                        : "bg-secondary text-white"
+                      ? "bg-dark text-white"
+                      : "bg-secondary text-white"
                       } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
                   >
                     <span className="truncate">
@@ -406,8 +406,8 @@ const DeptAdditionalSection = ({
                     type="button"
                     onClick={() => switchReportToEditMode(index)}
                     className={`${isLightMode
-                        ? "bg-red-500 text-white"
-                        : "bg-red-600 text-white"
+                      ? "bg-red-500 text-white"
+                      : "bg-red-600 text-white"
                       } px-3 py-2 mt-1 rounded-r-lg`}
                     title={t("Replace file")}
                   >
@@ -433,8 +433,8 @@ const DeptAdditionalSection = ({
                   type="file"
                   placeholder={t("Template File")}
                   className={`    ${isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
                     }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingReportIndex === index ? "opacity-50" : ""
                     }`}
                   disabled={loadingReportIndex === index}
@@ -509,8 +509,8 @@ const DeptAdditionalSection = ({
               {...register(`developmentPrograms.${index}.programName` as const)}
               placeholder={t("Program Name")}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <input
@@ -518,8 +518,8 @@ const DeptAdditionalSection = ({
               {...register(`developmentPrograms.${index}.objective` as const)}
               placeholder={t("Objective")}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 } w-full bg-secondary border-none outline-none px-4 py-2 mt-1 rounded-lg border `}
             />
 
@@ -529,8 +529,8 @@ const DeptAdditionalSection = ({
                 <div className="flex">
                   <div
                     className={`${isLightMode
-                        ? "bg-dark text-white"
-                        : "bg-secondary text-white"
+                      ? "bg-dark text-white"
+                      : "bg-secondary text-white"
                       } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
                   >
                     <span className="truncate">
@@ -555,8 +555,8 @@ const DeptAdditionalSection = ({
                     type="button"
                     onClick={() => switchProgramToEditMode(index)}
                     className={`${isLightMode
-                        ? "bg-red-500 text-white"
-                        : "bg-red-600 text-white"
+                      ? "bg-red-500 text-white"
+                      : "bg-red-600 text-white"
                       } px-3 py-2 mt-1 rounded-r-lg`}
                     title={t("Replace file")}
                   >
@@ -582,8 +582,8 @@ const DeptAdditionalSection = ({
                   type="file"
                   placeholder={t("Program File")}
                   className={`    ${isLightMode
-                      ? "bg-dark  placeholder:text-tdark "
-                      : "bg-secondary"
+                    ? "bg-dark  placeholder:text-tdark "
+                    : "bg-secondary"
                     }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingProgramIndex === index ? "opacity-50" : ""
                     }`}
                   disabled={loadingProgramIndex === index}
@@ -632,8 +632,8 @@ const DeptAdditionalSection = ({
               {...register(`developmentPrograms.${index}.notes` as const)}
               placeholder={t("Notes")}
               className={`    ${isLightMode
-                  ? "bg-dark  placeholder:text-tdark "
-                  : "bg-secondary"
+                ? "bg-dark  placeholder:text-tdark "
+                : "bg-secondary"
                 }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
               rows={1}
             />

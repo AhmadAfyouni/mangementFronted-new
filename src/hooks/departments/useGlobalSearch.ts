@@ -4,17 +4,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
 import { EntityType, setSearchQuery, setFilter, resetFilters, setCurrentPage, setItemsPerPage, resetEntitySearch } from '@/state/slices/searchSlice';
 
-
 // Generic interface for searchable entities
 interface SearchableEntity {
-    id: string;
-    [key: string]: any;
+    id: string; // Only require `id`
 }
 
-
-
 // Configuration for search fields and filters
-export interface SearchConfig<T extends SearchableEntity> {
+export interface SearchConfig<
+    T extends SearchableEntity,
+    F extends Partial<Record<keyof T, string | number | boolean | null>> = Partial<Record<keyof T, string | number | boolean | null>>
+> {
     // Fields to search in
     searchFields: (keyof T)[];
     // Available filter options
@@ -25,7 +24,7 @@ export interface SearchConfig<T extends SearchableEntity> {
         };
     };
     // Custom filter function for complex filtering
-    customFilterFn?: (item: T, filters: any) => boolean;
+    customFilterFn?: (item: T, filters: F) => boolean;
 }
 
 /**
@@ -34,33 +33,34 @@ export interface SearchConfig<T extends SearchableEntity> {
  * @param data The array of data to search/filter
  * @param config Search configuration
  */
-function useGlobalSearch<T extends SearchableEntity>(
-    entity: EntityType,
-    data: T[],
-    config: SearchConfig<T>
-) {
+function useGlobalSearch<
+    T extends SearchableEntity,
+    F extends Partial<Record<keyof T, string | number | boolean | null>>
+>(entity: EntityType, data: T[], config: SearchConfig<T, F>) {
     const dispatch = useDispatch();
     const globalSearchState = useSelector((state: RootState) => state.globalSearch);
 
     // Get entity-specific state
     const searchQuery = globalSearchState.queries[entity];
-    const filters = globalSearchState.filters[entity];
+    const filters = globalSearchState.filters[entity] as F;
     const { currentPage, itemsPerPage } = globalSearchState.pagination[entity];
 
     // Filter data based on search query and filters
     const filteredData = useMemo(() => {
-        return data.filter(item => {
+        return data.filter((item) => {
             // Search query filtering
-            const matchesSearch = !searchQuery || config.searchFields.some(field => {
-                const value = item[field];
-                if (typeof value === 'string') {
-                    return value.toLowerCase().includes(searchQuery.toLowerCase());
-                }
-                if (typeof value === 'number') {
-                    return value.toString().includes(searchQuery);
-                }
-                return false;
-            });
+            const matchesSearch =
+                !searchQuery ||
+                config.searchFields.some((field) => {
+                    const value = item[field];
+                    if (typeof value === 'string') {
+                        return value.toLowerCase().includes(searchQuery.toLowerCase());
+                    }
+                    if (typeof value === 'number') {
+                        return value.toString().includes(searchQuery);
+                    }
+                    return false;
+                });
 
             // Filter criteria
             let matchesFilters = true;
@@ -73,7 +73,7 @@ function useGlobalSearch<T extends SearchableEntity>(
                 for (const key in filters) {
                     const filterValue = filters[key];
                     if (filterValue !== null && filterValue !== undefined) {
-                        if (item[key] !== filterValue) {
+                        if (item[key as keyof T] !== filterValue) {
                             matchesFilters = false;
                             break;
                         }
@@ -101,7 +101,10 @@ function useGlobalSearch<T extends SearchableEntity>(
         dispatch(setSearchQuery({ entity, query }));
     };
 
-    const handleFilter = (filterKey: string, value: string | number | boolean | null) => {
+    const handleFilter = (
+        filterKey: string,
+        value: string | number | boolean | null
+    ) => {
         dispatch(setFilter({ entity, filterKey, value }));
     };
 

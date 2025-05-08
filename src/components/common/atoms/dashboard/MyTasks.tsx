@@ -1,7 +1,7 @@
 import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
 import { MyTask } from "@/types/dashboard.type";
-import { FileIcon, Inbox, MessageSquare, MoreHorizontal } from "lucide-react";
+import { FileIcon, Inbox, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 const MyTasks: React.FC = () => {

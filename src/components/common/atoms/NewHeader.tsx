@@ -16,18 +16,17 @@ import {
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
+import { EntityType, setSearchQuery } from "@/state/slices/searchSlice";
 import { logout } from "@/state/slices/userSlice";
 import { AppDispatch, RootState } from "@/state/store";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import RouteWrapper from "./ui/RouteWrapper";
 import Notification from "./ui/Notification";
-import { setSearchQuery, EntityType } from "@/state/slices/searchSlice";
-import { useCallback, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import RouteWrapper from "./ui/RouteWrapper";
 
 const NewHeader = ({
   setIsExpanded,
