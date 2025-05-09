@@ -18,15 +18,6 @@ import { RootState } from "@/state/store";
 import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
 import { setActiveEntity } from "@/state/slices/searchSlice";
 
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  onPageChange: (page: number) => void;
-  onItemsPerPageChange: (count: number) => void;
-}
-
 const TruncatedText = ({ text }: { text: string }) => (
   <p className="truncate max-w-[200px]">{text || "N/A"}</p>
 );
@@ -101,7 +92,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   // Search configuration
   const searchConfig: SearchConfig<JobTitleType> = {
     searchFields: ['title', 'description'] as Array<keyof JobTitleType>,
-    customFilterFn: (item, filters) => {
+    customFilterFn: (item,) => {
       // If we have a search query, check if it matches any field
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -163,7 +154,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
 
     // Calculate start and end page numbers to show
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     // Adjust if we're near the end
     if (endPage - startPage + 1 < maxVisiblePages) {

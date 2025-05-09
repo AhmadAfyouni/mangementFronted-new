@@ -1,8 +1,7 @@
 import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
-import { ProjectStats } from "@/types/dashboard.type";
 import { CalendarIcon } from "lucide-react";
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, BarChart } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 // Projects section component - Redesigned
 const ProjectsSection: React.FC = () => {

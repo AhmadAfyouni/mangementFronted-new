@@ -1,5 +1,5 @@
 // src/services/dashboard.service.ts
-import { DailyTask, DailyTimelineResponse, DashboardData, DashboardParamsDto, MessagePreview, MyTask, ProjectStats, RecentActivity, TaskSummary, TimeTracking } from "@/types/dashboard.type";
+import { DailyTask, DashboardData, DashboardParamsDto, MessagePreview, MyTask, ProjectStats, RecentActivity, TaskSummary, TimeTracking } from "@/types/dashboard.type";
 import { apiClient } from "@/utils/axios/usage";
 
 export const useDashboardService = () => {

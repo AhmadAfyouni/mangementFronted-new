@@ -6,11 +6,9 @@ import {
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
-import { RootState } from "@/state/store";
 import { DepartmentType } from "@/types/DepartmentType.type";
 import Image from "next/image";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import { DevelopmentProgramsModal, FilesReportsModal, TextModal } from "./departments/DepartmentsComponents";
 
 interface PaginationProps {
@@ -52,9 +50,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     title: "",
   });
 
-  // Get search state from Redux
-  const searchQuery = useSelector((state: RootState) =>
-    state.globalSearch.queries.departments);
 
   // State for Files & Reports and Development Programs modals
   const [filesReportsModal, setFilesReportsModal] = useState<{
@@ -120,7 +115,7 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
 
     // Calculate start and end page numbers to show
     let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
 
     // Adjust if we're near the end
     if (endPage - startPage + 1 < maxVisiblePages) {
