@@ -1,42 +1,61 @@
 import useLanguage from "@/hooks/useLanguage";
 import { useState } from "react";
 import { formatTime } from "./ListTaskDetails";
+import { CalendarClock } from "lucide-react";
 
-// Add this function near the top of your ListTaskDetails component, after the existing formatTime function
+// Format time log function with improved date handling
 export const formatTimeLog = (
   startTime: string,
   endTime: string,
   lang: string
 ) => {
   const start = new Date(startTime);
-  const end = new Date(endTime);
-  const durationInSeconds = Math.floor(
+
+  // Handle invalid end date
+  let end;
+  let isInvalidEnd = false;
+  try {
+    end = new Date(endTime);
+    // Check if end date is valid
+    if (isNaN(end.getTime())) {
+      isInvalidEnd = true;
+      end = new Date(); // Use current time as fallback
+    }
+  } catch (e) {
+    isInvalidEnd = true;
+    end = new Date(); // Use current time as fallback
+  }
+
+  const durationInSeconds = isInvalidEnd ? 0 : Math.floor(
     (end.getTime() - start.getTime()) / 1000
   );
 
-  // Format dates based on language
+  // Format dates in a more compact way
   const dateOptions: Intl.DateTimeFormatOptions = {
-    year: "numeric",
     month: "short",
     day: "numeric",
+    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
+    hour12: true
   };
 
+  // Format the dates
   const startFormatted = start.toLocaleDateString(
     lang === "ar" ? "ar" : "en-US",
     dateOptions
   );
-  const endFormatted = end.toLocaleDateString(
-    lang === "ar" ? "ar" : "en-US",
-    dateOptions
-  );
+
+  const endFormatted = isInvalidEnd
+    ? "Invalid Date"
+    : end.toLocaleDateString(lang === "ar" ? "ar" : "en-US", dateOptions);
 
   return {
     startFormatted,
     endFormatted,
-    durationFormatted: formatTime(durationInSeconds),
+    durationFormatted: isInvalidEnd ? "NaN:NaN:NaN" : formatTime(durationInSeconds),
+    isInvalidEnd
   };
 };
 
@@ -52,7 +71,7 @@ export const TimeLogSection: React.FC<{
   return (
     <>
       <div className="flex justify-between items-center mb-2">
-        <label className="font-bold block text-twhite">{t("Time Logs")}</label>
+        <label className="font-bold block">{t("Time Logs")}</label>
         <button
           className="text-xs bg-dark text-twhite px-2 py-1 rounded"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -86,10 +105,10 @@ export const TimeLogSection: React.FC<{
               <div></div>
             </div>
 
-            <div className="max-h-48 overflow-y-auto">
+            <div className="max-h-64 overflow-y-auto pb-20">
               {timeLogs.length > 0 ? (
                 timeLogs.map((log, index) => {
-                  const { startFormatted, endFormatted, durationFormatted } =
+                  const { startFormatted, endFormatted, durationFormatted, isInvalidEnd } =
                     formatTimeLog(
                       log.start,
                       log.end,
@@ -99,21 +118,14 @@ export const TimeLogSection: React.FC<{
                   return (
                     <div
                       key={log._id || index}
-                      className={`grid grid-cols-4 gap-2 py-2 text-xs ${index % 2 === 0
-                        ? isLightMode
-                          ? "bg-darker bg-opacity-30"
-                          : "bg-tblack bg-opacity-30"
-                        : ""
-                        }`}
+                      className={`grid grid-cols-4 px-4 py-3 hover:bg-black hover:bg-opacity-30 transition-colors duration-150
+                                     ${index % 2 === 0 ? "bg-black bg-opacity-20" : ""}`}
                     >
-                      <div className="break-words">{startFormatted}</div>
-                      <div className="break-words">{endFormatted}</div>
-                      <div className="break-words">{durationFormatted}</div>
+                      <div className="text-blue-300 font-mono text-sm">{startFormatted}</div>
+                      <div className={`font-mono text-sm ${isInvalidEnd ? "text-red-400" : "text-blue-300"}`}>{endFormatted}</div>
+                      <div className={`font-mono text-sm ${isInvalidEnd ? "text-red-400" : "text-green-400"} font-medium`}>{durationFormatted}</div>
                       <div className="text-right">
-                        <span
-                          className={`${isLightMode ? "bg-dark" : "bg-gray-700"
-                            } text-twhite px-2 py-1 rounded-md text-xs`}
-                        >
+                        <span className="bg-blue-900 text-blue-100 px-3 py-1 rounded-full font-medium text-xs inline-flex items-center justify-center">
                           {t("Session")} {timeLogs.length - index}
                         </span>
                       </div>
@@ -121,7 +133,10 @@ export const TimeLogSection: React.FC<{
                   );
                 })
               ) : (
-                <p className="text-center py-2">{t("No time logs recorded")}</p>
+                <div className="flex items-center justify-center py-10 text-gray-500">
+                  <CalendarClock className="w-5 h-5 mr-2" />
+                  <p>{t("No time logs recorded")}</p>
+                </div>
               )}
             </div>
           </div>
