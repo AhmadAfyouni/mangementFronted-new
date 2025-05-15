@@ -183,6 +183,14 @@ export default function TaskDetailsPage() {
     handleViewFile,
     isLoadingFile,
     setAttachedFile,
+    // Edit/Delete functionality
+    editingComment,
+    editText,
+    setEditText,
+    startEditComment,
+    cancelEditComment,
+    saveCommentEdit,
+    deleteComment,
   } = useComments(taskId, true);
 
   if (isTaskLoading || !task) {
@@ -245,6 +253,15 @@ export default function TaskDetailsPage() {
                 handleSendComment={handleSendComment}
                 handleViewFile={handleViewFile}
                 isSubmitting={isSubmitting}
+                isLoadingFile={isLoadingFile}
+                // Edit/Delete props
+                editingComment={editingComment}
+                editText={editText}
+                setEditText={setEditText}
+                startEditComment={startEditComment}
+                cancelEditComment={cancelEditComment}
+                saveCommentEdit={saveCommentEdit}
+                deleteComment={deleteComment}
               />
             </div>
 
