@@ -124,6 +124,16 @@ export default function TaskDetailsPage() {
     } catch (error) {
       const err = error as AxiosError;
       console.log("Error updating task:", err);
+
+      // Revert local state to original task data on save failure
+      if (task) {
+        setTaskName(task.name);
+        setSelectedStatus(task.status);
+        setSelectedPriority(task.priority);
+        setDescription(task.description);
+        setCalendar(task.due_date);
+      }
+
       setSnackbarConfig({
         message: err.response?.data.message + "",
         open: true,
