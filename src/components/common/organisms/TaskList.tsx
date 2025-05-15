@@ -34,14 +34,6 @@ const ListTasks = ({
   return (
     <>
       <div className="bg-main rounded-lg p-4 w-full h-full">
-        {/* Header Section */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <ListChecks className="w-6 h-6 text-blue-400" />
-            <h2 className="text-2xl font-bold text-twhite">{t("Tasks Overview")}</h2>
-          </div>
-          <p className="text-gray-400">{t("Manage and track your tasks efficiently")}</p>
-        </div>
 
         {/* Enhanced Table Container */}
         <div className="min-w-full bg-main rounded-lg overflow-hidden">
