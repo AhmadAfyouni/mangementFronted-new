@@ -44,7 +44,7 @@ const ListSection: React.FC<{
 
       {/* Section Header */}
       <div
-        className={`col-span-4 bg-secondary/50 px-6 py-3 cursor-pointer hover:bg-secondary/70 transition-colors`}
+        className={`col-span-4 bg-secondary/50  py-3 cursor-pointer hover:bg-secondary/70 transition-colors`}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <div className="flex items-center justify-between">
