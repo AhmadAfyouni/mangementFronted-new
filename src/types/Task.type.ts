@@ -250,6 +250,18 @@ export type ReceiveTaskType = {
   section: Section;
   parent_task?: string;
   rate?: number;
+  department?: {
+    _id: string,
+    name: string,
+    goal: string,
+    category: string,
+    mainTasks: string,
+    supportingFiles: any[],
+    numericOwners: any[],
+    requiredReports: any[],
+    developmentPrograms: any[],
+
+  },
 };
 
 export type ExtendedReceiveTaskType = {

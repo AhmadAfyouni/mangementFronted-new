@@ -9,14 +9,12 @@ interface TaskSidebarProps {
   task: any;
   allTasks?: any[];
   onAddSubtask: () => void;
-  canAddSubtask: boolean;
 }
 
 export const TaskSidebar: React.FC<TaskSidebarProps> = ({
   task,
   allTasks,
   onAddSubtask,
-  canAddSubtask,
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
@@ -63,7 +61,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
           <p className="text-gray-400 text-center py-4">{t("No subtasks yet.")}</p>
         )}
 
-        {canAddSubtask && (
+        {(
           <button
             onClick={onAddSubtask}
             className="w-full mt-4 py-2 bg-dark text-twhite rounded-lg hover:bg-gray-700 transition-colors"

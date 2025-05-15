@@ -48,8 +48,6 @@ export default function TaskDetailsPage() {
   const { selector: userId } = useRedux(
     (state: RootState) => state.user.userInfo?.id
   );
-  const isPrimary = useRolePermissions("primary_user");
-  const isAdmin = useRolePermissions("admin");
 
   const [calendar, setCalendar] = useState<string | undefined>();
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
@@ -187,14 +185,6 @@ export default function TaskDetailsPage() {
     );
   }
 
-  const assigneeId = task.assignee?._id || task.assignee?.id;
-  const empId = task.emp?.id || task.emp?._id;
-  const canEdit = userId === assigneeId || userId === empId || isAdmin || isPrimary;
-  const canEditStatus = userId === assigneeId || userId === empId;
-  const canEditPriority = userId === assigneeId;
-  const canControlTimer = userId === empId;
-  const canAddSubtask = isAdmin || isPrimary;
-
   return (
     <GridContainer>
       <div className={`col-span-full min-h-screen bg-main p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -202,7 +192,6 @@ export default function TaskDetailsPage() {
           <TaskHeader
             task={task}
             onUpdate={handleUpdate}
-            canEdit={canEdit}
             taskName={taskName}
             onNameChange={setTaskName}
           />
@@ -218,8 +207,6 @@ export default function TaskDetailsPage() {
                 onStatusChange={handleStatusChange}
                 onPriorityChange={setSelectedPriority}
                 onDueDateChange={setCalendar}
-                canEditStatus={canEditStatus}
-                canEditPriority={canEditPriority}
                 isStatusMenuOpen={isStatusMenuOpen}
                 isPriorityMenuOpen={isPriorityMenuOpen}
                 setStatusMenuOpen={setStatusMenuOpen}
@@ -257,7 +244,6 @@ export default function TaskDetailsPage() {
                 displayTime={displayTime}
                 isTaskRunning={isTaskRunning}
                 isMakingAPICall={isMakingAPICall}
-                canControl={canControlTimer}
                 selectedStatus={selectedStatus}
                 onStart={handleStart}
                 onPause={handlePause}
@@ -270,7 +256,6 @@ export default function TaskDetailsPage() {
                 task={task}
                 allTasks={allTasks}
                 onAddSubtask={() => setIsModalOpen(true)}
-                canAddSubtask={canAddSubtask}
               />
             </div>
           </div>

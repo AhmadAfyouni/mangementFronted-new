@@ -12,8 +12,6 @@ interface TaskInfoCardProps {
   onStatusChange: (status: string) => void;
   onPriorityChange: (priority: "LOW" | "MEDIUM" | "HIGH") => void;
   onDueDateChange: (date: string) => void;
-  canEditStatus: boolean;
-  canEditPriority: boolean;
   isStatusMenuOpen: boolean;
   isPriorityMenuOpen: boolean;
   setStatusMenuOpen: (open: boolean) => void;
@@ -28,8 +26,6 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   onStatusChange,
   onPriorityChange,
   onDueDateChange,
-  canEditStatus,
-  canEditPriority,
   isStatusMenuOpen,
   isPriorityMenuOpen,
   setStatusMenuOpen,
@@ -100,19 +96,15 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
           </div>
           <div className="relative">
             <button
-              onClick={() => canEditStatus && setStatusMenuOpen(!isStatusMenuOpen)}
-              disabled={!canEditStatus}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${getStatusColor(selectedStatus || task.status)} ${
-                canEditStatus 
-                  ? 'hover:bg-opacity-50 cursor-pointer hover:scale-105 border border-transparent hover:border-current' 
-                  : 'cursor-not-allowed opacity-60'
-              }`}
+              onClick={() => setStatusMenuOpen(!isStatusMenuOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${getStatusColor(selectedStatus || task.status)} ${'hover:bg-opacity-50 cursor-pointer hover:scale-105 border border-transparent hover:border-current'
+
+                }`}
             >
               {t(selectedStatus || task.status)}
-              {canEditStatus && (
-                <ChevronDown className={`w-4 h-4 transition-transform ${
-                  isStatusMenuOpen ? 'rotate-180' : ''
-                }`} />
+              {(
+                <ChevronDown className={`w-4 h-4 transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''
+                  }`} />
               )}
             </button>
 
@@ -143,23 +135,19 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
           </div>
           <div className="relative">
             <button
-              onClick={() => canEditPriority && setPriorityMenuOpen(!isPriorityMenuOpen)}
-              disabled={!canEditPriority}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${getPriorityColor(selectedPriority || task.priority)} ${
-                canEditPriority 
-                  ? 'hover:bg-opacity-50 cursor-pointer hover:scale-105 border border-transparent hover:border-current' 
-                  : 'cursor-not-allowed opacity-60'
-              }`}
+              onClick={() => setPriorityMenuOpen(!isPriorityMenuOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${getPriorityColor(selectedPriority || task.priority)} ${'hover:bg-opacity-50 cursor-pointer hover:scale-105 border border-transparent hover:border-current'
+
+                }`}
             >
               {t(selectedPriority || task.priority)}
-              {canEditPriority && (
-                <ChevronDown className={`w-4 h-4 transition-transform ${
-                  isPriorityMenuOpen ? 'rotate-180' : ''
-                }`} />
+              {(
+                <ChevronDown className={`w-4 h-4 transition-transform ${isPriorityMenuOpen ? 'rotate-180' : ''
+                  }`} />
               )}
             </button>
 
-            {isPriorityMenuOpen && canEditPriority && (
+            {isPriorityMenuOpen && (
               <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} bg-dark rounded-lg shadow-xl p-2 z-10 min-w-[150px]`}>
                 {priorityOptions.map((option) => (
                   <button
@@ -187,9 +175,8 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => calRef.current?.showPicker()}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                task.is_over_due ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
-              } hover:bg-opacity-50 hover:scale-105 cursor-pointer border border-transparent hover:border-current`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${task.is_over_due ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
+                } hover:bg-opacity-50 hover:scale-105 cursor-pointer border border-transparent hover:border-current`}
             >
               <Calendar className="w-4 h-4" />
               {formatDate(due_date || task.due_date, currentLanguage as "ar" | "en")}

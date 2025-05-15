@@ -8,7 +8,6 @@ interface TaskTimeTrackingProps {
   displayTime: number;
   isTaskRunning: boolean;
   isMakingAPICall: boolean;
-  canControl: boolean;
   selectedStatus?: string;
   onStart: () => void;
   onPause: () => void;
@@ -21,7 +20,6 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
   displayTime,
   isTaskRunning,
   isMakingAPICall,
-  canControl,
   selectedStatus,
   onStart,
   onPause,
@@ -54,7 +52,7 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
         <p className="text-gray-400">{t("Total Time Spent")}</p>
       </div>
 
-      {canControl && selectedStatus !== "DONE" && (
+      {selectedStatus !== "DONE" && (
         <div className="flex justify-center gap-3">
           {isMakingAPICall ? (
             <PageSpinner />

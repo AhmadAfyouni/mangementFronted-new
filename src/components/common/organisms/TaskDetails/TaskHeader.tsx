@@ -8,12 +8,11 @@ import { useState } from "react";
 interface TaskHeaderProps {
   task: ReceiveTaskType;
   onUpdate: () => void;
-  canEdit: boolean;
   taskName: string;
   onNameChange: (name: string) => void;
 }
 
-export const TaskHeader: React.FC<TaskHeaderProps> = ({ task, onUpdate, canEdit, taskName, onNameChange }) => {
+export const TaskHeader: React.FC<TaskHeaderProps> = ({ task, onUpdate, taskName, onNameChange }) => {
   const { t, currentLanguage } = useLanguage();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(taskName);
@@ -69,7 +68,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({ task, onUpdate, canEdit,
               <h1 className="text-3xl font-bold text-twhite">
                 {taskName || 'Untitled Task'}
               </h1>
-              {canEdit && (
+              {(
                 <button
                   onClick={() => setIsEditingName(true)}
                   className="p-2 text-gray-400 hover:text-twhite hover:bg-gray-700/50 rounded-lg transition-all"
@@ -100,7 +99,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({ task, onUpdate, canEdit,
           </div>
         </div>
 
-        {canEdit && (
+        {(
           <button
             onClick={onUpdate}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
