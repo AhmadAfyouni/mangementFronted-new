@@ -6,7 +6,15 @@ import { formatDate, isDueSoon } from "@/services/task.service";
 import { ProjectType } from "@/types/Project.type";
 import PageSpinner from "../atoms/ui/PageSpinner";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
-import { collabColors } from "./ProjectsContent";
+import { Folder, Users, Building2, Calendar, Target } from "lucide-react";
+
+export const collabColors = [
+  "bg-gradient-to-br from-purple-500 to-purple-700",
+  "bg-gradient-to-br from-blue-500 to-blue-700",
+  "bg-gradient-to-br from-green-500 to-green-700",
+  "bg-gradient-to-br from-yellow-500 to-yellow-700",
+  "bg-gradient-to-br from-red-500 to-red-700",
+];
 
 const ProfileProjectsReport = ({
   isCentered = false,
@@ -16,6 +24,7 @@ const ProfileProjectsReport = ({
   const { t, currentLanguage } = useLanguage();
   const isAdmin = useRolePermissions("admin");
   const { isLightMode } = useCustomTheme();
+  const isRTL = currentLanguage === "ar";
 
   const { data: projects, isLoading } = useCustomQuery<ProjectType[]>({
     queryKey: ["projects"],
@@ -23,104 +32,147 @@ const ProfileProjectsReport = ({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderCollaborators = (items: any[], type: "departments" | "members") =>
-    items.length === 1 ? (
-      <div className="border-2 border-blue-500/30 bg-dark text-twhite py-1 px-2 w-fit mx-auto rounded-lg text-xs sm:text-sm font-bold">
-        {items[0].name}
-      </div>
-    ) : (
-      <div className="flex justify-center -gap-2 sm:-gap-4" dir="ltr">
-        {items.slice(0, 3).map((item, index) => (
-          <div
-            key={type === "members" ? item.id : index}
-            className={`relative ${collabColors[index % collabColors.length]} 
-              cursor-pointer text-twhite rounded-full bg-dark 
-              px-2 py-1 sm:px-4 sm:py-2 
-              flex items-center justify-center 
-              text-xs sm:text-sm font-bold 
-              ${type === "members" ? "shadow-lg" : ""}`}
-            title={item.name}
-          >
-            {item.name
-              .split(" ")
-              .map((word: string) => word[0])
-              .join("")
-              .toUpperCase()}
-          </div>
-        ))}
-        {items.length > 3 && (
-          <div
-            className="relative text-twhite cursor-pointer rounded-full bg-dark 
-              px-2 py-1 sm:px-4 sm:py-2 
-              flex items-center justify-center 
-              text-xs sm:text-sm font-semibold 
-              shadow-lg"
-            title={items
-              .slice(3)
-              .map((item) => item.name)
-              .join(", ")}
-          >
-            +{items.length - 3}
-          </div>
-        )}
+  const renderCollaborators = (items: any[], type: "departments" | "members") => (
+    <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} -space-x-2 overflow-hidden`}>
+      {items.slice(0, 3).map((item, index) => (
+        <div
+          key={type === "members" ? item.id : index}
+          className={`relative ${collabColors[index % collabColors.length]} 
+            w-10 h-10 rounded-full flex items-center justify-center 
+            text-xs font-bold text-white shadow-lg ring-2 ring-secondary
+            transform hover:scale-110 transition-transform cursor-pointer`}
+          title={item.name}
+        >
+          {item.name
+            .split(" ")
+            .map((word: string) => word[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2)}
+        </div>
+      ))}
+      {items.length > 3 && (
+        <div
+          className="relative w-10 h-10 rounded-full bg-tblack text-twhite
+            flex items-center justify-center text-xs font-bold 
+            shadow-lg ring-2 ring-secondary cursor-pointer"
+          title={items
+            .slice(3)
+            .map((item) => item.name)
+            .join(", ")}
+        >
+          +{items.length - 3}
+        </div>
+      )}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <PageSpinner title={t("Loading projects...")} />
       </div>
     );
+  }
+
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="text-center text-gray-400 p-8">
+        <Folder className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+        <p className="text-lg">{t("No projects found")}</p>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`bg-main min-h-64 rounded-md shadow-md 
-        ${isCentered ? "mx-auto w-full md:w-[90%] lg:w-[80%] xl:w-[70%]" : ""}
-        mt-5 p-3 sm:p-5 text-twhite border border-slate-700`}
+      className={`${isCentered ? "mx-auto max-w-5xl" : ""}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="text-base sm:text-lg font-bold mb-4">
-        {t("My Projects")}
+      <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <Folder className="w-6 h-6 text-purple-400" />
+        <h2 className="text-xl font-bold text-twhite">{t("My Projects")}</h2>
+        <span className="text-sm text-gray-400 bg-tblack px-3 py-1 rounded-full">
+          {projects.length}
+        </span>
       </div>
 
-      <div className="w-full gap-3 ">
-        {projects?.map((project, index) => (
-          <RouteWrapper key={index} href={"/projects/details/" + project._id}>
+      <div className="grid gap-4">
+        {projects.map((project, index) => (
+          <RouteWrapper key={project._id} href={`/projects/details/${project._id}`}>
             <div
-              className="hover:bg-slate-700 transition-colors 
-              px-2 sm:px-4 py-2 bg-dark rounded-md 
-              flex flex-col sm:flex-row sm:items-center sm:justify-between 
-              group gap-3 sm:gap-0  mt-1"
+              className="group bg-secondary border border-gray-700 rounded-xl p-6 
+                hover:border-gray-600 transition-all duration-300 cursor-pointer"
             >
-              <div
-                className={`sm:w-[40%] text-center sm:text-start group-hover:${isLightMode ? "text-tblackAF" : "text-twhite"
-                  }
-                text-sm sm:text-base font-medium py-1 sm:py-3 px-2 sm:px-4`}
-              >
-                {project.name}
-              </div>
+              <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} items-start justify-between gap-6`}>
+                {/* Project Info */}
+                <div className="flex-1">
+                  <div className={`flex items-center gap-3 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`w-12 h-12 rounded-lg ${collabColors[index % collabColors.length]} 
+                      flex items-center justify-center shadow-lg`}>
+                      <Target className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-twhite group-hover:text-blue-400 transition-colors">
+                        {project.name}
+                      </h3>
+                      {project.description && (
+                        <p className="text-sm text-gray-400">
+                          {project.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <div
-                className="flex flex-col sm:flex-row items-start sm:items-center 
-                justify-start sm:justify-between sm:w-[60%] gap-3 sm:gap-0"
-              >
-                <div className="w-full sm:w-auto">
-                  {project.departments &&
-                    renderCollaborators(project.departments, "departments")}
-                </div>
-
-                <div className="w-full sm:w-auto">
-                  {project.members &&
-                    renderCollaborators(project.members, "members")}
-                </div>
-
-                <div className="w-full sm:w-auto flex justify-center">
-                  <div
-                    className={`border-2 border-yellow-500/30 bg-dark text-twhite 
-                    py-1 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-bold
-                    ${isDueSoon(project.endDate) ? "flash" : ""}`}
-                  >
-                    {formatDate(
-                      project.endDate,
-                      currentLanguage as "en" | "ar"
+                  {/* Project Stats */}
+                  <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} gap-6 mt-4`}>
+                    {project.departments && project.departments.length > 0 && (
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Building2 className="w-4 h-4 text-blue-400" />
+                        <span className="text-sm text-gray-400">
+                          {project.departments.length} {t("Departments")}
+                        </span>
+                      </div>
+                    )}
+                    {project.members && project.members.length > 0 && (
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Users className="w-4 h-4 text-green-400" />
+                        <span className="text-sm text-gray-400">
+                          {project.members.length} {t("Members")}
+                        </span>
+                      </div>
+                    )}
+                    {project.endDate && (
+                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Calendar className="w-4 h-4 text-purple-400" />
+                        <span className={`text-sm ${isDueSoon(project.endDate) ? 'text-red-400' : 'text-gray-400'}`}>
+                          {formatDate(project.endDate, currentLanguage as "en" | "ar")}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
+
+                {/* Collaborators */}
+                <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} gap-4`}>
+                  {project.departments && project.departments.length > 0 && (
+                    <div>
+                      <p className={`text-xs text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t("Departments")}
+                      </p>
+                      {renderCollaborators(project.departments, "departments")}
+                    </div>
+                  )}
+                  {project.members && project.members.length > 0 && (
+                    <div>
+                      <p className={`text-xs text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t("Members")}
+                      </p>
+                      {renderCollaborators(project.members, "members")}
+                    </div>
+                  )}
+                </div>
               </div>
-              {isLoading && <PageSpinner />}
             </div>
           </RouteWrapper>
         ))}

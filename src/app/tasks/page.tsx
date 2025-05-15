@@ -51,11 +51,10 @@ const TasksView: React.FC = () => {
 
   const { data: deptTree } = useCustomQuery<{ tree: DeptTree[] }>({
     queryKey: ["deptTree", selectedProj ?? "three"],
-    url: `/${
-      selectedProj
-        ? `projects/project-departments-tree/${selectedProj}`
-        : "department/tree"
-    }`,
+    url: `/${selectedProj
+      ? `projects/project-departments-tree/${selectedProj}`
+      : "department/tree"
+      }`,
   });
 
   const { selector } = useRedux(
@@ -65,14 +64,8 @@ const TasksView: React.FC = () => {
   const { data: sections, isLoading: isSectionsLoading } = useCustomQuery<
     SectionType[]
   >({
-    queryKey: ["sections", selectedOption, selectedDept ?? "one"],
-    url: `/sections/${
-      myProj && myDept
-        ? `department/${selectedDept}`
-        : myDept
-        ? `department/${selectedDept}`
-        : `department/${selector}`
-    }`,
+    queryKey: ["sections"],
+    url: `/sections`
   });
 
   useEffect(() => {

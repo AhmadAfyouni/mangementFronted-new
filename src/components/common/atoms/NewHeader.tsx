@@ -293,26 +293,6 @@ const NewHeader = ({
                 </li>
               </RouteWrapper>
 
-              <RouteWrapper
-                href="/notifications"
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                }}
-              >
-                <li
-                  className={`
-                    px-4 py-3
-                    cursor-pointer
-                    transition-colors duration-200
-                    ${isLightMode
-                      ? "hover:bg-darkest hover:text-tblackAF"
-                      : "hover:bg-tblack"
-                    }
-                  `}
-                >
-                  {t("Notifications")}
-                </li>
-              </RouteWrapper>
 
               <RouteWrapper
                 href={"/auth"}

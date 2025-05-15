@@ -33,9 +33,8 @@ const useCustomQuery = <TData,>({
         if (axios.isAxiosError(error) && error.response) {
           setSnackbarConfig({
             open: true,
-            message: `Error: ${
-              error.response.data.message || "An error occurred"
-            }`,
+            message: `Error: ${error.response.data.message || "An error occurred"
+              }`,
             severity: "error",
           });
         } else {

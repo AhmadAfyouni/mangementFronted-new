@@ -5,6 +5,7 @@ import {
   ReceiveTaskType,
 } from "@/types/Task.type";
 import { apiClient } from "@/utils/axios/usage";
+import { AxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 import { DropResult } from "react-beautiful-dnd";
 
@@ -66,9 +67,10 @@ export const updateTaskData = async (
   data: { [key: string]: string }
 ) => {
   try {
-    await apiClient.post(`/tasks/update/${taskId}`, data);
+    return await apiClient.post(`/tasks/update/${taskId}`, data);
   } catch (error) {
     console.error("Failed to update task status", error);
+    throw error;
   }
 };
 

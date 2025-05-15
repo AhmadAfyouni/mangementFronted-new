@@ -20,15 +20,25 @@ import {
 import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
 import PageSpinner from "../ui/PageSpinner";
-import ListTaskDetails, { formatTime } from "./ListTaskDetails";
+import { User, Clock } from "lucide-react";
+
+const formatTime = (totalSeconds: number) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
 const ListRow: React.FC<{
   task: ReceiveTaskType;
   level: number;
 }> = ({ task, level }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
   const { t, currentLanguage } = useLanguage();
   const { setSnackbarConfig } = useMokkBar();
   const { isLightMode } = useCustomTheme();
@@ -42,159 +52,152 @@ const ListRow: React.FC<{
   const { selector: userId } = useRedux(
     (state: RootState) => state.user.userInfo?.id
   );
-  return (
-    <>
-      <div
-        style={{
-          marginRight: currentLanguage === "ar" ? `${level * 20}px` : undefined,
-          marginLeft: currentLanguage === "en" ? `${level * 20}px` : undefined,
-        }}
-      >
-        <div
-          className={` ${
-            isLightMode
-              ? "bg-secondary  hover:bg-darker "
-              : "bg-dark  hover:bg-slate-700"
-          }  flex flex-col md:flex-row items-center justify-between w-full cursor-pointer my-1 px-5 group  !rounded-md ${
-            currentLanguage == "en" ? " border-l-4 " : " border-r-4"
-          } ${getPriorityBorderColor(task.priority)}  `}
-        >
-          <div
-            onClick={() => setIsModalOpen((prev) => !prev)}
-            className={` w-full  flex items-center  gap-2  px-6 py-4 text-twhite  ${
-              isLightMode
-                ? "group-hover:text-tblackAF"
-                : "group-hover:text-twhite"
-            }  `}
-          >
-            <Image
-              src={task.parent_task ? SubtasksIcon : TasksIcon}
-              alt="task icon"
-              height={20}
-              width={20}
-              className={
-                isLightMode ? `bg-darker w-[25px] h-[25px] p-1 rounded-md` : ""
-              }
-            />
-            {task.name}
-          </div>
-          <div
-            onClick={() => setIsModalOpen((prev) => !prev)}
-            className={` w-full  px-6 py-4  text-center ${
-              isLightMode
-                ? "group-hover:text-tblackAF"
-                : "group-hover:text-twhite"
-            }   ${task.is_over_due ? "text-red-500" : "text-tdark"} ${
-              isDueSoon(task.due_date) ? "flash" : ""
-            }`}
-          >
-            {formatDate(task.due_date, currentLanguage as "en" | "ar")}
-          </div>
-          <div
-            onClick={() => setIsModalOpen((prev) => !prev)}
-            className={`w-full   px-6 py-4 text-tdark ${
-              isLightMode
-                ? "group-hover:text-tblackAF"
-                : "group-hover:text-twhite"
-            }  text-center `}
-          >
-            {t(task.status)}
-          </div>
 
-          {
-            <div className=" w-full px-6 py-4 flex items-center justify-center">
-              <span
-                className={`  text-tdark ${
-                  isLightMode
-                    ? "group-hover:text-tblackAF"
-                    : "group-hover:text-twhite"
-                }  px-2 py-1 rounded text-xs cursor-pointer`}
-              >
-                {task?.status == "DONE"
-                  ? formatTime(task?.totalTimeSpent || 0)
-                  : formatTime(elapsedTime)}
-              </span>
-              {userId == task?.emp.id && (
-                <>
-                  {task?.status == "DONE" ? (
-                    <span className="bg-secondary text-twhite px-2 py-1 rounded text-xs cursor-not-allowed flex items-center gap-1">
-                      <Image
-                        src={CheckIcon}
-                        alt="start icon"
-                        width={15}
-                        height={15}
-                      />{" "}
-                      {t("Completed")}
-                    </span>
-                  ) : (
-                    <span
-                      className={`${
-                        isLightMode ? "bg-dark" : "bg-secondary"
-                      }  text-twhite px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-4`}
-                    >
-                      {isMakingAPICall ? (
-                        <PageSpinner />
-                      ) : !isTaskRunning ? (
-                        <div
-                          className="flex  items-center gap-1"
-                          onClick={async () => {
-                            if (task?.status === "ONGOING") {
-                              await startTaskTicker();
-                            } else {
-                              setSnackbarConfig({
-                                message: t("Task Status must be ONGOING"),
-                                open: true,
-                                severity: "warning",
-                              });
-                            }
-                          }}
-                        >
-                          <Image
-                            src={PlayIcon}
-                            alt="start icon"
-                            width={15}
-                            height={15}
-                          />{" "}
-                          {t("Start")}
-                        </div>
-                      ) : (
-                        <div
-                          className="flex  items-center gap-1"
-                          onClick={async () => {
-                            await pauseTaskTicker();
-                          }}
-                        >
-                          <Image
-                            src={PauseIcon}
-                            alt="pause icon"
-                            width={15}
-                            height={15}
-                          />{" "}
-                          {t("Pause")}
-                        </div>
-                      )}
-                    </span>
-                  )}
-                </>
-              )}
+  const handleTaskClick = () => {
+    router.push(`/tasks/${task.id}`);
+  };
+
+  const isRTL = currentLanguage === "ar";
+
+  const getPaddingStyle = () => {
+    if (isRTL) {
+      return { paddingRight: `${level * 24 + 24}px`, paddingLeft: '24px' };
+    }
+    return { paddingLeft: `${level * 24 + 24}px`, paddingRight: '24px' };
+  };
+
+  const getStatusStyles = () => {
+    if (task.status === "DONE") return "text-green-400";
+    if (task.status === "ONGOING") return "text-blue-400";
+    if (task.status === "ON_TEST") return "text-yellow-400";
+    return "text-gray-400";
+  };
+
+  return (
+    <div
+      className={`grid grid-cols-4 bg-dark hover:bg-secondary/50 cursor-pointer ${isRTL ? "border-r-4" : "border-l-4"
+        } ${getPriorityBorderColor(task.priority)} my-1`}
+      onClick={handleTaskClick}
+    >
+      {/* Task Name */}
+      <div
+        className="flex items-center gap-3 py-4"
+        style={getPaddingStyle()}
+      >
+        <Image
+          src={task.parent_task ? SubtasksIcon : TasksIcon}
+          alt="task icon"
+          height={20}
+          width={20}
+          className={isLightMode ? `bg-darker w-[25px] h-[25px] p-1 rounded-md` : ""}
+        />
+        <div className="flex-1">
+          <span className="text-twhite font-medium">{task.name}</span>
+          {task.assignee && (
+            <div className="flex items-center gap-1 mt-1">
+              <User className="w-3 h-3 text-gray-400" />
+              <span className="text-xs text-gray-400">{task.assignee.name}</span>
             </div>
-          }
+          )}
         </div>
       </div>
-      {isModalOpen && (
-        <>
-          <div
-            className="fixed inset-0 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
-          />
-          <ListTaskDetails
-            task={task}
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-          />
-        </>
-      )}
-    </>
+
+      {/* Due Date */}
+      <div
+        className="flex items-center py-4 px-6"
+      >
+        <span className={`text-sm ${task.is_over_due ? "text-red-500" : "text-gray-400"
+          } ${isDueSoon(task.due_date) ? "animate-pulse" : ""}`}>
+          {formatDate(task.due_date, currentLanguage as "en" | "ar")}
+        </span>
+      </div>
+
+      {/* Status */}
+      <div
+        className="flex items-center py-4 px-6"
+      >
+        <span className={`text-sm font-medium ${getStatusStyles()}`}>
+          {t(task.status)}
+        </span>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-center gap-3 py-4 px-6">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-gray-400" />
+          <span className="text-sm text-gray-400">
+            {task?.status === "DONE"
+              ? formatTime(task?.totalTimeSpent || 0)
+              : formatTime(elapsedTime)}
+          </span>
+        </div>
+
+        {userId === task?.emp.id && (
+          <>
+            {task?.status === "DONE" ? (
+              <span className="flex items-center gap-1 px-3 py-1 rounded-lg bg-green-500/20 text-green-400 text-sm">
+                <Image
+                  src={CheckIcon}
+                  alt="check icon"
+                  width={15}
+                  height={15}
+                />
+                {t("Completed")}
+              </span>
+            ) : (
+              <span
+                className={`${isLightMode ? "bg-dark" : "bg-secondary"
+                  } text-twhite px-3 py-1 rounded-lg text-sm cursor-pointer flex items-center gap-2`}
+              >
+                {isMakingAPICall ? (
+                  <PageSpinner />
+                ) : !isTaskRunning ? (
+                  <div
+                    className="flex items-center gap-1"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (task?.status === "ONGOING") {
+                        await startTaskTicker();
+                      } else {
+                        setSnackbarConfig({
+                          message: t("Task Status must be ONGOING"),
+                          open: true,
+                          severity: "warning",
+                        });
+                      }
+                    }}
+                  >
+                    <Image
+                      src={PlayIcon}
+                      alt="play icon"
+                      width={15}
+                      height={15}
+                    />
+                    {t("Start")}
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center gap-1"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await pauseTaskTicker();
+                    }}
+                  >
+                    <Image
+                      src={PauseIcon}
+                      alt="pause icon"
+                      width={15}
+                      height={15}
+                    />
+                    {t("Pause")}
+                  </div>
+                )}
+              </span>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
