@@ -1,23 +1,61 @@
 import { UseFormGetValues } from "react-hook-form";
 import { DeptTree } from "./trees/Department.tree.type";
 
+// File and version data structure from API
+export interface FileVersion {
+  _id: string;
+  fileId: string;
+  fileUrl: string;
+  originalName: string;
+  version: number;
+  fileType: string;
+  isCurrentVersion: boolean;
+  description: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  id: string;
+}
+
+export interface FileData {
+  _id: string;
+  originalName: string;
+  entityType: string;
+  entityId: string;
+  fileType: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  currentVersion: FileVersion;
+}
+
 export interface DepartmentType {
   id: string;
   name: string;
-  description: string;
   goal: string;
   category: string;
   mainTasks: string;
-  parent_department?: string;
-  numericOwners: { category: string; count: number }[];
-  supportingFiles: string[];
-  requiredReports: { name: string; templateFile: string }[];
+  parent_department: {
+    id: string;
+  } | null;
+  supportingFiles: FileData[];
+  requiredReports: {
+    name: string;
+    templateFileId: FileData | string;
+    _id: string;
+  }[];
   developmentPrograms: {
     programName: string;
     objective: string;
-    notes?: string;
-    programFile: string;
+    notes: string;
+    programFileId: FileData | string;
+    _id: string;
   }[];
+  numericOwners: { category: string; count: number }[];
+  createdAt: string;
+  updatedAt: string;
+  description?: string;
 }
 
 export interface DepartmentFormInputs {

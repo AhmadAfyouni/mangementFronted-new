@@ -8,16 +8,16 @@ import FileManagerService from "@/services/fileManager.service";
  */
 export const useFileUpload = () => {
   const queryClient = useQueryClient();
-  
+
   const uploadMutation = useMutation<
-    FileUploadResponse, 
-    Error, 
+    FileUploadResponse,
+    Error,
     FileObject & {
       entityType: string;
       entityId: string;
       fileType?: string;
       description?: string;
-    }, 
+    },
     unknown
   >({
     mutationFn: async (uploadData) => {
@@ -25,19 +25,19 @@ export const useFileUpload = () => {
     },
     onSuccess: (data, variables) => {
       // Invalidate relevant queries to trigger refetch
-      queryClient.invalidateQueries({ 
-        queryKey: ['files', variables.entityType, variables.entityId] 
+      queryClient.invalidateQueries({
+        queryKey: ['files', variables.entityType, variables.entityId]
       });
-      
+
       // If we have a specific file type, invalidate that query as well
       if (variables.fileType) {
-        queryClient.invalidateQueries({ 
-          queryKey: ['files', variables.entityType, variables.entityId, variables.fileType] 
+        queryClient.invalidateQueries({
+          queryKey: ['files', variables.entityType, variables.entityId, variables.fileType]
         });
       }
     },
   });
-  
+
   return {
     uploadFile: uploadMutation.mutate,
     uploadFileAsync: uploadMutation.mutateAsync,

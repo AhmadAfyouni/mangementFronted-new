@@ -19,11 +19,15 @@ import {
 } from "@/services/department.service";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import React, { useEffect } from "react";
 
 const AddDept = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { isLightMode } = useCustomTheme();
+
+  // Track if this is the first render
+  const initialRenderRef = React.useRef(true);
 
   const {
     appendDevelopmentProgram,
@@ -83,6 +87,30 @@ const AddDept = () => {
       },
     });
 
+  // Handle initialization after the component mounts and data is loaded
+  useEffect(() => {
+    if (departmentData && initialRenderRef.current) {
+      // This ensures we only run this once
+      initialRenderRef.current = false;
+
+      // Initialize parent department correctly
+      if (departmentData.parent_department) {
+        const parentId = typeof departmentData.parent_department === 'object'
+          ? departmentData.parent_department.id
+          : departmentData.parent_department;
+
+        console.log('Setting parent_department_id to:', parentId);
+        setValue('parent_department_id', parentId);
+      }
+
+      // Initialize category correctly
+      if (departmentData.category) {
+        console.log('Setting category to:', departmentData.category);
+        setValue('category', departmentData.category);
+      }
+    }
+  }, [departmentData, setValue]);
+
   return (
     <GridContainer>
       <div
@@ -122,7 +150,7 @@ const AddDept = () => {
                 label={t("Category")}
                 placeholder={t("Select Category")}
                 selectOptions={requiredCategoryOptions}
-                value={departmentData && departmentData.category}
+                value={departmentData?.category || ''}
                 onChange={(e) => setValue("category", e.target.value)}
                 showAddButton={true}
                 onAddClick={() => setIsAddingCategory(true)}
@@ -162,7 +190,10 @@ const AddDept = () => {
           <DeptFormInput
             type="select"
             label={t("Parent Department")}
-            value={departmentData && departmentData.parent_department}
+            value={departmentData?.parent_department ?
+              (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ?
+                departmentData.parent_department.id : departmentData.parent_department :
+              ''}
             onChange={(e) => setValue("parent_department_id", e.target.value)}
             placeholder={t("Select a parent department")}
             selectOptions={

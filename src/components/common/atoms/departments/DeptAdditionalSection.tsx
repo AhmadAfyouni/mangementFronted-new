@@ -5,10 +5,12 @@ import useLanguage from "@/hooks/useLanguage";
 import { FileManager } from '@/components/common/atoms/fileManager';
 import { useFileUpload } from '@/hooks/fileManager';
 import { DepartmentFormInputs } from "@/types/DepartmentType.type";
+import { FileObject } from "./DeptAdditionalSection.d";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UseFormGetValues, UseFormRegister } from "react-hook-form";
 import useSnackbar from "@/hooks/useSnackbar";
+import FileUploadService from "@/services/fileUpload.service";
 
 interface DeptAdditionalSectionProps {
   register: UseFormRegister<DepartmentFormInputs>;
@@ -71,41 +73,78 @@ const DeptAdditionalSection = ({
   const [loadingReportIndex, setLoadingReportIndex] = useState<number | null>(null);
   const [loadingProgramIndex, setLoadingProgramIndex] = useState<number | null>(null);
 
+  // Use refs to track previous field lengths to prevent unnecessary updates
+  const prevReportsLength = useRef(requiredReportsFields.length);
+  const prevProgramsLength = useRef(developmentProgramsFields.length);
+
   // Initialize supporting files from form values
-  const files = getValues("supportingFiles") || [];
   useEffect(() => {
     try {
-      setSupportingFileUrls(files);
+      // Make sure we're getting the array of URLs
+      const savedFiles = getValues("supportingFiles") || [];
+      console.log('Initializing supporting files from form:', savedFiles);
+      
+      if (Array.isArray(savedFiles)) {
+        setSupportingFileUrls(savedFiles);
+      } else {
+        console.error('Supporting files is not an array:', savedFiles);
+        setSupportingFileUrls([]);
+      }
     } catch (error) {
       console.error("Error initializing supporting files:", error);
+      setSupportingFileUrls([]);
     }
-  }, [files, getValues]);
+  }, [getValues]);
 
-  // Reset edit modes when fields change
+  // Reset edit modes when fields change - only initialize new fields
   useEffect(() => {
-    const newReportEditMode: FileEditMode = {};
-    requiredReportsFields.forEach((field, index) => {
-      // If templateFile is empty or user was already in edit mode, keep in edit mode
-      newReportEditMode[index] =
-        !field.templateFile || reportEditMode[index] || false;
-    });
-    setReportEditMode(newReportEditMode);
-  }, [requiredReportsFields]);
+    // Only update if the array length changed (adding/removing fields)
+    if (requiredReportsFields.length !== prevReportsLength.current) {
+      const newReportEditMode = { ...reportEditMode };
+      
+      // Set edit mode only for new fields
+      if (requiredReportsFields.length > prevReportsLength.current) {
+        // Initialize new fields only
+        for (let i = prevReportsLength.current; i < requiredReportsFields.length; i++) {
+          const field = requiredReportsFields[i];
+          newReportEditMode[i] = !field.templateFile;
+        }
+      }
+      
+      setReportEditMode(newReportEditMode);
+      prevReportsLength.current = requiredReportsFields.length;
+    }
+  }, [requiredReportsFields.length]);
 
   useEffect(() => {
-    const newProgramEditMode: FileEditMode = {};
-    developmentProgramsFields.forEach((field, index) => {
-      // If programFile is empty or user was already in edit mode, keep in edit mode
-      newProgramEditMode[index] =
-        !field.programFile || programEditMode[index] || false;
-    });
-    setProgramEditMode(newProgramEditMode);
-  }, [developmentProgramsFields]);
+    // Only update if the array length changed (adding/removing fields)
+    if (developmentProgramsFields.length !== prevProgramsLength.current) {
+      const newProgramEditMode = { ...programEditMode };
+      
+      // Set edit mode only for new fields
+      if (developmentProgramsFields.length > prevProgramsLength.current) {
+        // Initialize new fields only
+        for (let i = prevProgramsLength.current; i < developmentProgramsFields.length; i++) {
+          const field = developmentProgramsFields[i];
+          newProgramEditMode[i] = !field.programFile;
+        }
+      }
+      
+      setProgramEditMode(newProgramEditMode);
+      prevProgramsLength.current = developmentProgramsFields.length;
+    }
+  }, [developmentProgramsFields.length]);
 
   // Function to process file URL for display
   const processPublicUrl = (fileUrl: string) => {
     // Extract filename from URL
     try {
+      if (!fileUrl) return "";
+      
+      // Handle both absolute URLs and relative paths
+      if (fileUrl.includes("/public-files/departments/")) {
+        return fileUrl.split("/public-files/departments/")[1].split("?")[0];
+      }
       if (fileUrl.includes("/departments/")) {
         return fileUrl.split("/departments/")[1].split("?")[0];
       }
@@ -116,10 +155,20 @@ const DeptAdditionalSection = ({
     }
   };
 
-  // Function to check if string is a valid URL
+  // Function to check if string is a valid URL or valid file path
   const isValidUrl = (urlString: string) => {
     try {
-      return Boolean(urlString && urlString.includes("http"));
+      if (!urlString) return false;
+      
+      // Check for absolute URLs
+      if (urlString.includes("http")) return true;
+      
+      // Check for relative file paths
+      if (urlString.startsWith("/public-files/") || urlString.includes("/departments/")) {
+        return true;
+      }
+      
+      return false;
     } catch (e) {
       console.log("Error checking URL:", e);
       return false;
@@ -137,32 +186,109 @@ const DeptAdditionalSection = ({
     setProgramEditMode((prev) => ({ ...prev, [index]: true }));
   };
 
-  // Handle file upload completion for different sections
-  const handleSupportingFileUpload = (fileId: string, fileUrl: string) => {
-    const newUrls = [...supportingFileUrls, fileUrl];
+  // Handler for file upload - only cares about storing the URL correctly
+  const handleSupportingFileUpload = async (input: React.ChangeEvent<HTMLInputElement> | string) => {
+    // If called from FileManager component with fileUrl directly
+    if (typeof input === 'string') {
+      // Make sure we're storing the public URL
+      const newUrls = [...supportingFileUrls, input];
+      console.log('Adding URL from FileManager:', input);
+      setSupportingFileUrls(newUrls);
+      setValue("supportingFiles", newUrls);
+      return;
+    }
+
+    // If called from file input
+    if (input.target?.files?.length) {
+      const file = input.target.files[0];
+      if (file) {
+        try {
+          // Upload file directly and get the public URL
+          const publicUrl = await handleDirectFileUpload(file, `Supporting file for department`);
+          console.log('Supporting file uploaded, adding URL:', publicUrl);
+          
+          // Store the public URL in both state and form value
+          const newUrls = [...supportingFileUrls, publicUrl];
+          setSupportingFileUrls(newUrls);
+          setValue("supportingFiles", newUrls);
+          
+          // Reset the file input
+          input.target.value = '';
+        } catch (error) {
+          console.error('Error uploading supporting file:', error);
+          setSnackbarConfig({
+            open: true,
+            message: t('Error uploading file'),
+            severity: 'error'
+          });
+        }
+      }
+    }
+  };
+
+  // Function to remove a supporting file
+  const removeSupportingFile = (index: number) => {
+    const newUrls = [...supportingFileUrls];
+    newUrls.splice(index, 1);
     setSupportingFileUrls(newUrls);
     setValue("supportingFiles", newUrls);
   };
 
   const { uploadFileAsync } = useFileUpload();
 
+  // Using direct file upload for files when creating a new department
+  const handleDirectFileUpload = async (file: File, description: string) => {
+    try {
+      // Use the file upload service directly instead of the entity-based upload
+      const fileUrl = await FileUploadService.uploadSingleFile(
+        { file, name: file.name },
+        'departments'
+      );
+      console.log('File uploaded successfully with URL:', fileUrl);
+      return fileUrl;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setSnackbarConfig({
+        open: true,
+        message: t('Error uploading file'),
+        severity: 'error'
+      });
+      throw error;
+    }
+  };
+
   const handleReportFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
       setLoadingReportIndex(index);
       try {
-        const result = await uploadFileAsync({
-          file,
-          entityType: 'department',
-          entityId: departmentId || 'new',
-          fileType: 'template',
-          description: `Template for ${requiredReportsFields[index].name}`,
-          name: file.name
-        });
+        let fileUrl;
+        
+        if (departmentId && departmentId !== 'new') {
+          // If we have a department ID, use the regular file upload through the API
+          const result = await uploadFileAsync({
+            file,
+            entityType: 'department',
+            entityId: departmentId,
+            fileType: 'template',
+            description: `Template for ${requiredReportsFields[index].name}`,
+            name: file.name
+          });
+          
+          // Extract the public URL from the result
+          fileUrl = result.data.fileUrl;
+          console.log('Report file uploaded through API, URL:', fileUrl);
+        } else {
+          // For new department, use direct file upload to get public URL
+          fileUrl = await handleDirectFileUpload(file, `Template for ${requiredReportsFields[index].name}`);
+          console.log('Report file uploaded directly, URL:', fileUrl);
+        }
 
-        setValue(`requiredReports.${index}.templateFile`, result.data.fileUrl);
+        // Store the URL in the form
+        setValue(`requiredReports.${index}.templateFile`, fileUrl);
         setReportEditMode((prev) => ({ ...prev, [index]: false }));
       } catch (error) {
+        console.error('Error uploading report file:', error);
         setSnackbarConfig({
           open: true,
           message: t('Error uploading file'),
@@ -179,20 +305,34 @@ const DeptAdditionalSection = ({
     if (file) {
       setLoadingProgramIndex(index);
       try {
-        const result = await uploadFileAsync({
-          file,
-          entityType: 'department',
-          entityId: departmentId || 'new',
-          fileType: 'program',
-          description: `Program for ${developmentProgramsFields[index].name}`,
-          name: file.name
-        });
+        let fileUrl;
+        
+        if (departmentId && departmentId !== 'new') {
+          // If we have a department ID, use the regular file upload through the API
+          const result = await uploadFileAsync({
+            file,
+            entityType: 'department',
+            entityId: departmentId,
+            fileType: 'program',
+            description: `Program for ${developmentProgramsFields[index].name || 'Development Program'}`,
+            name: file.name
+          });
+          
+          // Extract the public URL from the result
+          fileUrl = result.data.fileUrl;
+          console.log('Program file uploaded through API, URL:', fileUrl);
+        } else {
+          // For new department, use direct file upload to get public URL
+          fileUrl = await handleDirectFileUpload(file, `Program for ${developmentProgramsFields[index].name || 'Development Program'}`);
+          console.log('Program file uploaded directly, URL:', fileUrl);
+        }
 
-        setValue(`developmentPrograms.${index}.programFile`, result.data.fileUrl);
+        // Store the URL in the form
+        setValue(`developmentPrograms.${index}.programFile`, fileUrl);
         setProgramEditMode((prev) => ({ ...prev, [index]: false }));
       } catch (error) {
+        console.error('Error uploading program file:', error);
         setSnackbarConfig({
-
           open: true,
           message: t('Error uploading file'),
           severity: 'error'
@@ -200,6 +340,41 @@ const DeptAdditionalSection = ({
       } finally {
         setLoadingProgramIndex(null);
       }
+    }
+  };
+
+  // Function to determine if a field should be in edit mode
+  const isInReportEditMode = (index: number, templateFile: string) => {
+    return reportEditMode[index] === true || !isValidUrl(templateFile);
+  };
+
+  const isInProgramEditMode = (index: number, programFile: string) => {
+    return programEditMode[index] === true || !isValidUrl(programFile);
+  };
+
+  // Function to handle opening a file
+  const handleOpenFile = (fileUrl: string) => {
+    if (!fileUrl) return;
+    
+    try {
+      // Determine if URL needs the base URL prepended
+      let fullUrl = fileUrl;
+      
+      // If it's a relative path, prepend the base URL
+      if (fileUrl.startsWith('/public-files/')) {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
+        fullUrl = `${baseUrl}${fileUrl}`;
+      }
+      
+      // Open in a new tab
+      window.open(fullUrl, '_blank');
+    } catch (error) {
+      console.error('Error opening file:', error);
+      setSnackbarConfig({
+        open: true,
+        message: t('Error opening file'),
+        severity: 'error'
+      });
     }
   };
 
@@ -267,18 +442,88 @@ const DeptAdditionalSection = ({
         </button>
       </div>
 
-      {/* Supporting Files Section - Using the new FileManager Component */}
-      {departmentId && (
-        <div className="mb-6">
+      {/* Supporting Files Section */}
+      <div className="mb-6">
+        <label className="text-tmid block text-sm font-medium mb-2">
+          {t("Supporting Files")}
+        </label>
+        {departmentId && departmentId !== 'new' ? (
           <FileManager
             entityType="department"
             entityId={departmentId}
             fileType="supporting"
             title={t("Supporting Files")}
-            onUploadComplete={(fileId, fileUrl) => handleSupportingFileUpload(fileId, fileUrl)}
+            onUploadComplete={(_, fileUrl) => handleSupportingFileUpload(fileUrl)}
           />
-        </div>
-      )}
+        ) : (
+          <div className="mt-2">
+            <div className="flex gap-4 items-center mb-2">
+              <input
+                type="file"
+                className={`${isLightMode
+                  ? "bg-dark  placeholder:text-tdark "
+                  : "bg-secondary"
+                  }  w-full  bg-secondary border-none outline-none  px-4 py-2 rounded-lg border`}
+                onChange={handleSupportingFileUpload}
+              />
+            </div>
+            
+            {/* Display already uploaded supporting files */}
+            {supportingFileUrls.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2">{t("Uploaded Files")}</h4>
+                <div className="space-y-2">
+                  {supportingFileUrls.map((fileUrl, index) => (
+                    <div 
+                      key={index}
+                      className={`flex items-center justify-between p-2 rounded-lg ${isLightMode ? 'bg-dark text-white' : 'bg-main text-white'}`}
+                    >
+                      <div className="flex items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        <span className="truncate max-w-xs">{processPublicUrl(fileUrl)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSupportingFile(index)}
+                        className="ml-2 p-1 rounded-full hover:bg-red-600 transition-colors"
+                        title={t("Remove file")}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Required Reports Section */}
       <div>
@@ -297,14 +542,15 @@ const DeptAdditionalSection = ({
                 }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
             />
             <div className="relative w-full">
-              {!reportEditMode[index] && isValidUrl(field.templateFile) ? (
+              {!isInReportEditMode(index, field.templateFile) ? (
                 // Show open file button with edit option
                 <div className="flex">
                   <div
                     className={`${isLightMode
                       ? "bg-dark text-white"
                       : "bg-secondary text-white"
-                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
+                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center cursor-pointer`}
+                    onClick={() => handleOpenFile(field.templateFile)}
                   >
                     <span className="truncate">
                       {processPublicUrl(field.templateFile)}
@@ -415,14 +661,15 @@ const DeptAdditionalSection = ({
             />
 
             <div className="relative w-full">
-              {!programEditMode[index] && isValidUrl(field.programFile) ? (
+              {!isInProgramEditMode(index, field.programFile) ? (
                 // Show open file button with edit option
                 <div className="flex">
                   <div
                     className={`${isLightMode
                       ? "bg-dark text-white"
                       : "bg-secondary text-white"
-                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
+                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center cursor-pointer`}
+                    onClick={() => handleOpenFile(field.programFile)}
                   >
                     <span className="truncate">
                       {processPublicUrl(field.programFile)}

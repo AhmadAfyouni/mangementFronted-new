@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { 
-  useFilesByEntity, 
-  useFileUpload, 
-  useFileVersions, 
-  useFileDelete, 
+import {
+  useFilesByEntity,
+  useFileUpload,
+  useFileVersions,
+  useFileDelete,
   useVersionDelete,
-  useSetCurrentVersion 
+  useSetCurrentVersion
 } from '@/hooks/fileManager';
 import { FileEntity, FileObject, FileVersion } from '@/types/FileManager.type';
 import useSnackbar from '@/hooks/useSnackbar';
@@ -26,57 +26,57 @@ export const useFileManager = ({
   fileType
 }: UseFileManagerProps) => {
   const { t } = useLanguage();
-  const { showSnackbar } = useSnackbar();
-  
+  const { setSnackbarConfig } = useSnackbar();
+
   // State for selected file and version
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
-  
+
   // Fetch files query
   const filesQuery = useFilesByEntity(entityType, entityId, fileType);
-  
+
   // Fetch versions query - only enabled if a file is selected
   const versionsQuery = useFileVersions(
-    selectedFileId || '', 
+    selectedFileId || '',
     !!selectedFileId
   );
-  
+
   // File upload mutation
   const {
     uploadFileAsync,
     isUploading,
     uploadError
   } = useFileUpload();
-  
+
   // File delete mutation
   const {
     deleteFileAsync,
     isDeleting,
     deleteError
   } = useFileDelete();
-  
+
   // Version delete mutation
   const {
     deleteVersionAsync,
     isDeletingVersion
   } = useVersionDelete();
-  
+
   // Set current version mutation
   const {
     setCurrentVersionAsync,
     isSetting
   } = useSetCurrentVersion();
-  
+
   // Helper function to select a file
   const selectFile = (fileId: string) => {
     setSelectedFileId(fileId);
   };
-  
+
   // Helper function to get the selected file
   const getSelectedFile = (): FileEntity | undefined => {
     if (!selectedFileId || !filesQuery.data?.data?.files) return undefined;
     return filesQuery.data.data.files.find(f => f.id === selectedFileId);
   };
-  
+
   // Upload a file
   const uploadFile = async (fileObject: FileObject, description?: string) => {
     try {
@@ -88,22 +88,24 @@ export const useFileManager = ({
         fileType: fileType || 'document',
         description
       });
-      
-      showSnackbar({
-        message: t('File uploaded successfully'),
+
+      setSnackbarConfig({
+
+        open: true, message: t('File uploaded successfully'),
         severity: 'success'
       });
-      
+
       return result.data;
     } catch (error) {
-      showSnackbar({
-        message: t('Error uploading file'),
+      setSnackbarConfig({
+
+        open: true, message: t('Error uploading file'),
         severity: 'error'
       });
       throw error;
     }
   };
-  
+
   // Delete a file
   const deleteFile = async (fileId: string) => {
     try {
@@ -112,26 +114,28 @@ export const useFileManager = ({
         entityType,
         entityId
       });
-      
+
       if (selectedFileId === fileId) {
         setSelectedFileId(null);
       }
-      
-      showSnackbar({
-        message: t('File deleted successfully'),
+
+      setSnackbarConfig({
+
+        open: true, message: t('File deleted successfully'),
         severity: 'success'
       });
-      
+
       return result;
     } catch (error) {
-      showSnackbar({
-        message: t('Error deleting file'),
+      setSnackbarConfig({
+
+        open: true, message: t('Error deleting file'),
         severity: 'error'
       });
       throw error;
     }
   };
-  
+
   // Delete a file version
   const deleteVersion = async (versionId: string, fileId: string) => {
     try {
@@ -139,22 +143,24 @@ export const useFileManager = ({
         versionId,
         fileId
       });
-      
-      showSnackbar({
-        message: t('Version deleted successfully'),
+
+      setSnackbarConfig({
+
+        open: true, message: t('Version deleted successfully'),
         severity: 'success'
       });
-      
+
       return result;
     } catch (error) {
-      showSnackbar({
-        message: t('Error deleting version'),
+      setSnackbarConfig({
+
+        open: true, message: t('Error deleting version'),
         severity: 'error'
       });
       throw error;
     }
   };
-  
+
   // Set current version
   const setCurrentVersion = async (versionId: string, fileId: string) => {
     try {
@@ -162,22 +168,24 @@ export const useFileManager = ({
         versionId,
         fileId
       });
-      
-      showSnackbar({
-        message: t('Version set as current successfully'),
+
+      setSnackbarConfig({
+
+        open: true, message: t('Version set as current successfully'),
         severity: 'success'
       });
-      
+
       return result;
     } catch (error) {
-      showSnackbar({
-        message: t('Error setting current version'),
+      setSnackbarConfig({
+
+        open: true, message: t('Error setting current version'),
         severity: 'error'
       });
       throw error;
     }
   };
-  
+
   return {
     // Queries
     files: filesQuery.data?.data?.files || [],
@@ -186,7 +194,7 @@ export const useFileManager = ({
     isLoadingVersions: versionsQuery.isLoading,
     filesError: filesQuery.error,
     versionsError: versionsQuery.error,
-    
+
     // Mutations
     uploadFile,
     deleteFile,
@@ -198,12 +206,12 @@ export const useFileManager = ({
     isSetting,
     uploadError,
     deleteError,
-    
+
     // State management
     selectedFileId,
     selectFile,
     getSelectedFile,
-    
+
     // Refetch functions
     refetchFiles: filesQuery.refetch,
     refetchVersions: versionsQuery.refetch

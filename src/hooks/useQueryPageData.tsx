@@ -41,9 +41,30 @@ function useQueryData<T extends FieldValues>(
     if (key) {
       const storedData = sessionStorage.getItem(key); // Get data from storage
       if (storedData) {
-        const parsedData = JSON.parse(storedData) as T;
-        setQueryData(parsedData);
-        reset(parsedData); // Update form with parsed data
+        try {
+          const parsedData = JSON.parse(storedData) as T;
+          console.log('Retrieved data from session storage:', parsedData);
+
+          // Process parent_department to ensure it's properly structured
+          if (parsedData && 'parent_department' in parsedData) {
+            // Handle different data structures for parent_department
+            const parentDept = parsedData.parent_department;
+            if (parentDept && typeof parentDept === 'object' && 'id' in parentDept) {
+              // Already in the right format
+              console.log('Parent department in object format:', parentDept);
+            } else if (parentDept && typeof parentDept === 'string') {
+              // Convert string to object format
+              console.log('Converting parent department from string to object:', parentDept);
+              parsedData.parent_department = { id: parentDept };
+            }
+          }
+
+          setQueryData(parsedData);
+          reset(parsedData); // Update form with parsed data
+        } catch (error) {
+          console.error('Error parsing stored data:', error);
+          reset();
+        }
       }
     } else {
       reset(); // Reset form if no data is found

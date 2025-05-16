@@ -1,10 +1,10 @@
-import { FileObject } from "@/components/common/atoms/departments/DeptAdditionalSection";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useQueryPageData from "@/hooks/useQueryPageData";
 import {
   DepartmentFormInputs,
   DepartmentType,
 } from "@/types/DepartmentType.type";
+import { FileObject } from "@/types/FileManager.type";
 import { JobCategoryType } from "@/types/JobTitle.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import { useEffect, useState } from "react";
@@ -49,11 +49,23 @@ export const useAddDeptLogic = (reset: UseFormReset<DepartmentFormInputs>) => {
 
   useEffect(() => {
     if (departmentData) {
+      // Properly initialize category and parent department
       reset({
         ...departmentData,
         supportingFiles: departmentData.supportingFiles ?? [],
-        parent_department_id:
-          departmentData.parent_department && departmentData.parent_department,
+        // Ensure we extract the ID correctly from parent_department
+        parent_department_id: departmentData.parent_department ?
+          (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ?
+            departmentData.parent_department.id : departmentData.parent_department :
+          '',
+        // Make sure category is correctly set
+        category: departmentData.category || ''
+      });
+
+      // Log the values to confirm correct initialization
+      console.log('Initializing department form with:', {
+        parentDept: departmentData.parent_department,
+        category: departmentData.category
       });
     } else {
       reset();

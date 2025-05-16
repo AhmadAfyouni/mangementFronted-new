@@ -57,12 +57,25 @@ export const handleManualSubmit = async ({
       count: parseInt(owner.count + "", 10),
     })) || [];
 
+  // Ensure supporting files are processed correctly
   const formData = {
     ...data,
     numericOwners: formattedNumericOwners,
+    // Ensure these are all urls
+    supportingFiles: data.supportingFiles || [],
+    requiredReports: data.requiredReports?.map(report => ({
+      name: report.name,
+      templateFile: report.templateFile // This should be the public URL
+    })) || [],
+    developmentPrograms: data.developmentPrograms?.map(program => ({
+      programName: program.programName,
+      objective: program.objective,
+      notes: program.notes || "",
+      programFile: program.programFile // This should be the public URL
+    })) || []
   };
 
-  console.log("dept form data : ", formData);
+  console.log("Department form data being submitted:", formData);
 
   addDepartment(formData);
 };

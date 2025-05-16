@@ -11,7 +11,6 @@ import ReactFlow, {
   NodeProps,
   Position,
   Controls,
-  MiniMap,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import CustomModal from "../atoms/modals/CustomModal";
@@ -31,13 +30,13 @@ type DepartmentHierarchyTreeProps = {
 const generateLayout = (data: DeptTree[]) => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ 
-    rankdir: "TB", 
-    align: "UL", 
-    nodesep: 80, 
+  dagreGraph.setGraph({
+    rankdir: "TB",
+    align: "UL",
+    nodesep: 80,
     ranksep: 120,
-    marginx: 50, 
-    marginy: 50 
+    marginx: 50,
+    marginy: 50
   });
 
   const nodes: Node[] = [];
@@ -48,8 +47,8 @@ const generateLayout = (data: DeptTree[]) => {
     nodes.push({
       id: item.id,
       type: "custom",
-      data: { 
-        label: item.name, 
+      data: {
+        label: item.name,
         emps: item.emps,
         isMainDept: item.parentId === null,
       },
@@ -90,22 +89,20 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { t, currentLanguage } = useLanguage();
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [selectedDept, setSelectedDept] = useState<{ name: string; emps: any[] } | null>(null);
 
   const CustomNode = ({ data, selected }: NodeProps) => {
-    const isHovered = hoveredNode === data.id;
     const employeeCount = data.emps?.length || 0;
-    
-    const departmentClass = data.isMainDept 
+
+    const departmentClass = data.isMainDept
       ? "bg-gradient-to-br from-blue-500/20 to-blue-600/20 border-blue-500/50"
       : "bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/50";
-    
+
     const defaultNodeStyles = `
-      relative min-w-[220px] p-5 cursor-pointer transition-all duration-300
+      relative min-w-[220px] p-5 cursor-pointer
       ${lightMode ? "bg-white" : "bg-secondary"}
       ${departmentClass}
-      ${isHovered ? "scale-105 shadow-xl" : "shadow-md"}
+      shadow-md
       border-2 rounded-xl
       ${selected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
     `;
@@ -114,10 +111,7 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.02 }}
         className={nodeStyles ? nodeStyles(lightMode, data.isManager) : defaultNodeStyles}
-        onMouseEnter={() => setHoveredNode(data.id)}
-        onMouseLeave={() => setHoveredNode(null)}
         onClick={() => {
           if (data.emps && data.emps.length > 0) {
             setSelectedDept({ name: data.label, emps: data.emps });
@@ -147,7 +141,7 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
             </span>
           </div>
           {employeeCount > 0 && (
-            <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isHovered ? "translate-x-1" : ""}`} />
+            <ChevronRight className="w-4 h-4 text-gray-400" />
           )}
         </div>
 
@@ -156,7 +150,7 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
           type="target"
           position={Position.Top}
           className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{ 
+          style={{
             background: nodeColors.target,
             top: -6,
           }}
@@ -165,7 +159,7 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
           type="source"
           position={Position.Bottom}
           className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{ 
+          style={{
             background: nodeColors.source,
             bottom: -6,
           }}
@@ -201,20 +195,14 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
         fitViewOptions={{ padding: 0.2 }}
         className="!bg-transparent"
       >
-        <Background 
-          variant="dots" 
-          gap={20} 
-          size={1} 
+        <Background
+          gap={20}
+          size={1}
           color={lightMode ? "#e5e7eb" : "#374151"}
         />
-        <Controls 
+        <Controls
           className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
           showInteractive={false}
-        />
-        <MiniMap 
-          className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
-          nodeColor={node => node.data?.isMainDept ? "#3b82f6" : "#9333ea"}
-          maskColor={lightMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"}
         />
       </ReactFlow>
 

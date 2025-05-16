@@ -50,6 +50,26 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     title: "",
   });
 
+  // Helper function to extract file URL from either string or object
+  const getFileUrl = (fileData: any): string | undefined => {
+    if (!fileData) return undefined;
+
+    // If it's a string, return it directly
+    if (typeof fileData === 'string') return fileData;
+
+    // If it's an object with currentVersion, get the URL from it
+    if (fileData.currentVersion?.fileUrl) {
+      return fileData.currentVersion.fileUrl;
+    }
+
+    // If it's an object but not in the expected format, try to find any URL property
+    if (typeof fileData === 'object') {
+      if (fileData.fileUrl) return fileData.fileUrl;
+    }
+
+    return undefined;
+  };
+
 
   // State for Files & Reports and Development Programs modals
   const [filesReportsModal, setFilesReportsModal] = useState<{
@@ -93,7 +113,24 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
 
   // Function to open file
   const handleOpenFile = (url: string) => {
-    window.open(url, "_blank");
+    if (!url) return;
+
+    // Make sure the URL is properly formatted
+    let fullUrl = url;
+
+    // Check if URL starts with http:// or https://
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      fullUrl = `https://${url}`;
+    }
+
+    // Prevent duplicate URL issues
+    if (fullUrl.includes('http://http://') || fullUrl.includes('https://https://')) {
+      fullUrl = fullUrl.replace('http://http://', 'http://');
+      fullUrl = fullUrl.replace('https://https://', 'https://');
+    }
+
+    console.log('Opening URL:', fullUrl);
+    window.open(fullUrl, "_blank");
   };
 
   // Filter visible columns for better organization
@@ -179,7 +216,7 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
                   <td className="py-4 px-4">
                     {department.parent_department
                       ? departmentsData.find(
-                        (dep) => dep.id === department.parent_department
+                        (dep) => dep.id === department.parent_department?.id
                       )?.name || "-"
                       : "—"}
                   </td>

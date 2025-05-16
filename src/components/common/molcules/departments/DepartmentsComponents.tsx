@@ -63,13 +63,30 @@ export const FilesReportsModal: React.FC<FilesReportsModalProps> = ({
             // Set loading state for this specific file
             setLoadingFiles((prev) => ({ ...prev, [url]: true }));
 
+            // Get the full URL
+            let fullUrl = url;
+
+            // Check if URL already starts with http:// or https://
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
+                fullUrl = `${baseUrl}${url}`;
+            }
+
+            // Prevent duplicate URL issues
+            if (fullUrl.includes('http://http://') || fullUrl.includes('https://https://')) {
+                fullUrl = fullUrl.replace('http://http://', 'http://');
+                fullUrl = fullUrl.replace('https://https://', 'https://');
+            }
+
+            console.log("full url is : ", fullUrl);
+
             // Simulate loading
             setTimeout(() => {
                 // Reset loading state
                 setLoadingFiles((prev) => ({ ...prev, [url]: false }));
 
                 // Open the file
-                onOpenFile(url, fileName);
+                onOpenFile(fullUrl, fileName);
             }, 500);
         };
 
@@ -172,26 +189,31 @@ export const FilesReportsModal: React.FC<FilesReportsModalProps> = ({
                         {department.supportingFiles &&
                             department.supportingFiles.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {department.supportingFiles.map((fileUrl, index) => (
-                                    <div
-                                        key={`file-${index}`}
-                                        className={`p-3 rounded-lg ${isLightMode
-                                            ? "bg-darkest border border-darkest"
-                                            : "bg-dark border border-dark"
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="truncate flex-1">
-                                                <span className="text-sm text-white font-medium">
-                                                    {getFilenameFromUrl(fileUrl)}
-                                                </span>
-                                            </div>
-                                            <div className="ml-2">
-                                                {renderFileLink(fileUrl, t("Open"))}
+                                {department.supportingFiles.map((fileUrl, index) => {
+
+                                    console.log(" new full url from source is : ", fileUrl);
+
+                                    return (
+                                        <div
+                                            key={`file-${index}`}
+                                            className={`p-3 rounded-lg ${isLightMode
+                                                ? "bg-darkest border border-darkest"
+                                                : "bg-dark border border-dark"
+                                                }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="truncate flex-1">
+                                                    <span className="text-sm text-white font-medium">
+                                                        {getFilenameFromUrl(fileUrl.currentVersion.fileUrl)}
+                                                    </span>
+                                                </div>
+                                                <div className="ml-2">
+                                                    {renderFileLink(fileUrl.currentVersion.fileUrl, t("Open"))}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         ) : (
                             <div
@@ -234,7 +256,12 @@ export const FilesReportsModal: React.FC<FilesReportsModalProps> = ({
                                             </h5>
                                         </div>
                                         <div className="ml-4">
-                                            {renderFileLink(report.templateFile, t("Template"))}
+                                            {renderFileLink(
+                                                typeof report.templateFileId === 'string'
+                                                    ? report.templateFileId
+                                                    : report.templateFileId?.currentVersion?.fileUrl,
+                                                t("Template")
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -258,6 +285,10 @@ export const FilesReportsModal: React.FC<FilesReportsModalProps> = ({
         </div>
     );
 };
+
+
+
+
 
 interface DevelopmentProgramsModalProps {
     department: DepartmentType;
@@ -289,13 +320,31 @@ export const DevelopmentProgramsModal: React.FC<DevelopmentProgramsModalProps> =
             // Set loading state for this specific file
             setLoadingFiles((prev) => ({ ...prev, [url]: true }));
 
+            // Get the full URL
+            let fullUrl = url;
+
+            // Check if URL already has a full protocol
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                // If it's a relative path, prepend the base URL
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
+                fullUrl = `${baseUrl}${url}`;
+            }
+
+            // Prevent duplicate URL issues
+            if (fullUrl.includes('http://http://') || fullUrl.includes('https://https://')) {
+                fullUrl = fullUrl.replace('http://http://', 'http://');
+                fullUrl = fullUrl.replace('https://https://', 'https://');
+            }
+
+            console.log('Opening program file URL:', fullUrl);
+
             // Simulate loading
             setTimeout(() => {
                 // Reset loading state
                 setLoadingFiles((prev) => ({ ...prev, [url]: false }));
 
                 // Open the file
-                onOpenFile(url, fileName);
+                onOpenFile(fullUrl, fileName);
             }, 500);
         };
 
@@ -408,9 +457,14 @@ export const DevelopmentProgramsModal: React.FC<DevelopmentProgramsModalProps> =
                                         <h4 className={`text-lg font-semibold text-white `}>
                                             {program.programName}
                                         </h4>
-                                        {program.programFile && (
+                                        {program.programFileId && (
                                             <div>
-                                                {renderFileLink(program.programFile, t("Program File"))}
+                                                {renderFileLink(
+                                                    typeof program.programFileId === 'string'
+                                                        ? program.programFileId
+                                                        : program.programFileId?.currentVersion?.fileUrl,
+                                                    t("Program File")
+                                                )}
                                             </div>
                                         )}
                                     </div>
