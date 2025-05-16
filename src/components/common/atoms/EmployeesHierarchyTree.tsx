@@ -105,13 +105,13 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
     const isHovered = hoveredNode === data.id;
     const showTooltip = tooltipNode === data.id;
     const isTopLevel = !data.parentId;
-    
-    const roleClass = data.is_manager 
+
+    const roleClass = data.is_manager
       ? "bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-500/50"
       : isTopLevel
-      ? "bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/50"
-      : "bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/50";
-    
+        ? "bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/50"
+        : "bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/50";
+
     const defaultNodeStyles = `
       relative min-w-[200px] p-4 cursor-pointer transition-all duration-300
       ${lightMode ? "bg-white" : "bg-secondary"}
@@ -139,9 +139,8 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
       >
         {/* Employee Info */}
         <div className="flex items-center gap-3 mb-2">
-          <div className={`relative p-2 rounded-lg ${
-            data.is_manager ? "bg-red-500/20" : isTopLevel ? "bg-green-500/20" : "bg-blue-500/20"
-          }`}>
+          <div className={`relative p-2 rounded-lg ${data.is_manager ? "bg-red-500/20" : isTopLevel ? "bg-green-500/20" : "bg-blue-500/20"
+            }`}>
             {data.is_manager ? (
               <Crown className="w-5 h-5 text-red-400" />
             ) : isTopLevel ? (
@@ -162,9 +161,8 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
         {/* Role Badge */}
         {(data.is_manager || isTopLevel) && (
           <div className="absolute -top-2 -right-2">
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-              data.is_manager ? "bg-red-500 text-white" : "bg-green-500 text-white"
-            }`}>
+            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${data.is_manager ? "bg-red-500 text-white" : "bg-green-500 text-white"
+              }`}>
               {data.is_manager ? "Manager" : "Head"}
             </span>
           </div>
@@ -191,7 +189,7 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
           type="target"
           position={Position.Top}
           className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{ 
+          style={{
             background: nodeColors.target,
             top: -6,
           }}
@@ -200,7 +198,7 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
           type="source"
           position={Position.Bottom}
           className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{ 
+          style={{
             background: nodeColors.source,
             bottom: -6,
           }}
@@ -226,7 +224,7 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
-  
+
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     []
@@ -235,9 +233,8 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
   const { selector } = useRedux((state: RootState) => state.wrapper);
 
   return (
-    <div className={`relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden ${
-      selector.isLoading ? "blur-sm" : ""
-    }`}>
+    <div className={`relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden ${selector.isLoading ? "blur-sm" : ""
+      }`}>
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <User className="w-5 h-5 text-gray-400" />
         <h3 className="text-lg font-bold text-twhite">Employee Hierarchy</h3>
@@ -252,17 +249,16 @@ const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
         fitViewOptions={{ padding: 0.2 }}
         className="!bg-transparent"
       >
-        <Background 
-          variant="dots" 
-          gap={20} 
-          size={1} 
+        <Background
+          gap={20}
+          size={1}
           color={lightMode ? "#e5e7eb" : "#374151"}
         />
-        <Controls 
+        <Controls
           className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
           showInteractive={false}
         />
-        <MiniMap 
+        <MiniMap
           className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
           nodeColor={node => {
             if (node.data?.is_manager) return "#ef4444";
