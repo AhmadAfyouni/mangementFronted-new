@@ -1,7 +1,6 @@
 "use client";
-import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PersonalInfoCard from "@/components/common/atoms/ProfileInfoCard";
-import TaskStatusBadge from "@/components/common/atoms/tasks/TaskStatusBadge";
+import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import HomeTasksReport from "@/components/common/molcules/HomeTasksReport";
 import ProfileProjectsReport from "@/components/common/molcules/ProfileProjectsReport";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
@@ -13,20 +12,20 @@ import { formatDate } from "@/services/task.service";
 import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import {
+  Activity,
+  AlertCircle,
+  Award,
   Briefcase,
   Building2,
   Calendar,
+  CheckCircle2,
+  Clock,
   Mail,
   MapPin,
   Phone,
-  Award,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  User,
   Target,
-  Activity,
+  TrendingUp,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 

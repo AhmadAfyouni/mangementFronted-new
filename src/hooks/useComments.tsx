@@ -7,7 +7,7 @@ import useLanguage from "./useLanguage";
 import { useQueryClient } from "@tanstack/react-query";
 
 export interface Comment {
-  _id: string;
+  id: string;
   content: string;
   createdAt: string;
   files?: string[];
@@ -36,8 +36,8 @@ const useComments = (taskId: string, autoFetch = true) => {
   const queryClient = useQueryClient();
 
   // Fetch comments for the task
-  const { 
-    data: comments = [] as Comment[], 
+  const {
+    data: comments = [] as Comment[],
     refetch: refetchComments,
     isLoading: isLoadingComments
   } = useCustomQuery<Comment[]>({
@@ -64,14 +64,14 @@ const useComments = (taskId: string, autoFetch = true) => {
     setIsSubmitting(true);
     try {
       const token = Cookies.get("access_token");
-      
+
       // If there's a file attachment, use FormData
       if (attachedFile) {
         const formData = new FormData();
         formData.append("content", comment);
         formData.append("taskId", taskId);
         formData.append("file", attachedFile);
-        
+
         await axios.post(
           `${process.env.NEXT_PUBLIC_BASE_URL}/comment`,
           formData,
@@ -105,10 +105,10 @@ const useComments = (taskId: string, autoFetch = true) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
+
       // Invalidate comments query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
-      
+
       setSnackbarConfig({
         message: t("Comment added successfully"),
         open: true,
@@ -151,7 +151,7 @@ const useComments = (taskId: string, autoFetch = true) => {
     setIsSubmitting(true);
     try {
       const token = Cookies.get("access_token");
-      
+
       // The URL should match the format shown in the network request
       await axios.put(
         `${process.env.NEXT_PUBLIC_BASE_URL}/comment/${commentId}`,
@@ -167,10 +167,10 @@ const useComments = (taskId: string, autoFetch = true) => {
       // Clear editing state and refetch comments
       setEditingComment(null);
       setEditText("");
-      
+
       // Invalidate comments query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
-      
+
       setSnackbarConfig({
         message: t("Comment updated successfully"),
         open: true,
@@ -194,7 +194,7 @@ const useComments = (taskId: string, autoFetch = true) => {
   const deleteComment = async (commentId: string) => {
     try {
       const token = Cookies.get("access_token");
-      
+
       // Make sure we're using the correct URL structure
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BASE_URL}/comment/${commentId}`,
@@ -208,7 +208,7 @@ const useComments = (taskId: string, autoFetch = true) => {
 
       // Invalidate comments query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
-      
+
       setSnackbarConfig({
         message: t("Comment deleted successfully"),
         open: true,
@@ -231,7 +231,7 @@ const useComments = (taskId: string, autoFetch = true) => {
     setIsLoadingFile(fileId);
     try {
       const token = Cookies.get("access_token");
-      
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BASE_URL}/attachments/download/${fileId}`,
         {

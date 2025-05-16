@@ -133,9 +133,13 @@ export default function TaskDetailsPage() {
         setDescription(task.description);
         setCalendar(task.due_date);
       }
-
+      // Extract message safely
+      let errorMessage = "An error occurred";
+      if (err.response?.data && typeof err.response.data === "object" && "message" in err.response.data) {
+        errorMessage = (err.response.data as { message: string }).message;
+      }
       setSnackbarConfig({
-        message: err.response?.data.message + "",
+        message: errorMessage,
         open: true,
         severity: "error",
       });
@@ -144,7 +148,7 @@ export default function TaskDetailsPage() {
 
   const handleStatusChange = (option: string) => {
     if (option === "DONE") {
-      if (userId === task?.assignee?._id || userId === task?.assignee?.id) {
+      if (userId === task?.assignee?._id || userId === task?.assignee?._id) {
         setSelectedStatus(option);
         setStatusMenuOpen(false);
         setIsRatingOpen(true);
