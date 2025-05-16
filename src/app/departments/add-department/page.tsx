@@ -179,7 +179,6 @@ const AddDept = () => {
             developmentProgramsFields={developmentProgramsFields}
             numericOwnersFields={numericOwnersFields}
             requiredReportsFields={requiredReportsFields}
-            supportingFiles={supportingFiles}
             errors={errors}
             appendDevelopmentProgram={appendDevelopmentProgram}
             appendNumericOwner={appendNumericOwner}
@@ -191,7 +190,7 @@ const AddDept = () => {
             removeRequiredReport={removeRequiredReport}
             setValue={setValue}
             getValues={getValues}
-            setSupportingFiles={setSupportingFiles}
+            departmentId={departmentData?.id} // Pass departmentId to DeptAdditionalSection
           />
 
           <button

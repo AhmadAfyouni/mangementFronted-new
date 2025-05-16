@@ -309,7 +309,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                         }`}
                     >
                       <Briefcase size={12} className="mx-1" />
-                      {t("Programs")}:{" "}
+                      {t("Programs")}:{""}
                       {department.developmentPrograms?.length || 0}
                     </span>
                   </div>

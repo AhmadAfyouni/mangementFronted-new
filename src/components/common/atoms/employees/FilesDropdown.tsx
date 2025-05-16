@@ -5,26 +5,26 @@ import {
 } from "@/types/EmployeeType.type";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-interface FilesDropdownProps {
-  legalDocuments?: LegalDocument[];
-  certifications?: Certification[];
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isLightMode: boolean;
-}
+import EmployeeFilesModal from "./EmployeeFilesModal";
 
 interface FilesButtonProps {
   employee: EmployeeType;
   isLightMode: boolean;
 }
 
-// File dropdown component
-const FilesDropdown: React.FC<FilesDropdownProps> = ({
+// File dropdown component (legacy)
+const FilesDropdown: React.FC<{
+  legalDocuments?: LegalDocument[];
+  certifications?: Certification[];
+  isOpen: boolean;
+  isLightMode: boolean;
+  onOpenModal: () => void;
+}> = ({
   legalDocuments,
   certifications,
   isOpen,
   isLightMode,
+  onOpenModal,
 }) => {
   const { t } = useTranslation();
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
@@ -53,6 +53,31 @@ const FilesDropdown: React.FC<FilesDropdownProps> = ({
       }`}
     >
       <div className="py-1">
+        {/* View All Files button */}
+        <button
+          className={`w-full text-left px-4 py-2 text-sm font-medium ${
+            isLightMode
+              ? "bg-gray-50 hover:bg-gray-100 text-blue-600"
+              : "bg-gray-800 hover:bg-gray-700 text-blue-400"
+          } flex items-center justify-between`}
+          onClick={onOpenModal}
+        >
+          <span>{t("Manage All Files")}</span>
+          <svg
+            className="h-4 w-4 ml-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+
         {legalDocuments && legalDocuments.length > 0 ? (
           <div>
             <div className="px-4 py-2 text-xs font-semibold opacity-70">
@@ -182,7 +207,7 @@ const FilesDropdown: React.FC<FilesDropdownProps> = ({
         {(!legalDocuments || legalDocuments.length === 0) &&
           (!certifications || certifications.length === 0) && (
             <div className="px-4 py-3 text-sm text-center opacity-70">
-              {t("No files available")}
+              {t("Use the File Manager to add or view files")}
             </div>
           )}
       </div>
@@ -193,6 +218,8 @@ const FilesDropdown: React.FC<FilesDropdownProps> = ({
 // File button to open dropdown
 const FilesButton: React.FC<FilesButtonProps> = ({ employee, isLightMode }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
   const totalFiles: number =
     (employee.legal_documents?.filter((doc) => doc.file)?.length || 0) +
     (employee.certifications?.filter((cert) => cert.file)?.length || 0);
@@ -200,6 +227,11 @@ const FilesButton: React.FC<FilesButtonProps> = ({ employee, isLightMode }) => {
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.stopPropagation();
     setIsOpen(!isOpen);
+  };
+
+  const handleOpenModal = () => {
+    setIsOpen(false);
+    setIsModalOpen(true);
   };
 
   // Close dropdown when clicking outside
@@ -215,44 +247,55 @@ const FilesButton: React.FC<FilesButtonProps> = ({ employee, isLightMode }) => {
   }, [isOpen]);
 
   return (
-    <div
-      className="relative"
-      onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
-    >
-      <button
-        className={`cursor-pointer p-2 w-16 text-xs flex justify-center font-bold rounded-full ${
-          isLightMode
-            ? "bg-blue-500/40 hover:bg-blue-500 hover:text-blue-100 border-2 border-blue-500/30"
-            : "bg-blue-500/40 hover:bg-blue-500 hover:text-blue-100 border-2 border-blue-500/30"
-        }`}
-        onClick={handleButtonClick}
+    <>
+      <div
+        className="relative"
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
       >
-        <div className="flex items-center">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          {totalFiles > 0 && <span className="ml-1">{totalFiles}</span>}
-        </div>
-      </button>
+        <button
+          className={`cursor-pointer p-2 w-16 text-xs flex justify-center font-bold rounded-full ${
+            isLightMode
+              ? "bg-blue-500/40 hover:bg-blue-500 hover:text-blue-100 border-2 border-blue-500/30"
+              : "bg-blue-500/40 hover:bg-blue-500 hover:text-blue-100 border-2 border-blue-500/30"
+          }`}
+          onClick={handleButtonClick}
+        >
+          <div className="flex items-center">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            {totalFiles > 0 && <span className="ml-1">{totalFiles}</span>}
+          </div>
+        </button>
 
-      <FilesDropdown
-        legalDocuments={employee.legal_documents}
-        certifications={employee.certifications}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        isLightMode={isLightMode}
-      />
-    </div>
+        <FilesDropdown
+          legalDocuments={employee.legal_documents}
+          certifications={employee.certifications}
+          isOpen={isOpen}
+          isLightMode={isLightMode}
+          onOpenModal={handleOpenModal}
+        />
+      </div>
+      
+      {/* Employee Files Modal */}
+      {isModalOpen && (
+        <EmployeeFilesModal 
+          employeeId={employee.id}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 

@@ -44,7 +44,7 @@ const ProfileProjectsReport = ({
           title={item.name}
         >
           {item.name
-            .split(" ")
+            .split("")
             .map((word: string) => word[0])
             .join("")
             .toUpperCase()

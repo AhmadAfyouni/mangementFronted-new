@@ -14,7 +14,7 @@ export interface PermissionsSectionProps {
 
 const permissionsOptions = permissionsArray.map((permission) => ({
   value: permission,
-  label: permission.replace(/_/g, " ").toUpperCase(),
+  label: permission.replace(/_/g, "").toUpperCase(),
 }));
 
 // New component for permissions section
@@ -94,7 +94,7 @@ export const PermissionsSection = ({
                 `}
               >
                 <h3 className="text-lg font-medium mb-4 capitalize">
-                  {t(category.replace(/([A-Z])/g, " $1").trim())}{" "}
+                  {t(category.replace(/([A-Z])/g, " $1").trim())}{""}
                   {t("Permissions")}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

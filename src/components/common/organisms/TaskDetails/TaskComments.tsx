@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import { MessageSquare, Paperclip, Send, Edit2, Trash2, X, Check, Download, User, AlertTriangle } from "lucide-react";
+import { MessageSquare, Paperclip, Send, Edit2, Trash2, X, Check, Download, User, AlertTriangle, Upload, FileText, ExternalLink } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import { formatDistanceToNow } from "date-fns";
@@ -12,8 +12,7 @@ interface Comment {
   id: string;
   content: string;
   createdAt: string;
-  files?: string[];
-  fileNames?: string[];
+  fileUrl?: string;
   author: {
     name: string,
     id: string,
@@ -32,6 +31,7 @@ interface TaskCommentsProps {
   handleViewFile: (fileId: string) => void;
   isSubmitting: boolean;
   isLoadingFile: string | null;
+  uploadingComment?: boolean;
   // New edit/delete functionality
   editingComment: string | null;
   editText: string;
@@ -96,6 +96,83 @@ const DeleteConfirmationModal = ({
   );
 };
 
+// File Attachment Component 
+const FileAttachment = ({
+  fileUrl,
+  fileName,
+  isLoading,
+  onViewFile,
+  fileStorageUrl
+}: {
+  fileUrl: string;
+  fileName?: string;
+  isLoading: boolean;
+  onViewFile: () => void;
+  fileStorageUrl: string;
+}) => {
+  const { t } = useLanguage();
+  const isFileManagerUrl = fileUrl.includes(fileStorageUrl);
+  const displayName = fileName || fileUrl.split('/').pop() || t("Attached File");
+
+  // Get file extension
+  const fileExtension = displayName.split('.').pop()?.toLowerCase() || '';
+
+  // Determine file type (for icon selection)
+  let fileTypeIcon = <FileText className="w-5 h-5" />;
+  if (['pdf'].includes(fileExtension)) {
+    fileTypeIcon = <FileText className="w-5 h-5 text-red-400" />;
+  } else if (['doc', 'docx'].includes(fileExtension)) {
+    fileTypeIcon = <FileText className="w-5 h-5 text-blue-400" />;
+  } else if (['xls', 'xlsx'].includes(fileExtension)) {
+    fileTypeIcon = <FileText className="w-5 h-5 text-green-400" />;
+  } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+    fileTypeIcon = <FileText className="w-5 h-5 text-purple-400" />;
+  }
+
+  return (
+    <div className="mt-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+      <div className="flex items-center gap-2">
+        {fileTypeIcon}
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center">
+            <span className="text-sm text-white font-medium truncate">
+              {displayName}
+            </span>
+            {isFileManagerUrl && (
+              <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-300">
+                {t("File Manager")}
+              </span>
+            )}
+          </div>
+
+          <div className="text-xs text-gray-400 truncate">
+            {isFileManagerUrl
+              ? t("Stored in file management system")
+              : t("Legacy attachment")}
+          </div>
+        </div>
+
+        <button
+          onClick={onViewFile}
+          className="p-2 bg-blue-800 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-1"
+          disabled={isLoading}
+          title={t("Open file")}
+        >
+          {isLoading ? (
+            <PageSpinner size="small" />
+          ) : (
+            <>
+              <ExternalLink className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("Open")}</span>
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const TaskComments: React.FC<TaskCommentsProps> = ({
   comments,
   comment,
@@ -108,6 +185,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
   handleViewFile,
   isSubmitting,
   isLoadingFile,
+  uploadingComment = false,
   // Edit/Delete props
   editingComment,
   editText,
@@ -122,6 +200,10 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
   const { selector: userId } = useRedux(
     (state: RootState) => state.user.userInfo?.id
   );
+
+  // Get the base server URL for attachment paths
+  const baseServerUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const fileStorageUrl = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
 
   // State for the delete confirmation modal
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
@@ -217,30 +299,18 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
               )}
 
               {/* Attached Files */}
-              {item.files && item.files.length > 0 && (
+              {item.fileUrl && (
                 <div className="mt-3 space-y-2">
-                  {item.files.map((fileId, index) => (
-                    <div
-                      key={fileId}
-                      className="flex items-center gap-2 p-2 bg-dark rounded-md border border-gray-700"
-                    >
-                      <Paperclip className="w-4 h-4 text-primary" />
-                      <span className="text-sm text-twhite flex-grow truncate">
-                        {item.fileNames?.[index] || t("Attached File")}
-                      </span>
-                      <button
-                        onClick={() => handleViewFile(fileId)}
-                        className="p-1.5 text-blue-400 hover:bg-blue-900/20 rounded-md transition-colors"
-                        disabled={isLoadingFile === fileId}
-                      >
-                        {isLoadingFile === fileId ? (
-                          <PageSpinner size="small" />
-                        ) : (
-                          <Download className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  ))}
+                  {
+                    <FileAttachment
+                      key={item.fileUrl}
+                      fileUrl={item.fileUrl}
+                      fileName={""}
+                      isLoading={isLoadingFile === item.fileUrl}
+                      onViewFile={() => handleViewFile(item.fileUrl + "")}
+                      fileStorageUrl={fileStorageUrl}
+                    />
+                  }
                 </div>
               )}
             </div>
@@ -268,20 +338,24 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
           <div className="flex flex-col gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 bg-secondary hover:bg-primary/10 text-primary rounded-md transition-colors"
-              title={t("Attach File")}
-              disabled={isSubmitting || !!attachedFile}
+              className={`p-2 ${attachedFile ? 'bg-green-700' : 'bg-secondary hover:bg-primary/10'} text-primary rounded-md transition-colors`}
+              title={attachedFile ? t("File selected") : t("Attach File")}
+              disabled={isSubmitting || uploadingComment}
             >
-              <Paperclip className="w-5 h-5" />
+              {attachedFile ? (
+                <Check className="w-5 h-5 text-green-300" />
+              ) : (
+                <Paperclip className="w-5 h-5" />
+              )}
             </button>
 
             <button
               onClick={handleSendComment}
               className="p-2 bg-primary hover:bg-primary-600 text-twhite rounded-md transition-colors"
-              disabled={isSubmitting || (!comment.trim() && !attachedFile)}
+              disabled={isSubmitting || (!comment.trim() && !attachedFile) || uploadingComment}
               title={t("Send Comment")}
             >
-              {isSubmitting ? <PageSpinner size="small" /> : <Send className="w-5 h-5" />}
+              {isSubmitting || uploadingComment ? <PageSpinner size="small" /> : <Send className="w-5 h-5" />}
             </button>
           </div>
 
@@ -290,6 +364,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
             onChange={handleFileChange}
             ref={fileInputRef}
             className="hidden"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt,.zip,.rar"
           />
         </div>
 
@@ -300,13 +375,25 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
             <span className="text-sm text-twhite flex-grow truncate">
               {attachedFile.name}
             </span>
+            <span className="text-xs text-gray-400">
+              {(attachedFile.size / 1024).toFixed(1)} KB
+            </span>
             <button
               onClick={() => setAttachedFile(null)}
               className="p-1 hover:bg-gray-700 rounded-full"
               title={t("Remove File")}
+              disabled={uploadingComment}
             >
               <X className="w-4 h-4 text-gray-400" />
             </button>
+          </div>
+        )}
+
+        {/* Upload status message */}
+        {uploadingComment && (
+          <div className="mt-3 p-2 bg-blue-900/20 border border-blue-800 rounded-md flex items-center gap-2 text-blue-300">
+            <Upload className="w-4 h-4" />
+            <span className="text-sm">{t("Uploading file and sending comment...")}</span>
           </div>
         )}
       </div>

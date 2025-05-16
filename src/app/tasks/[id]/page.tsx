@@ -37,12 +37,15 @@ export default function TaskDetailsPage() {
   const { isLightMode } = useCustomTheme();
 
   // Fetch task data
-  const { data: task, isLoading: isTaskLoading } = useCustomQuery<ReceiveTaskType>({
+  const {
+    data: task,
+    isLoading: isTaskLoading,
+    error: taskError
+  } = useCustomQuery<ReceiveTaskType>({
     queryKey: ["task", taskId],
     url: `/tasks/task/${taskId}`,
     nestedData: true
   });
-
 
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const { selector: userId } = useRedux(
@@ -57,6 +60,7 @@ export default function TaskDetailsPage() {
   const [description, setDescription] = useState<string>();
   const [taskName, setTaskName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [fileViewError, setFileViewError] = useState<string | null>(null);
 
   // Set initial values when task data is loaded
   useEffect(() => {
@@ -197,11 +201,51 @@ export default function TaskDetailsPage() {
     deleteComment,
   } = useComments(taskId, true);
 
+  // Enhanced file handling with error handling
+  const handleViewFileWithErrorHandling = (fileUrl: string) => {
+    try {
+      setFileViewError(null);
+      handleViewFile(fileUrl);
+    } catch (error) {
+      console.error("Error viewing file:", error);
+      setFileViewError(t("Failed to load file. Network error or file may be unavailable."));
+
+      setSnackbarConfig({
+        message: t("Failed to view file. Please try again."),
+        open: true,
+        severity: "error",
+      });
+    }
+  };
+
   if (isTaskLoading || !task) {
     return (
       <GridContainer>
         <div className="col-span-full flex items-center justify-center min-h-screen">
           <PageSpinner title={t("Loading task details...")} />
+        </div>
+      </GridContainer>
+    );
+  }
+
+  // If there was an error loading the task
+  if (taskError) {
+    return (
+      <GridContainer>
+        <div className="col-span-full flex flex-col items-center justify-center min-h-screen">
+          <div className="bg-red-900/20 border border-red-900 text-red-300 p-4 rounded-lg text-center max-w-md">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-xl font-bold mb-2">{t("Error Loading Task")}</h2>
+            <p className="mb-4">{t("There was a problem loading the task details.")}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors"
+            >
+              {t("Retry")}
+            </button>
+          </div>
         </div>
       </GridContainer>
     );
@@ -242,8 +286,9 @@ export default function TaskDetailsPage() {
 
               <TaskFiles
                 files={task.files}
-                onViewFile={handleViewFile}
+                onViewFile={handleViewFileWithErrorHandling}
                 isLoadingFile={isLoadingFile}
+                taskId={taskId}
               />
 
               <TaskComments
@@ -255,7 +300,7 @@ export default function TaskDetailsPage() {
                 fileInputRef={fileInputRef}
                 handleFileChange={handleFileChange}
                 handleSendComment={handleSendComment}
-                handleViewFile={handleViewFile}
+                handleViewFile={handleViewFileWithErrorHandling}
                 isSubmitting={isSubmitting}
                 isLoadingFile={isLoadingFile}
                 // Edit/Delete props

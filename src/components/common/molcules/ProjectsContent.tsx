@@ -132,7 +132,7 @@ const ProjectsContent = () => {
                                   title={dept.name}
                                 >
                                   {dept.name
-                                    .split(" ")
+                                    .split("")
                                     .map((word) => word[0])
                                     .join("")
                                     .toUpperCase()}

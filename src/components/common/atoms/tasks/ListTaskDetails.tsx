@@ -411,7 +411,7 @@ const ListTaskDetails: React.FC<{
                   alt="start icon"
                   width={15}
                   height={15}
-                />{" "}
+                />{""}
                 {t("Completed")}
               </span>
             ) : (
@@ -428,7 +428,7 @@ const ListTaskDetails: React.FC<{
                       alt="start icon"
                       width={15}
                       height={15}
-                    />{" "}
+                    />{""}
                     {t("Start")}
                   </div>
                 ) : (
@@ -441,7 +441,7 @@ const ListTaskDetails: React.FC<{
                       alt="pause icon"
                       width={15}
                       height={15}
-                    />{" "}
+                    />{""}
                     {t("Pause")}
                   </div>
                 )}

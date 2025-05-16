@@ -5,13 +5,14 @@ import useCustomQuery from "./useCustomQuery";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useLanguage from "./useLanguage";
 import { useQueryClient } from "@tanstack/react-query";
+import FileUploadService from "@/services/fileUpload.service";
+import { FileObject } from "@/types/FileManager.type";
 
 export interface Comment {
   id: string;
   content: string;
   createdAt: string;
-  files?: string[];
-  fileNames?: string[];
+  fileUrl?: string;
   author: {
     id: string;
     name: string;
@@ -30,10 +31,15 @@ const useComments = (taskId: string, autoFetch = true) => {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoadingFile, setIsLoadingFile] = useState<string | null>(null);
+  const [uploadingComment, setUploadingComment] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setSnackbarConfig } = useMokkBar();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+
+  // Get base URLs
+  const baseServerUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+  const fileManagerServerUrl = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
 
   // Fetch comments for the task
   const {
@@ -62,42 +68,58 @@ const useComments = (taskId: string, autoFetch = true) => {
     if (!comment.trim() && !attachedFile) return;
 
     setIsSubmitting(true);
+    setUploadingComment(true);
+
     try {
       const token = Cookies.get("access_token");
+      let fileUrl: string | null = null;
 
-      // If there's a file attachment, use FormData
+      // If there's a file attachment, first upload it using FileUploadService
       if (attachedFile) {
-        const formData = new FormData();
-        formData.append("content", comment);
-        formData.append("taskId", taskId);
-        formData.append("file", attachedFile);
+        try {
+          // Use the FileUploadService to get a public URL for the file
+          fileUrl = await FileUploadService.uploadSingleFile(
+            {
+              file: attachedFile,
+              name: attachedFile.name
+            },
+            "comments"
+          );
 
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/comment`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      } else {
-        // For text-only comments, use JSON
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/comment`,
-          {
-            content: comment,
-            taskId: taskId,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+          // Display success message for file upload
+          setSnackbarConfig({
+            message: t("File uploaded successfully"),
+            open: true,
+            severity: "success",
+          });
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          setSnackbarConfig({
+            message: t("Failed to upload file"),
+            open: true,
+            severity: "error",
+          });
+          setIsSubmitting(false);
+          setUploadingComment(false);
+          return;
+        }
       }
+
+      // Now send the comment with the file URL (if any)
+      await axios.post(
+        `${baseServerUrl}/comment`,
+        {
+          content: comment,
+          taskId: taskId,
+          fileUrl: fileUrl // Send the file URL instead of the actual file
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       // Clear state and refetch comments
       setComment("");
@@ -123,6 +145,7 @@ const useComments = (taskId: string, autoFetch = true) => {
       });
     } finally {
       setIsSubmitting(false);
+      setUploadingComment(false);
     }
   };
 
@@ -154,7 +177,7 @@ const useComments = (taskId: string, autoFetch = true) => {
 
       // The URL should match the format shown in the network request
       await axios.put(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/comment/${commentId}`,
+        `${baseServerUrl}/comment/${commentId}`,
         { content: editText },
         {
           headers: {
@@ -197,7 +220,7 @@ const useComments = (taskId: string, autoFetch = true) => {
 
       // Make sure we're using the correct URL structure
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/comment/${commentId}`,
+        `${baseServerUrl}/comment/${commentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -226,30 +249,25 @@ const useComments = (taskId: string, autoFetch = true) => {
 
   /**
    * View an attached file
+   * This function handles both file management server URLs and base server URLs
+   * Always opens files in a new browser window
    */
-  const handleViewFile = async (fileId: string) => {
-    setIsLoadingFile(fileId);
+  const handleViewFile = async (fileUrl: string) => {
+    // Set loading state using the file URL as the identifier
+    setIsLoadingFile(fileUrl);
+
     try {
-      const token = Cookies.get("access_token");
+      // Check if this is a file from the file management server
+      const isFileManagerUrl = fileUrl.includes(fileManagerServerUrl);
 
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/attachments/download/${fileId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob",
-        }
-      );
+      if (isFileManagerUrl || fileUrl.startsWith('http')) {
+        // File is already a direct URL - open it in a new window
+        window.open(fileUrl, '_blank');
+      } else {
 
-      // Create URL for file and open in new tab
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("target", "_blank");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+        // Open in a new window with specific dimensions
+        window.open(`${baseServerUrl}${fileUrl}`, '_blank');
+      }
     } catch (error) {
       console.error("Error viewing file:", error);
       setSnackbarConfig({
@@ -271,6 +289,7 @@ const useComments = (taskId: string, autoFetch = true) => {
     isSubmitting,
     isLoadingComments,
     isLoadingFile,
+    uploadingComment,
     fileInputRef,
     handleFileChange,
     handleSendComment,

@@ -27,8 +27,9 @@ type SingleFileUploadResponse = Omit<MultiFileUploadResponse, "files"> & {
 };
 
 class FileUploadService {
-  private static readonly baseUrl: string =
-    process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "http://92.112.194.101:3002";
+  // Using the file storage URL specifically for upload operations
+  private static readonly baseUrl: string = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
+  // Make sure we're not adding any path segments as they should be included in the URL
 
   static async uploadMultipleFiles(files: FileObject[], path: string) {
     if (!files || !files.length) {
@@ -56,10 +57,9 @@ class FileUploadService {
       );
 
       console.log("Files uploaded successfully:", response.data);
-      return response.data.files.map(
-        (selFile) =>
-          process.env.NEXT_PUBLIC_FILE_STORAGE_URL + selFile.publicUrl
-      );
+      // Return the file URLs without prepending the base URL again
+      // The API response already includes the complete URL paths
+      return response.data.files.map((selFile) => selFile.publicUrl);
     } catch (error) {
       console.error("Error uploading files:", error);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -84,9 +84,9 @@ class FileUploadService {
         }
       );
 
-      return (
-        process.env.NEXT_PUBLIC_FILE_STORAGE_URL + response.data.file.publicUrl
-      );
+      // Return the full URL without prepending the base URL again
+      // The API response already includes the complete URL path
+      return response.data.file.publicUrl;
     } catch (error) {
       console.error("Error uploading file:", error);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

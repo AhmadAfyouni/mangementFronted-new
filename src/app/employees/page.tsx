@@ -83,7 +83,7 @@ const EmployeesView: React.FC = () => {
           </>
         ) : !employees || employees.info.length === 0 ? (
           <>
-            {" "}
+            {""}
             <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5">
               {t("No Employees")}
             </div>
