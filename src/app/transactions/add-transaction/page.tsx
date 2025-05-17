@@ -271,7 +271,7 @@ const NewTransaction = () => {
               </p>
               <p className="text-sm text-tmid">
                 <span className="font-medium text-twhite">
-                  {t("Duration")}:{" "}
+                  {t("Duration")}:{""}
                 </span>
                 {template.duration.value} {t(template.duration.unit)}
               </p>
@@ -280,7 +280,7 @@ const NewTransaction = () => {
               {startDate && (
                 <p className="text-sm text-tmid" dir={getDir()}>
                   <span className="font-medium text-twhite">
-                    {t("End Date")}:{" "}
+                    {t("End Date")}:{""}
                   </span>
                   {endDate}
                 </p>
@@ -288,7 +288,7 @@ const NewTransaction = () => {
               {template.needAdminApproval && (
                 <p className="text-sm text-tmid">
                   <span className="font-medium text-twhite">
-                    {t("Admin Approval")}:{" "}
+                    {t("Admin Approval")}:{""}
                   </span>
                   {t("Required")}
                 </p>
@@ -413,7 +413,7 @@ const NewTransaction = () => {
                             ></div>
                           </div>
                           <p className="text-xs text-blue-400 mt-1">
-                            {t("Uploading")}:{" "}
+                            {t("Uploading")}:{""}
                             {Math.round(fileStatuses[field.name].progress)}%
                           </p>
                         </div>

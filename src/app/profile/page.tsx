@@ -1,7 +1,6 @@
 "use client";
-import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PersonalInfoCard from "@/components/common/atoms/ProfileInfoCard";
-import TaskStatusBadge from "@/components/common/atoms/tasks/TaskStatusBadge";
+import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import HomeTasksReport from "@/components/common/molcules/HomeTasksReport";
 import ProfileProjectsReport from "@/components/common/molcules/ProfileProjectsReport";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
@@ -13,12 +12,20 @@ import { formatDate } from "@/services/task.service";
 import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import {
+  Activity,
+  AlertCircle,
+  Award,
   Briefcase,
   Building2,
   Calendar,
+  CheckCircle2,
+  Clock,
   Mail,
   MapPin,
   Phone,
+  Target,
+  TrendingUp,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,180 +39,267 @@ const Profile = () => {
   const isPrimary = useRolePermissions("primary_user");
   const { currentLanguage, t } = useLanguage();
   const { data: tasksData } = useCustomQuery<ReceiveTaskType[]>({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", isAdmin ? "admin" : isPrimary ? "primary" : "employee"],
     url: `/tasks/${isAdmin
-        ? "get-all-tasks"
-        : isPrimary
-          ? "get-my-dept-tasks"
-          : "get-emp-tasks"
+      ? "get-all-tasks"
+      : isPrimary
+        ? "get-my-dept-tasks"
+        : "get-emp-tasks"
       }`,
     nestedData: true,
   });
-  const currently =
-    tasksData &&
-    tasksData.filter((task) => !task.is_over_due && task.status != "DONE")
-      .length;
-  const overdue =
-    tasksData && tasksData.filter((task) => task.is_over_due).length;
-  const completed =
-    tasksData && tasksData.filter((task) => task.status == "DONE").length;
+
+  // Ensure consistent filtering logic
+  const currentTasks = tasksData?.filter((task) => task.status !== "DONE" && !task.is_over_due) || [];
+  const overdueTasks = tasksData?.filter((task) => task.is_over_due && task.status !== "DONE") || [];
+  const completedTasks = tasksData?.filter((task) => task.status === "DONE") || [];
+
+  const currently = currentTasks.length;
+  const overdue = overdueTasks.length;
+  const completed = completedTasks.length;
+  const total = tasksData?.length || 0;
+
+  const isRTL = currentLanguage === "ar";
+
+  // Calculate performance metrics
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const onTimeRate = total > 0 ? Math.round(((total - overdue) / total) * 100) : 0;
 
   return (
     <GridContainer>
-      <div className="col-span-full min-h-screen bg-main p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Profile Header */}
-          <div className="flex items-center gap-6 mb-8">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 to-red-500 flex items-center justify-center text-3xl font-bold text-white">
-              {info?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {info?.name}
-              </h1>
-              <p className="text-slate-400">
-                {info?.job?.title} at {info?.department?.name}
-              </p>
+      <div className={`col-span-full min-h-screen bg-main ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Enhanced Profile Header */}
+          <div className="bg-secondary rounded-2xl shadow-xl p-8 mb-6">
+            <div className={`flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {/* Enhanced Avatar with gradient ring */}
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 p-1">
+                  <div className="w-full h-full rounded-full bg-tblack flex items-center justify-center">
+                    <span className="text-4xl font-bold text-twhite">
+                      {info?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <div className="absolute bottom-2 right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-secondary"></div>
+              </div>
+
+              {/* Profile Info */}
+              <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                <h1 className="text-4xl font-bold text-twhite mb-2">
+                  {info?.name}
+                </h1>
+                <p className="text-xl text-gray-400 mb-4">
+                  {info?.job?.title} {isRTL ? 'في' : 'at'} {info?.department?.name}
+                </p>
+
+                {/* Quick Stats */}
+                <div className={`flex gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-400" />
+                    <span className="text-twhite">{total} {t("Total Tasks")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-green-400" />
+                    <span className="text-twhite">{completionRate}% {t("Completion Rate")}</span>
+                  </div>
+                  {info?.job?.grade_level && (
+                    <div className="flex items-center gap-2">
+                      <Award className="w-5 h-5 text-yellow-400" />
+                      <span className="text-twhite">{info.job.grade_level}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="gap-6">
-            {/* Custom Tabs */}
-            <div className="bg-dark rounded-lg p-1">
-              <div className="flex justify-between gap-2">
-                {["overview", "tasks", "projects"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2 px-4 rounded-md transition-all ${activeTab === tab
-                        ? "bg-tblack text-white"
-                        : "text-slate-400 hover:text-white hover:bg-tblack   "
-                      }`}
-                  >
-                    {t(tab.charAt(0).toUpperCase() + tab.slice(1))}
-                  </button>
-                ))}
-              </div>
+          {/* Enhanced Tabs */}
+          <div className="bg-secondary rounded-xl shadow-lg p-2 mb-6">
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {[
+                { id: "overview", icon: User },
+                { id: "tasks", icon: CheckCircle2 },
+                { id: "projects", icon: Briefcase }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg transition-all duration-300 ${activeTab === tab.id
+                    ? "bg-tblack text-twhite shadow-lg transform scale-105"
+                    : "text-gray-400 hover:text-twhite hover:bg-dark"
+                    }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span className="font-medium">{t(tab.id.charAt(0).toUpperCase() + tab.id.slice(1))}</span>
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Tab Content */}
-            {activeTab === "overview" && (
+          {/* Tab Content */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Performance Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-secondary border border-gray-700 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <CheckCircle2 className="w-10 h-10 text-green-400" />
+                    <span className="text-3xl font-bold text-green-400">{completed}</span>
+                  </div>
+                  <h3 className="text-twhite font-medium">{t("Completed")}</h3>
+                  <p className="text-sm text-gray-400 mt-1">{completionRate}% {t("of total")}</p>
+                </div>
+
+                <div className="bg-secondary border border-gray-700 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <Clock className="w-10 h-10 text-blue-400" />
+                    <span className="text-3xl font-bold text-blue-400">{currently}</span>
+                  </div>
+                  <h3 className="text-twhite font-medium">{t("In Progress")}</h3>
+                  <p className="text-sm text-gray-400 mt-1">{t("Active tasks")}</p>
+                </div>
+
+                <div className="bg-secondary border border-gray-700 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <AlertCircle className="w-10 h-10 text-red-400" />
+                    <span className="text-3xl font-bold text-red-400">{overdue}</span>
+                  </div>
+                  <h3 className="text-twhite font-medium">{t("Overdue")}</h3>
+                  <p className="text-sm text-gray-400 mt-1">{t("Need attention")}</p>
+                </div>
+
+                <div className="bg-secondary border border-gray-700 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <TrendingUp className="w-10 h-10 text-purple-400" />
+                    <span className="text-3xl font-bold text-purple-400">{onTimeRate}%</span>
+                  </div>
+                  <h3 className="text-twhite font-medium">{t("On Time Rate")}</h3>
+                  <p className="text-sm text-gray-400 mt-1">{t("Performance")}</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
-                <div className="bg-dark border border-slate-700 rounded-lg overflow-hidden">
-                  <div className="p-4 border-b border-slate-700">
-                    <h2 className="text-lg font-semibold text-white">
+                {/* Enhanced Personal Information Card */}
+                <div className="bg-dark border border-gray-700 rounded-xl overflow-hidden shadow-xl">
+                  <div className={`p-6 border-b border-gray-700 bg-secondary ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <h2 className="text-xl font-bold text-twhite flex items-center gap-2">
+                      <User className="w-6 h-6 text-purple-400" />
                       {t("Personal Information")}
                     </h2>
                   </div>
-                  <div className="p-4 gap-4">
-                    <PersonalInfoCard
-                      icon={Phone}
-                      label="Phone"
-                      value={info?.phone}
-                    />
-                    <PersonalInfoCard
-                      icon={Mail}
-                      label="Email"
-                      value={info?.email}
-                    />
-                    <PersonalInfoCard
-                      icon={MapPin}
-                      label="Address"
-                      value={info?.address}
-                    />
-                    {info && (
+                  <div className="p-6 space-y-4">
+                    {info?.phone && (
+                      <PersonalInfoCard
+                        icon={Phone}
+                        label="Phone"
+                        value={info.phone}
+                      />
+                    )}
+                    {info?.email && (
+                      <PersonalInfoCard
+                        icon={Mail}
+                        label="Email"
+                        value={info.email}
+                      />
+                    )}
+                    {info?.address && (
+                      <PersonalInfoCard
+                        icon={MapPin}
+                        label="Address"
+                        value={info.address}
+                      />
+                    )}
+                    {info?.dob && (
                       <PersonalInfoCard
                         icon={Calendar}
                         label="Date Of Birth"
                         value={formatDate(
-                          info!.dob,
+                          info.dob,
                           currentLanguage as "ar" | "en"
                         )}
+                      />
+                    )}
+                    {info?.phone && (
+                      <PersonalInfoCard
+                        icon={Phone}
+                        label="Emergency Contact"
+                        value={info.emergency_contact}
                       />
                     )}
                   </div>
                 </div>
 
-                {/* Work Information */}
-                <div className="bg-dark border border-slate-700 rounded-lg overflow-hidden">
-                  <div className="p-4 border-b border-slate-700">
-                    <h2 className="text-lg font-semibold text-white">
+                {/* Enhanced Work Information Card */}
+                <div className="bg-dark border border-gray-700 rounded-xl overflow-hidden shadow-xl">
+                  <div className={`p-6 border-b border-gray-700 bg-secondary ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <h2 className="text-xl font-bold text-twhite flex items-center gap-2">
+                      <Briefcase className="w-6 h-6 text-blue-400" />
                       {t("Work Details")}
                     </h2>
                   </div>
-                  <div className="p-4 gap-4">
-                    <PersonalInfoCard
-                      icon={Building2}
-                      label="Department"
-                      value={info?.department?.name}
-                    />
-                    <PersonalInfoCard
-                      icon={Briefcase}
-                      label="Job Title"
-                      value={info?.job?.title}
-                    />
-                    {info && (
+                  <div className="p-6 space-y-4">
+                    {info?.department?.name && (
+                      <PersonalInfoCard
+                        icon={Building2}
+                        label="Department"
+                        value={info.department.name}
+                      />
+                    )}
+                    {info?.job?.title && (
+                      <PersonalInfoCard
+                        icon={Briefcase}
+                        label="Job Title"
+                        value={info.job.title}
+                      />
+                    )}
+                    {info?.employment_date && (
                       <PersonalInfoCard
                         icon={Calendar}
                         label="Employment Date"
                         value={formatDate(
-                          info!.employment_date,
+                          info.employment_date,
                           currentLanguage as "ar" | "en"
                         )}
                       />
                     )}
-                    <PersonalInfoCard
-                      icon={Briefcase}
-                      label="Base Salary"
-                      value={info?.base_salary}
-                    />
-                  </div>
-                </div>
-
-                {/* Task Overview */}
-                <div className="md:col-span-2 bg-dark border border-slate-700 rounded-lg overflow-hidden">
-                  <div className="p-4 border-b border-slate-700">
-                    <h2 className="text-lg font-semibold text-white">
-                      {t("Task Overview")}
-                    </h2>
-                  </div>
-                  <div className="p-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <TaskStatusBadge
-                        count={currently + ""}
-                        label="Current Tasks"
-                        color="text-blue-400"
+                    {info?.base_salary && (
+                      <PersonalInfoCard
+                        icon={Award}
+                        label="Base Salary"
+                        value={`${info.base_salary.toLocaleString()}`}
                       />
-                      <TaskStatusBadge
-                        count={overdue + ""}
-                        label="Overdue"
-                        color="text-red-400"
+                    )}
+                    {info?.job?.grade_level && (
+                      <PersonalInfoCard
+                        icon={TrendingUp}
+                        label="Grade Level"
+                        value={info.job.grade_level}
                       />
-                      <TaskStatusBadge
-                        count={completed + ""}
-                        label="Completed"
-                        color="text-green-400"
-                      />
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab === "tasks" && (
-              <div className="bg-dark border border-slate-700 rounded-lg p-6">
-                <HomeTasksReport tasksData={tasksData} isCentered={false} />
-              </div>
-            )}
+          {activeTab === "tasks" && (
+            <div className="bg-dark border border-gray-700 rounded-xl p-6 shadow-xl">
+              <HomeTasksReport
+                tasksData={tasksData}
+                isCentered={false}
+                currentTasks={currentTasks}
+                overdueTasks={overdueTasks}
+                completedTasks={completedTasks}
+              />
+            </div>
+          )}
 
-            {activeTab === "projects" && (
-              <div className="bg-dark border border-slate-700 rounded-lg p-6">
-                <ProfileProjectsReport />
-              </div>
-            )}
-          </div>
+          {activeTab === "projects" && (
+            <div className="bg-dark border border-gray-700 rounded-xl p-6 shadow-xl">
+              <ProfileProjectsReport />
+            </div>
+          )}
         </div>
       </div>
     </GridContainer>

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { XIcon } from "@/assets";
-import useCustomTheme from "@/hooks/useCustomTheme";
+import { FileManager } from '@/components/common/atoms/fileManager';
+import { useFileUpload } from '@/hooks/fileManager';
 import useLanguage from "@/hooks/useLanguage";
+import useSnackbar from "@/hooks/useSnackbar";
 import FileUploadService from "@/services/fileUpload.service";
-import { DepartmentFormInputs } from "@/types/DepartmentType.type";
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import { DepartmentFormInputs, FileData } from "@/types/DepartmentType.type";
+import { Briefcase, Edit, ExternalLink, FileText, Plus, Trash, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { UseFormGetValues, UseFormRegister } from "react-hook-form";
 
 interface DeptAdditionalSectionProps {
@@ -30,14 +31,8 @@ interface DeptAdditionalSectionProps {
   appendDevelopmentProgram: (value: any) => void;
   removeDevelopmentProgram: (index: number) => void;
   setValue: (name: string, value: any) => void;
-  supportingFiles: FileObject[];
-  setSupportingFiles: React.Dispatch<React.SetStateAction<FileObject[]>>;
-}
-
-// Type for file object
-export interface FileObject {
-  name: string;
-  file: File;
+  departmentId?: string; // Added departmentId prop for existing departments
+  isLightMode?: boolean; // Added isLightMode prop for styling
 }
 
 // Type for file item editing mode
@@ -60,116 +55,94 @@ const DeptAdditionalSection = ({
   appendDevelopmentProgram,
   removeDevelopmentProgram,
   setValue,
-  setSupportingFiles,
   getValues,
+  departmentId,
 }: DeptAdditionalSectionProps) => {
   const { t } = useLanguage();
-  const { isLightMode } = useCustomTheme();
-  const [supportingFileUrls, setSupportingFileUrls] = useState<string[]>([]);
+
+  const { setSnackbarConfig } = useSnackbar();
+  const [supportingFileUrls, setSupportingFileUrls] = useState<FileData[]>([]);
 
   // Track edit mode for each file type
   const [reportEditMode, setReportEditMode] = useState<FileEditMode>({});
   const [programEditMode, setProgramEditMode] = useState<FileEditMode>({});
 
   // Loading states
-  const [supportingFilesLoading, setSupportingFilesLoading] = useState(false);
-  const [loadingReportIndex, setLoadingReportIndex] = useState<number | null>(
-    null
-  );
-  const [loadingProgramIndex, setLoadingProgramIndex] = useState<number | null>(
-    null
-  );
+  const [loadingReportIndex, setLoadingReportIndex] = useState<number | null>(null);
+  const [loadingProgramIndex, setLoadingProgramIndex] = useState<number | null>(null);
+
+  // Use refs to track previous field lengths to prevent unnecessary updates
+  const prevReportsLength = useRef(requiredReportsFields.length);
+  const prevProgramsLength = useRef(developmentProgramsFields.length);
 
   // Initialize supporting files from form values
-  const files = getValues("supportingFiles") || [];
   useEffect(() => {
     try {
-      setSupportingFileUrls(files);
-      console.log("supportingsadsa files : ", files);
-    } catch (error) {
-      console.error("Error initializing supporting files:", error);
-    }
-  }, [files, getValues]);
+      // Make sure we're getting the array of URLs
+      const savedFiles = getValues("supportingFiles") || [];
+      console.log('Initializing supporting files from form:', savedFiles);
 
-  // Reset edit modes when fields change
-  useEffect(() => {
-    const newReportEditMode: FileEditMode = {};
-    requiredReportsFields.forEach((field, index) => {
-      // If templateFile is empty or user was already in edit mode, keep in edit mode
-      newReportEditMode[index] =
-        !field.templateFile || reportEditMode[index] || false;
-    });
-    setReportEditMode(newReportEditMode);
-  }, [requiredReportsFields]);
-
-  useEffect(() => {
-    const newProgramEditMode: FileEditMode = {};
-    developmentProgramsFields.forEach((field, index) => {
-      // If programFile is empty or user was already in edit mode, keep in edit mode
-      newProgramEditMode[index] =
-        !field.programFile || programEditMode[index] || false;
-    });
-    setProgramEditMode(newProgramEditMode);
-  }, [developmentProgramsFields]);
-
-  // Handle file selection for supporting files
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList = e.target.files;
-    if (!fileList) return;
-
-    setSupportingFilesLoading(true);
-
-    try {
-      // Process each file and upload it
-      for (let i = 0; i < fileList.length; i++) {
-        const file = fileList[i];
-
-        // Add to local state for UI display
-        setSupportingFiles((prev) => [
-          ...prev,
-          {
-            name: file.name,
-            file: file,
-          },
-        ]);
-
-        // Upload file to server
-        const fileName = await FileUploadService.uploadSingleFile(
-          {
-            file,
-            name: file.name,
-          },
-          "departments"
-        );
-
-        // Add to URLs list
-        setSupportingFileUrls((prev) => [...prev, fileName]);
-
-        // Update form value
-        setValue("supportingFiles", [...supportingFileUrls, fileName]);
+      if (Array.isArray(savedFiles)) {
+        setSupportingFileUrls(savedFiles);
+      } else {
+        console.error('Supporting files is not an array:', savedFiles);
+        setSupportingFileUrls([]);
       }
     } catch (error) {
-      console.error("Error uploading supporting files:", error);
-    } finally {
-      setSupportingFilesLoading(false);
+      console.error("Error initializing supporting files:", error);
+      setSupportingFileUrls([]);
     }
-  };
+  }, [getValues]);
 
-  // Handle file removal
-  const handleRemoveFile = (index: number) => {
-    // Remove from URLs list
-    const newUrls = [...supportingFileUrls];
-    newUrls.splice(index, 1);
-    setSupportingFileUrls(newUrls);
+  // Reset edit modes when fields change - only initialize new fields
+  useEffect(() => {
+    // Only update if the array length changed (adding/removing fields)
+    if (requiredReportsFields.length !== prevReportsLength.current) {
+      const newReportEditMode = { ...reportEditMode };
 
-    // Update form value
-    setValue("supportingFiles", newUrls);
-  };
+      // Set edit mode only for new fields
+      if (requiredReportsFields.length > prevReportsLength.current) {
+        // Initialize new fields only
+        for (let i = prevReportsLength.current; i < requiredReportsFields.length; i++) {
+          const field = requiredReportsFields[i];
+          newReportEditMode[i] = !field.templateFile;
+        }
+      }
+
+      setReportEditMode(newReportEditMode);
+      prevReportsLength.current = requiredReportsFields.length;
+    }
+  }, [requiredReportsFields, reportEditMode]);
+
+  useEffect(() => {
+    // Only update if the array length changed (adding/removing fields)
+    if (developmentProgramsFields.length !== prevProgramsLength.current) {
+      const newProgramEditMode = { ...programEditMode };
+
+      // Set edit mode only for new fields
+      if (developmentProgramsFields.length > prevProgramsLength.current) {
+        // Initialize new fields only
+        for (let i = prevProgramsLength.current; i < developmentProgramsFields.length; i++) {
+          const field = developmentProgramsFields[i];
+          newProgramEditMode[i] = !field.programFile;
+        }
+      }
+
+      setProgramEditMode(newProgramEditMode);
+      prevProgramsLength.current = developmentProgramsFields.length;
+    }
+  }, [developmentProgramsFields, programEditMode]);
 
   // Function to process file URL for display
   const processPublicUrl = (fileUrl: string) => {
     // Extract filename from URL
     try {
+      if (!fileUrl) return "";
+
+      // Handle both absolute URLs and relative paths
+      if (fileUrl.includes("/public-files/departments/")) {
+        return fileUrl.split("/public-files/departments/")[1].split("?")[0];
+      }
       if (fileUrl.includes("/departments/")) {
         return fileUrl.split("/departments/")[1].split("?")[0];
       }
@@ -180,30 +153,35 @@ const DeptAdditionalSection = ({
     }
   };
 
-  // Function to check if string is a valid URL
+  // Helper function to safely get file URL from a FileData object or string
+  const getFileUrl = (fileData: FileData | string): string => {
+    if (typeof fileData === 'string') {
+      return fileData;
+    }
+    return fileData?.currentVersion?.fileUrl || '';
+  };
+
+  // Function to check if string is a valid URL or valid file path
   const isValidUrl = (urlString: string) => {
     try {
-      return Boolean(urlString && urlString.includes("http"));
+      if (!urlString) return false;
+
+      // Check for absolute URLs
+      if (urlString.includes("http")) return true;
+
+      // Check for relative file paths
+      if (urlString.startsWith("/public-files/") || urlString.includes("/departments/")) {
+        return true;
+      }
+
+      return false;
     } catch (e) {
       console.log("Error checking URL:", e);
       return false;
     }
   };
 
-  // For debugging - log values when they change
-  useEffect(() => {
-    console.log("Required Reports updated:", requiredReportsFields);
-  }, [requiredReportsFields]);
-
-  useEffect(() => {
-    console.log("Development Programs updated:", developmentProgramsFields);
-  }, [developmentProgramsFields]);
-
-  useEffect(() => {
-    console.log("Supporting File URLs:", supportingFileUrls);
-  }, [supportingFileUrls]);
-
-  // Handle mode switching functions
+  // Mode switching functions
   const switchReportToEditMode = (index: number) => {
     setValue(`requiredReports.${index}.templateFile`, "");
     setReportEditMode((prev) => ({ ...prev, [index]: true }));
@@ -214,455 +192,585 @@ const DeptAdditionalSection = ({
     setProgramEditMode((prev) => ({ ...prev, [index]: true }));
   };
 
+  // Handler for file upload - only cares about storing the URL correctly
+  const handleSupportingFileUpload = async (input: React.ChangeEvent<HTMLInputElement> | string) => {
+    // If called from FileManager component with fileUrl directly
+    if (typeof input === 'string') {
+      // Create a proper FileData object from the string URL
+      const fileDataObj: FileData = {
+        _id: Date.now().toString(), // Generate temporary ID
+        originalName: input.split('/').pop() || 'file',
+        entityType: 'department',
+        entityId: departmentId || 'new',
+        fileType: 'supporting',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        __v: 0,
+        currentVersion: {
+          _id: Date.now().toString(),
+          fileId: Date.now().toString(),
+          fileUrl: input,
+          originalName: input.split('/').pop() || 'file',
+          version: 1,
+          fileType: 'supporting',
+          isCurrentVersion: true,
+          description: '',
+          createdBy: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          __v: 0,
+          id: Date.now().toString()
+        }
+      };
+      // Make sure we're storing the public URL as a FileData object
+      const newUrls = [...supportingFileUrls, fileDataObj];
+      console.log('Adding URL from FileManager:', input);
+      setSupportingFileUrls(newUrls);
+      setValue("supportingFiles", newUrls);
+      return;
+    }
+
+    // If called from file input
+    if (input.target?.files?.length) {
+      const file = input.target.files[0];
+      if (file) {
+        try {
+          // Upload file directly and get the public URL
+          const publicUrl = await handleDirectFileUpload(file);
+          console.log('Supporting file uploaded, adding URL:', publicUrl);
+
+          // Create a proper FileData object
+          const fileDataObj: FileData = {
+            _id: Date.now().toString(), // Generate temporary ID
+            originalName: file.name,
+            entityType: 'department',
+            entityId: departmentId || 'new',
+            fileType: 'supporting',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            __v: 0,
+            currentVersion: {
+              _id: Date.now().toString(),
+              fileId: Date.now().toString(),
+              fileUrl: publicUrl,
+              originalName: file.name,
+              version: 1,
+              fileType: 'supporting',
+              isCurrentVersion: true,
+              description: '',
+              createdBy: '',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              __v: 0,
+              id: Date.now().toString()
+            }
+          };
+
+          // Store the FileData object in both state and form value
+          const newUrls = [...supportingFileUrls, fileDataObj];
+          setSupportingFileUrls(newUrls);
+          setValue("supportingFiles", newUrls);
+
+          // Reset the file input
+          input.target.value = '';
+        } catch (error) {
+          console.error('Error uploading supporting file:', error);
+          setSnackbarConfig({
+            open: true,
+            message: t('Error uploading file'),
+            severity: 'error'
+          });
+        }
+      }
+    }
+  };
+
+  // Function to remove a supporting file
+  const removeSupportingFile = (index: number) => {
+    // No changes needed here as we're working with indices
+    const newUrls = [...supportingFileUrls];
+    newUrls.splice(index, 1);
+    setSupportingFileUrls(newUrls);
+    setValue("supportingFiles", newUrls);
+  };
+
+  const { uploadFileAsync } = useFileUpload();
+
+  // Using direct file upload for files when creating a new department
+  const handleDirectFileUpload = async (file: File) => {
+    try {
+      // Use the file upload service directly instead of the entity-based upload
+      const fileUrl = await FileUploadService.uploadSingleFile(
+        { file, name: file.name },
+        'departments'
+      );
+      console.log('File uploaded successfully with URL:', fileUrl);
+      return fileUrl;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setSnackbarConfig({
+        open: true,
+        message: t('Error uploading file'),
+        severity: 'error'
+      });
+      throw error;
+    }
+  };
+
+  const handleReportFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLoadingReportIndex(index);
+      try {
+        let fileUrl;
+
+        if (departmentId && departmentId !== 'new') {
+          // If we have a department ID, use the regular file upload through the API
+          const result = await uploadFileAsync({
+            file,
+            entityType: 'department',
+            entityId: departmentId,
+            fileType: 'template',
+            description: `Template for ${requiredReportsFields[index].name}`,
+            name: file.name
+          });
+
+          // Extract the public URL from the result
+          fileUrl = result.data.fileUrl;
+          console.log('Report file uploaded through API, URL:', fileUrl);
+        } else {
+          // For new department, use direct file upload to get public URL
+          fileUrl = await handleDirectFileUpload(file);
+          console.log('Report file uploaded directly, URL:', fileUrl);
+        }
+
+        // Store the URL in the form
+        setValue(`requiredReports.${index}.templateFile`, fileUrl);
+        setReportEditMode((prev) => ({ ...prev, [index]: false }));
+      } catch (error) {
+        console.error('Error uploading report file:', error);
+        setSnackbarConfig({
+          open: true,
+          message: t('Error uploading file'),
+          severity: 'error'
+        });
+      } finally {
+        setLoadingReportIndex(null);
+      }
+    }
+  };
+
+  const handleProgramFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLoadingProgramIndex(index);
+      try {
+        let fileUrl;
+
+        if (departmentId && departmentId !== 'new') {
+          // If we have a department ID, use the regular file upload through the API
+          const result = await uploadFileAsync({
+            file,
+            entityType: 'department',
+            entityId: departmentId,
+            fileType: 'program',
+            description: `Program for ${developmentProgramsFields[index].name || 'Development Program'}`,
+            name: file.name
+          });
+
+          // Extract the public URL from the result
+          fileUrl = result.data.fileUrl;
+          console.log('Program file uploaded through API, URL:', fileUrl);
+        } else {
+          // For new department, use direct file upload to get public URL
+          fileUrl = await handleDirectFileUpload(file);
+          console.log('Program file uploaded directly, URL:', fileUrl);
+        }
+
+        // Store the URL in the form
+        setValue(`developmentPrograms.${index}.programFile`, fileUrl);
+        setProgramEditMode((prev) => ({ ...prev, [index]: false }));
+      } catch (error) {
+        console.error('Error uploading program file:', error);
+        setSnackbarConfig({
+          open: true,
+          message: t('Error uploading file'),
+          severity: 'error'
+        });
+      } finally {
+        setLoadingProgramIndex(null);
+      }
+    }
+  };
+
+  // Function to determine if a field should be in edit mode
+  const isInReportEditMode = (index: number, templateFile: string) => {
+    return reportEditMode[index] === true || !isValidUrl(templateFile);
+  };
+
+  const isInProgramEditMode = (index: number, programFile: string) => {
+    return programEditMode[index] === true || !isValidUrl(programFile);
+  };
+
+  // Function to handle opening a file
+  const handleOpenFile = (fileUrl: string | FileData) => {
+    const url = getFileUrl(fileUrl);
+    if (!url) return;
+
+    try {
+      // Determine if URL needs the base URL prepended
+      let fullUrl = url;
+
+      // If it's a relative path, prepend the base URL
+      if (url.startsWith('/public-files/')) {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
+        fullUrl = `${baseUrl}${url}`;
+      }
+
+      // Open in a new tab
+      window.open(fullUrl, '_blank');
+    } catch (error) {
+      console.error('Error opening file:', error);
+      setSnackbarConfig({
+        open: true,
+        message: t('Error opening file'),
+        severity: 'error'
+      });
+    }
+  };
+
   return (
-    <>
-      <div>
-        <label className="text-tmid block text-sm font-medium">
-          {t("Numeric Owners")}
-        </label>
-        {numericOwnersFields.map((field, index) => (
-          <div key={field.id} className="flex gap-4 items-center">
-            <select
-              {...register(`numericOwners.${index}.category` as const)}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                } w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border ${errors.numericOwners?.[index]?.category
-                  ? "border-high"
-                  : "border-border"
-                }`}
-            >
-              <option value="">{t("Select a Job Category")}</option>
-              {availableCategories.map((category, i) => (
-                <option
-                  key={i}
-                  value={category}
-                  onClick={() => handleAddNumericOwner(appendNumericOwner)}
-                >
-                  {category}
-                </option>
-              ))}
-            </select>
-            {errors.numericOwners?.[index]?.category && (
-              <p className="text-red-500 mt-1 text-sm">
-                {errors.numericOwners?.[index]?.category?.message}
-              </p>
-            )}
-            <input
-              type="number"
-              {...register(`numericOwners.${index}.count` as const, {
-                valueAsNumber: true,
-              })}
-              placeholder={t("Count")}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
-            />
-            <Image
-              src={XIcon}
-              alt="icon"
-              width={30}
-              height={30}
-              className=" bg-main cursor-pointer p-1 shadow-md rounded-md text-red-500"
-              onClick={() => removeNumericOwner(index)} // Remove numeric owner
-            />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Numeric Owners Section */}
+      <div className="md:col-span-1 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-blue-900/30 flex items-center justify-center">
+            <Users className="w-5 h-5 text-blue-400" />
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => appendNumericOwner({ count: 1, category: "" })}
-          className="text-sm text-tbright underline"
-        >
-          {t("Add Numeric Owner")}
-        </button>
+          <h2 className="text-lg font-semibold">{t("Numeric Owners")}</h2>
+        </div>
+
+        <div className="space-y-3">
+          {numericOwnersFields.map((field, index) => (
+            <div key={field.id} className="p-4 rounded-lg bg-main  flex flex-col gap-3">
+              <div className="flex gap-2 items-center">
+                <select
+                  {...register(`numericOwners.${index}.category` as const)}
+                  className={`bg-secondary p-2 rounded-lg flex-1`}
+                >
+                  <option value="">{t("Select a Job Category")}</option>
+                  {availableCategories.map((category, i) => (
+                    <option
+                      key={i}
+                      value={category}
+                      onClick={() => handleAddNumericOwner(appendNumericOwner)}
+                    >
+                      {category}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removeNumericOwner(index)}
+                  className="p-2 rounded-lg hover:bg-red-600/20 text-red-400 transition-colors"
+                  title={t("Remove")}
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center">
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-blue-400" />
+                </div>
+                <input
+                  type="number"
+                  {...register(`numericOwners.${index}.count` as const, {
+                    valueAsNumber: true,
+                  })}
+                  placeholder={t("Count")}
+                  className="bg-secondary p-2 rounded-lg flex-1 "
+                />
+              </div>
+
+              {errors.numericOwners?.[index]?.category && (
+                <p className="text-red-500 text-sm">
+                  {errors.numericOwners?.[index]?.category?.message}
+                </p>
+              )}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => appendNumericOwner({ count: 1, category: "" })}
+            className="flex items-center gap-2 mt-2 px-4 py-2 rounded-lg bg-blue-900/20 text-blue-400 hover:bg-blue-900/30 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {t("Add Numeric Owner")}
+          </button>
+        </div>
       </div>
 
       {/* Supporting Files Section */}
-      <div>
-        <div className="block text-tmid text-sm font-medium">
-          {t("Supporting Files")}
+      <div className="md:col-span-1 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-green-900/30 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-green-400" />
+          </div>
+          <h2 className="text-lg font-semibold">{t("Supporting Files")}</h2>
         </div>
 
-        <input
-          hidden
-          id="file-id"
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          className={`    ${isLightMode ? "bg-dark  placeholder:text-tdark " : "bg-secondary"
-            }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg `}
-        />
+        {departmentId && departmentId !== 'new' ? (
+          <FileManager
+            entityType="department"
+            entityId={departmentId}
+            fileType="supporting"
+            title={t("Supporting Files")}
+            onUploadComplete={(_, fileUrl) => handleSupportingFileUpload(fileUrl)}
+          />
+        ) : (
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-main ">
+              <input
+                type="file"
+                className="bg-secondary p-2 rounded-lg w-full "
+                onChange={handleSupportingFileUpload}
+              />
+              <div className="mt-2 text-xs text-gray-400">
+                {t("Upload supporting files for this department")}
+              </div>
+            </div>
 
-        {/* Display loading state for supporting files */}
-        {supportingFilesLoading && (
-          <div className="flex items-center mt-2 mb-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent mx-2"></div>
-            <span className="text-sm text-tmid">{t("Uploading files...")}</span>
+            {/* Display already uploaded supporting files */}
+            {supportingFileUrls.length > 0 && (
+              <div className="space-y-2">
+                {supportingFileUrls.map((fileUrl, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg bg-main  flex items-center justify-between"
+                  >
+                    <div className="flex items-center flex-1 min-w-0 gap-2">
+                      <FileText className="w-4 h-4 text-green-400 flex-shrink-0" />
+                      <span className="truncate">{processPublicUrl(getFileUrl(fileUrl))}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSupportingFile(index)}
+                      className="p-1.5 rounded-lg hover:bg-red-600/20 text-red-400 transition-colors ml-2 flex-shrink-0"
+                      title={t("Remove file")}
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-
-        {/* Display existing supporting files from URLs */}
-        {supportingFileUrls.map((fileUrl, index) => (
-          <div key={`url-${index}`} className="flex gap-4 items-center mt-2">
-            <div
-              className={`${isLightMode ? "bg-dark text-white" : "bg-secondary text-white"
-                } px-4 py-2 rounded-l-lg flex-1 flex items-center cursor-pointer`}
-            >
-              <span className="truncate">{processPublicUrl(fileUrl)}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 ml-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRemoveFile(index)}
-              className={`${isLightMode ? "bg-red-500 text-white" : "bg-red-600 text-white"
-                } px-3 py-2 mt-1 rounded-r-lg`}
-              title={t("Remove file")}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </button>
-          </div>
-        ))}
-
-        <label
-          htmlFor="file-id"
-          className="text-sm text-tbright underline cursor-pointer mt-2 inline-block"
-        >
-          {t("Attach Supporting File")}
-        </label>
       </div>
 
       {/* Required Reports Section */}
-      <div>
-        <label className="text-tmid block text-sm font-medium">
-          {t("Required Reports")}
-        </label>
-        {requiredReportsFields.map((field, index) => (
-          <div key={field.id} className="flex gap-4 items-center">
-            <input
-              type="text"
-              {...register(`requiredReports.${index}.name` as const)}
-              placeholder={t("Report Name")}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
-            />
-            <div className="relative w-full">
-              {!reportEditMode[index] && isValidUrl(field.templateFile) ? (
-                // Show open file button with edit option
-                <div className="flex">
-                  <div
-                    className={`${isLightMode
-                      ? "bg-dark text-white"
-                      : "bg-secondary text-white"
-                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
-                  >
-                    <span className="truncate">
-                      {processPublicUrl(field.templateFile)}
-                    </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => switchReportToEditMode(index)}
-                    className={`${isLightMode
-                      ? "bg-red-500 text-white"
-                      : "bg-red-600 text-white"
-                      } px-3 py-2 mt-1 rounded-r-lg`}
-                    title={t("Replace file")}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ) : (
-                // Show file input when in edit mode or no file exists
-                <input
-                  type="file"
-                  placeholder={t("Template File")}
-                  className={`    ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingReportIndex === index ? "opacity-50" : ""
-                    }`}
-                  disabled={loadingReportIndex === index}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setLoadingReportIndex(index);
-                      try {
-                        const fileName =
-                          await FileUploadService.uploadSingleFile(
-                            {
-                              file,
-                              name: file.name,
-                            },
-                            "departments"
-                          );
-                        // Set the new file URL and ensure it's a fresh URL
-                        const newFileUrl = fileName.includes("?")
-                          ? fileName.split("?")[0] + `?v=${Date.now()}`
-                          : `${fileName}?v=${Date.now()}`;
-
-                        setValue(
-                          `requiredReports.${index}.templateFile` as const,
-                          newFileUrl
-                        );
-                        // Switch to view mode after successful upload
-                        setReportEditMode((prev) => ({
-                          ...prev,
-                          [index]: false,
-                        }));
-                      } finally {
-                        setLoadingReportIndex(null);
-                      }
-                    }
-                  }}
-                />
-              )}
-              {loadingReportIndex === index && (
-                <div className="absolute top-0 right-0 h-full flex items-center pr-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                </div>
-              )}
-            </div>
-            <Image
-              src={XIcon}
-              alt="icon"
-              width={30}
-              height={30}
-              className=" bg-main cursor-pointer p-1 shadow-md rounded-md text-red-500"
-              onClick={() => removeRequiredReport(index)}
-            />
+      <div className="md:col-span-1 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-purple-900/30 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-purple-400" />
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => appendRequiredReport({ name: "", templateFile: "" })}
-          className="text-sm text-tbright underline"
-        >
-          {t("Add Required Report")}
-        </button>
+          <h2 className="text-lg font-semibold">{t("Required Reports")}</h2>
+        </div>
+
+        <div className="space-y-3">
+          {requiredReportsFields.map((field, index) => (
+            <div key={field.id} className="p-4 rounded-lg bg-main  space-y-3">
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  {...register(`requiredReports.${index}.name` as const)}
+                  placeholder={t("Report Name")}
+                  className="bg-secondary p-2 rounded-lg flex-1 "
+                />
+                <button
+                  type="button"
+                  onClick={() => removeRequiredReport(index)}
+                  className="p-2 rounded-lg hover:bg-red-600/20 text-red-400 transition-colors"
+                  title={t("Remove")}
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="relative">
+                {!isInReportEditMode(index, field.templateFile) ? (
+                  // Show open file button with edit option
+                  <div className="flex">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenFile(field.templateFile)}
+                      className="flex items-center gap-2 p-2 rounded-l-lg bg-secondary  flex-1 text-left text-sm"
+                    >
+                      <FileText className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                      <span className="truncate flex-1">
+                        {processPublicUrl(field.templateFile)}
+                      </span>
+                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => switchReportToEditMode(index)}
+                      className="p-2 rounded-r-lg bg-secondary  text-gray-400 hover:text-white transition-colors"
+                      title={t("Replace file")}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  // Show file input when in edit mode or no file exists
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary ">
+                    <FileText className="w-4 h-4 text-purple-400" />
+                    <input
+                      type="file"
+                      placeholder={t("Template File")}
+                      className={`bg-secondary flex-1 min-w-0 ${loadingReportIndex === index ? "opacity-50" : ""}`}
+                      disabled={loadingReportIndex === index}
+                      onChange={(e) => handleReportFileChange(e, index)}
+                    />
+                    {loadingReportIndex === index && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => appendRequiredReport({ name: "", templateFile: "" })}
+            className="flex items-center gap-2 mt-2 px-4 py-2 rounded-lg bg-purple-900/20 text-purple-400 hover:bg-purple-900/30 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {t("Add Required Report")}
+          </button>
+        </div>
       </div>
 
       {/* Development Programs Section */}
-      <div>
-        <label className="text-tmid block text-sm font-medium">
-          {t("Development Programs")}
-        </label>
-        {developmentProgramsFields.map((field, index) => (
-          <div key={field.id} className="flex gap-4 items-center">
-            <input
-              type="text"
-              {...register(`developmentPrograms.${index}.programName` as const)}
-              placeholder={t("Program Name")}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
-            />
-            <input
-              type="text"
-              {...register(`developmentPrograms.${index}.objective` as const)}
-              placeholder={t("Objective")}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                } w-full bg-secondary border-none outline-none px-4 py-2 mt-1 rounded-lg border `}
-            />
-
-            <div className="relative w-full">
-              {!programEditMode[index] && isValidUrl(field.programFile) ? (
-                // Show open file button with edit option
-                <div className="flex">
-                  <div
-                    className={`${isLightMode
-                      ? "bg-dark text-white"
-                      : "bg-secondary text-white"
-                      } px-4 py-2 mt-1 rounded-l-lg flex-1 text-left flex items-center`}
-                  >
-                    <span className="truncate">
-                      {processPublicUrl(field.programFile)}
-                    </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => switchProgramToEditMode(index)}
-                    className={`${isLightMode
-                      ? "bg-red-500 text-white"
-                      : "bg-red-600 text-white"
-                      } px-3 py-2 mt-1 rounded-r-lg`}
-                    title={t("Replace file")}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ) : (
-                // Show file input when in edit mode or no file exists
-                <input
-                  type="file"
-                  placeholder={t("Program File")}
-                  className={`    ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border ${loadingProgramIndex === index ? "opacity-50" : ""
-                    }`}
-                  disabled={loadingProgramIndex === index}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setLoadingProgramIndex(index);
-                      try {
-                        const fileName =
-                          await FileUploadService.uploadSingleFile(
-                            {
-                              file,
-                              name: file.name,
-                            },
-                            "departments"
-                          );
-                        // Set the new file URL and ensure it's a fresh URL
-                        const newFileUrl = fileName.includes("?")
-                          ? fileName.split("?")[0] + `?v=${Date.now()}`
-                          : `${fileName}?v=${Date.now()}`;
-
-                        setValue(
-                          `developmentPrograms.${index}.programFile` as const,
-                          newFileUrl
-                        );
-                        // Switch to view mode after successful upload
-                        setProgramEditMode((prev) => ({
-                          ...prev,
-                          [index]: false,
-                        }));
-                      } finally {
-                        setLoadingProgramIndex(null);
-                      }
-                    }
-                  }}
-                />
-              )}
-              {loadingProgramIndex === index && (
-                <div className="absolute top-0 right-0 h-full flex items-center pr-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                </div>
-              )}
-            </div>
-
-            <textarea
-              {...register(`developmentPrograms.${index}.notes` as const)}
-              placeholder={t("Notes")}
-              className={`    ${isLightMode
-                ? "bg-dark  placeholder:text-tdark "
-                : "bg-secondary"
-                }  w-full  bg-secondary border-none outline-none  px-4 py-2 mt-1 rounded-lg border `}
-              rows={1}
-            />
-            <Image
-              src={XIcon}
-              alt="icon"
-              width={30}
-              height={30}
-              className=" bg-main cursor-pointer p-1 shadow-md rounded-md text-red-500"
-              onClick={() => removeDevelopmentProgram(index)}
-            />
+      <div className="md:col-span-3 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-amber-900/30 flex items-center justify-center">
+            <Briefcase className="w-5 h-5 text-amber-400" />
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={() =>
-            appendDevelopmentProgram({
-              programName: "",
-              objective: "",
-              notes: "",
-              programFile: "",
-            })
-          }
-          className="text-sm text-tbright underline"
-        >
-          {t("Add Development Program")}
-        </button>
+          <h2 className="text-lg font-semibold">{t("Development Programs")}</h2>
+        </div>
+
+        <div className="space-y-4">
+          {developmentProgramsFields.map((field, index) => (
+            <div key={field.id} className="p-5 rounded-lg bg-main  space-y-4">
+              <div className="flex gap-4 items-center">
+                <div className="w-8 h-8 rounded-full bg-amber-900/30 flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 text-amber-400" />
+                </div>
+                <input
+                  type="text"
+                  {...register(`developmentPrograms.${index}.programName` as const)}
+                  placeholder={t("Program Name")}
+                  className="bg-secondary p-2 rounded-lg flex-1 "
+                />
+                <button
+                  type="button"
+                  onClick={() => removeDevelopmentProgram(index)}
+                  className="p-2 rounded-lg hover:bg-red-600/20 text-red-400 transition-colors"
+                  title={t("Remove")}
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-sm mb-1 block">{t("Objective")}</label>
+                  <input
+                    type="text"
+                    {...register(`developmentPrograms.${index}.objective` as const)}
+                    placeholder={t("Program objective")}
+                    className="bg-secondary p-3 rounded-lg w-full "
+                  />
+                </div>
+
+                <div>
+                  <label className="text-gray-400 text-sm mb-1 block">{t("Notes")}</label>
+                  <textarea
+                    {...register(`developmentPrograms.${index}.notes` as const)}
+                    placeholder={t("Additional notes")}
+                    className="bg-secondary p-3 rounded-lg w-full "
+                    rows={1}
+                  />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label className="text-gray-400 text-sm mb-1 block">{t("Program File")}</label>
+                {!isInProgramEditMode(index, field.programFile) ? (
+                  // Show open file button with edit option
+                  <div className="flex">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenFile(field.programFile)}
+                      className="flex items-center gap-2 p-3 rounded-l-lg bg-secondary  flex-1 text-left"
+                    >
+                      <FileText className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <span className="truncate flex-1">
+                        {processPublicUrl(field.programFile)}
+                      </span>
+                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => switchProgramToEditMode(index)}
+                      className="p-3 rounded-r-lg bg-secondary  text-gray-400 hover:text-white transition-colors"
+                      title={t("Replace file")}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  // Show file input when in edit mode or no file exists
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary ">
+                    <FileText className="w-4 h-4 text-amber-400" />
+                    <input
+                      type="file"
+                      placeholder={t("Program File")}
+                      className={`bg-secondary flex-1 min-w-0 ${loadingProgramIndex === index ? "opacity-50" : ""}`}
+                      disabled={loadingProgramIndex === index}
+                      onChange={(e) => handleProgramFileChange(e, index)}
+                    />
+                    {loadingProgramIndex === index && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-400"></div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              appendDevelopmentProgram({
+                programName: "",
+                objective: "",
+                notes: "",
+                programFile: "",
+              })
+            }
+            className="flex items-center gap-2 mt-2 px-4 py-2 rounded-lg bg-amber-900/20 text-amber-400 hover:bg-amber-900/30 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {t("Add Development Program")}
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

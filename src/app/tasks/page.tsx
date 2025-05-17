@@ -1,20 +1,18 @@
 "use client";
 import { TabBoardIcon, TabListIcon, TreeIcon } from "@/assets";
+import TaskHierarchyTree from "@/components/common/atoms/tasks/TasksHierarchyTree";
+import TasksTab from "@/components/common/atoms/tasks/TasksTab";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
-import TasksTab from "@/components/common/atoms/tasks/TasksTab";
+import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 import TaskList from "@/components/common/organisms/TaskList";
 import TasksContent from "@/components/common/organisms/TasksContent";
-import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
-import TaskHierarchyTree from "@/components/common/atoms/tasks/TasksHierarchyTree";
 import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
-import { useRedux } from "@/hooks/useRedux";
-import { RootState } from "@/state/store";
 import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
@@ -27,7 +25,6 @@ const TasksView: React.FC = () => {
   const [myProj, setMyProj] = useState(false);
   const [myDept, setMyDept] = useState(false);
   const [selectedProj, setSelectedProj] = useState<string | null>(null);
-  const [selectedDept, setSelectedDept] = useState<string | null>(null);
 
   const { t } = useLanguage();
   const isAdmin = useRolePermissions("admin");
@@ -51,28 +48,18 @@ const TasksView: React.FC = () => {
 
   const { data: deptTree } = useCustomQuery<{ tree: DeptTree[] }>({
     queryKey: ["deptTree", selectedProj ?? "three"],
-    url: `/${
-      selectedProj
-        ? `projects/project-departments-tree/${selectedProj}`
-        : "department/tree"
-    }`,
+    url: `/${selectedProj
+      ? `projects/project-departments-tree/${selectedProj}`
+      : "department/tree"
+      }`,
   });
 
-  const { selector } = useRedux(
-    (state: RootState) => state.user.userInfo?.department.id
-  );
 
   const { data: sections, isLoading: isSectionsLoading } = useCustomQuery<
     SectionType[]
   >({
-    queryKey: ["sections", selectedOption, selectedDept ?? "one"],
-    url: `/sections/${
-      myProj && myDept
-        ? `department/${selectedDept}`
-        : myDept
-        ? `department/${selectedDept}`
-        : `department/${selector}`
-    }`,
+    queryKey: ["sections"],
+    url: `/sections`
   });
 
   useEffect(() => {
@@ -102,7 +89,6 @@ const TasksView: React.FC = () => {
               onChange={(e) => {
                 const value = e.target.value;
 
-                setSelectedDept(value);
                 const deptOption = `departmentId=${value}`;
                 const projOption = selectedProj
                   ? `&projectId=${selectedProj}`
@@ -153,7 +139,6 @@ const TasksView: React.FC = () => {
                   setSelectedOption(value);
                 }
                 setSelectedProj(null);
-                setSelectedDept(null);
               }}
             >
               {canViewTasks && <option value="">{t("My Tasks")}</option>}

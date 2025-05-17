@@ -66,9 +66,10 @@ export const updateTaskData = async (
   data: { [key: string]: string }
 ) => {
   try {
-    await apiClient.post(`/tasks/update/${taskId}`, data);
+    return await apiClient.post(`/tasks/update/${taskId}`, data);
   } catch (error) {
     console.error("Failed to update task status", error);
+    throw error;
   }
 };
 

@@ -80,9 +80,8 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
   index,
   showRemoveButton = false,
 }) => {
-  const baseInputStyles = `w-full px-4 py-2 mt-1 rounded-lg border-none outline-none ${
-    isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"
-  }`;
+  const baseInputStyles = `w-full px-4 py-2 mt-1 rounded-lg border-none outline-none ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-main"
+    }`;
 
   const renderInput = () => {
     if (isTextArea) {

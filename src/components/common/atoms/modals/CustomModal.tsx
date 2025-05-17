@@ -14,11 +14,13 @@ interface CustomModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  content: string[];
+  content: React.ReactNode;
   language: "en" | "ar";
   actionText: string;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   fullWidth?: boolean;
+  // For backward compatibility with previous string[] implementation
+  contentArray?: string[];
 }
 
 
@@ -35,10 +37,17 @@ export const getPermissionInfo = (permission: string): { icon: LucideIcon; color
   return { icon: Lock, color: "text-purple-400" };
 };
 
+// To correctly determine if content is a string array for proper rendering
+const isStringArray = (content: React.ReactNode): boolean => {
+  return Array.isArray(content) && 
+         content.length > 0 && 
+         typeof content[0] === 'string';
+};
+
 // Permission Card Component
 const PermissionCard = ({ permission, isLightMode }: { permission: string; isLightMode: boolean }) => {
   const { icon: Icon, color } = getPermissionInfo(permission);
-  
+
   // Format the permission text
   const formatPermissionText = (text: string) => {
     return text
@@ -46,14 +55,14 @@ const PermissionCard = ({ permission, isLightMode }: { permission: string; isLig
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   };
-  
+
   return (
     <div className={`
       relative overflow-hidden
       rounded-xl transition-all duration-200
       border h-[150px] p-4
-      ${isLightMode 
-        ? 'bg-darker/5 border-darker/10 hover:bg-darker/10' 
+      ${isLightMode
+        ? 'bg-darker/5 border-darker/10 hover:bg-darker/10'
         : 'bg-dark/20 border-dark/40 hover:bg-dark/30'}
       group flex items-center
     `}>
@@ -70,12 +79,12 @@ const PermissionCard = ({ permission, isLightMode }: { permission: string; isLig
         <div className={`
           w-12 h-12 rounded-xl flex items-center justify-center
           transition-all duration-200 flex-shrink-0
-          ${isLightMode 
-            ? 'bg-white shadow-sm' 
+          ${isLightMode
+            ? 'bg-white shadow-sm'
             : 'bg-dark shadow-lg shadow-dark/20'}
         `}>
-          <Icon 
-            size={22} 
+          <Icon
+            size={22}
             className={`${color} transition-transform duration-200 group-hover:scale-110`}
           />
         </div>
@@ -100,6 +109,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   onClose,
   title,
   content,
+  contentArray,
   language,
   actionText,
   maxWidth = "sm",
@@ -145,23 +155,29 @@ const CustomModal: React.FC<CustomModalProps> = ({
           ${isLightMode ? "text-tblack" : "text-tmid"}
         `}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {content.map((item, index) => (
-            <PermissionCard 
-              key={index}
-              permission={t(item)}
-              isLightMode={isLightMode}
-            />
-          ))}
-        </div>
+        {isStringArray(content) || (contentArray && Array.isArray(contentArray)) ? (
+          // Render the grid for string array content (for backward compatibility)
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(isStringArray(content) ? content as string[] : contentArray)?.map((item, index) => (
+              <PermissionCard
+                key={index}
+                permission={t(item)}
+                isLightMode={isLightMode}
+              />
+            ))}
+          </div>
+        ) : (
+          // Render the direct ReactNode content
+          <>{content}</>
+        )}
       </DialogContent>
 
       {/* Actions */}
       <DialogActions
         className={`
           p-4 
-          ${isLightMode 
-            ? "bg-main border-darker/10" 
+          ${isLightMode
+            ? "bg-main border-darker/10"
             : "bg-secondary border-dark/40"}
           ${getDir() == "rtl" ? "justify-start" : "justify-end"}
         `}
@@ -171,8 +187,8 @@ const CustomModal: React.FC<CustomModalProps> = ({
           className={`
             py-2 px-6 rounded-lg font-medium
             transition-all duration-200 
-            ${isLightMode 
-              ? "bg-darker text-twhite hover:bg-opacity-90" 
+            ${isLightMode
+              ? "bg-darker text-twhite hover:bg-opacity-90"
               : "bg-dark text-twhite hover:bg-opacity-80"}
             hover:shadow-lg hover:-translate-y-0.5
             active:translate-y-0 active:shadow-md

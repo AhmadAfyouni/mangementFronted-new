@@ -167,6 +167,7 @@ const AddEmp: React.FC = () => {
   const { data: jobs } = useCustomQuery<JobTitleType[]>({
     queryKey: ["jobTitles"],
     url: `/job-titles/get-job-titles`,
+    nestedData: true
   });
 
   const { mutate: addEmployee, isPending: isPendingEmployee } =
@@ -951,206 +952,210 @@ const AddEmp: React.FC = () => {
             )}
           </div>
 
-          {/* Allowances */}
-          <button
-            type="button"
-            onClick={() => appendAllowance({ allowance_type: "", amount: 0 })}
-            className="text-tbright block text-sm"
-          >
-            {t("Add Allowance")}
-          </button>
-          {allowancesFields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block  text-sm font-medium">
-                  {t("Allowance")} {index + 1}
-                </label>
-                <input
-                  type="text"
-                  {...register(`allowances.${index}.allowance_type` as const)}
-                  placeholder={t("Allowance Type")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-                <input
-                  type="number"
-                  {...register(`allowances.${index}.amount` as const)}
-                  placeholder={t("Amount")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  removeAllowance(index); // Remove the specific allowance
-                  reset(getValues()); // Reset the form to update the state
-                }}
-                className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
-              >
-                X
-              </button>
-            </div>
-          ))}
 
-          {/* Incentives */}
-          <button
-            type="button"
-            onClick={() => appendIncentive({ description: "", amount: 0 })}
-            className="text-tbright block text-sm"
-          >
-            {t("Add Incentive")}
-          </button>
-          {incentivesFields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block  text-sm font-medium">
-                  {t("Incentive")} {index + 1}
-                </label>
-                <input
-                  type="text"
-                  {...register(`incentives.${index}.description` as const)}
-                  placeholder={t("Description")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-                <input
-                  type="number"
-                  {...register(`incentives.${index}.amount` as const)}
-                  placeholder={t("Amount")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  removeIncentive(index); // Remove the specific incentive
-                  reset(getValues()); // Reset the form to update the state
-                }}
-                className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
-              >
-                X
-              </button>
-            </div>
-          ))}
+          <div className="flex flex-col items-start gap-4 mt-4">
 
-          {/* Bank Accounts */}
-          <button
-            type="button"
-            onClick={() =>
-              appendBankAccount({ bank_name: "", account_number: "" })
-            }
-            className="text-tbright block text-sm"
-          >
-            {t("Add Bank Account")}
-          </button>
-          {bankAccountsFields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block  text-sm font-medium">
-                  {t("Bank Account")} {index + 1}
-                </label>
-                <input
-                  type="text"
-                  {...register(`bank_accounts.${index}.bank_name` as const)}
-                  placeholder={t("Bank Name")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-                <input
-                  type="text"
-                  {...register(
-                    `bank_accounts.${index}.account_number` as const
-                  )}
-                  placeholder={t("Account Number")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
+            {/* Allowances */}
+            <button
+              type="button"
+              onClick={() => appendAllowance({ allowance_type: "", amount: 0 })}
+              className="text-tbright block text-sm"
+            >
+              {t("Add Allowance")}
+            </button>
+            {allowancesFields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block  text-sm font-medium">
+                    {t("Allowance")} {index + 1}
+                  </label>
+                  <input
+                    type="text"
+                    {...register(`allowances.${index}.allowance_type` as const)}
+                    placeholder={t("Allowance Type")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                  <input
+                    type="number"
+                    {...register(`allowances.${index}.amount` as const)}
+                    placeholder={t("Amount")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeAllowance(index); // Remove the specific allowance
+                    reset(getValues()); // Reset the form to update the state
+                  }}
+                  className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
+                >
+                  X
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  removeBankAccount(index); // Remove the specific bank account
-                  reset(getValues()); // Reset the form to update the state
-                }}
-                className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
-              >
-                X
-              </button>
-            </div>
-          ))}
+            ))}
 
-          {/* Evaluations */}
-          <button
-            type="button"
-            onClick={() =>
-              appendEvaluation({
-                evaluation_type: "",
-                description: "",
-                plan: "",
-              })
-            }
-            className="text-tbright block text-sm"
-          >
-            {t("Add Evaluation")}
-          </button>
-          {evaluationsFields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block  text-sm font-medium">
-                  {t("Evaluation")} {index + 1}
-                </label>
-                <input
-                  type="text"
-                  {...register(`evaluations.${index}.evaluation_type` as const)}
-                  placeholder={t("Evaluation Type")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-                <textarea
-                  {...register(`evaluations.${index}.description` as const)}
-                  placeholder={t("Description")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
-                <textarea
-                  {...register(`evaluations.${index}.plan` as const)}
-                  placeholder={t("Plan")}
-                  className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
-                    ? "bg-dark  placeholder:text-tdark "
-                    : "bg-secondary"
-                    }  outline-none border-none`}
-                />
+            {/* Incentives */}
+            <button
+              type="button"
+              onClick={() => appendIncentive({ description: "", amount: 0 })}
+              className="text-tbright block text-sm"
+            >
+              {t("Add Incentive")}
+            </button>
+            {incentivesFields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block  text-sm font-medium">
+                    {t("Incentive")} {index + 1}
+                  </label>
+                  <input
+                    type="text"
+                    {...register(`incentives.${index}.description` as const)}
+                    placeholder={t("Description")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                  <input
+                    type="number"
+                    {...register(`incentives.${index}.amount` as const)}
+                    placeholder={t("Amount")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeIncentive(index); // Remove the specific incentive
+                    reset(getValues()); // Reset the form to update the state
+                  }}
+                  className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
+                >
+                  X
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  removeEvaluation(index); // Remove the specific evaluation
-                  reset(getValues()); // Reset the form to update the state
-                }}
-                className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
-              >
-                X
-              </button>
-            </div>
-          ))}
+            ))}
+
+            {/* Bank Accounts */}
+            <button
+              type="button"
+              onClick={() =>
+                appendBankAccount({ bank_name: "", account_number: "" })
+              }
+              className="text-tbright block text-sm"
+            >
+              {t("Add Bank Account")}
+            </button>
+            {bankAccountsFields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block  text-sm font-medium">
+                    {t("Bank Account")} {index + 1}
+                  </label>
+                  <input
+                    type="text"
+                    {...register(`bank_accounts.${index}.bank_name` as const)}
+                    placeholder={t("Bank Name")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                  <input
+                    type="text"
+                    {...register(
+                      `bank_accounts.${index}.account_number` as const
+                    )}
+                    placeholder={t("Account Number")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeBankAccount(index); // Remove the specific bank account
+                    reset(getValues()); // Reset the form to update the state
+                  }}
+                  className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+
+            {/* Evaluations */}
+            <button
+              type="button"
+              onClick={() =>
+                appendEvaluation({
+                  evaluation_type: "",
+                  description: "",
+                  plan: "",
+                })
+              }
+              className="text-tbright block text-sm"
+            >
+              {t("Add Evaluation")}
+            </button>
+            {evaluationsFields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block  text-sm font-medium">
+                    {t("Evaluation")} {index + 1}
+                  </label>
+                  <input
+                    type="text"
+                    {...register(`evaluations.${index}.evaluation_type` as const)}
+                    placeholder={t("Evaluation Type")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                  <textarea
+                    {...register(`evaluations.${index}.description` as const)}
+                    placeholder={t("Description")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                  <textarea
+                    {...register(`evaluations.${index}.plan` as const)}
+                    placeholder={t("Plan")}
+                    className={`w-full px-4 py-2 mt-1 rounded-lg border ${isLightMode
+                      ? "bg-dark  placeholder:text-tdark "
+                      : "bg-secondary"
+                      }  outline-none border-none`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeEvaluation(index); // Remove the specific evaluation
+                    reset(getValues()); // Reset the form to update the state
+                  }}
+                  className="text-twhite bg-red-500 font-bold  px-4 py-2 shadow-md rounded-md"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
 
           {/* Submit Button */}
           <button

@@ -1,6 +1,6 @@
 import { PaperClipIcon } from "@/assets";
-import { FileObject } from "@/components/common/atoms/departments/DeptAdditionalSection";
 import fileUploadService from "@/services/fileUpload.service";
+import { FileObject } from "@/types/FileManager.type";
 import { TaskFormInputs } from "@/types/Task.type";
 import Image from "next/image";
 import React, { useRef, useState } from "react";

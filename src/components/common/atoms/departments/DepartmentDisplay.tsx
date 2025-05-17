@@ -50,7 +50,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
   const filteredDepartments = departments.filter(
     (dept) =>
       dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dept.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dept.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dept.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -275,10 +275,10 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                               className={`truncate max-w-[70%] ${isLightMode ? "text-blackAF" : "text-twhite/80"
                                 }`}
                             >
-                              {file.split("/").pop()}
+                              {file.currentVersion.fileUrl.split("/").pop()}
                             </span>
                             <button
-                              onClick={(e) => handleFileDownload(e, file)}
+                              onClick={(e) => handleFileDownload(e, file.currentVersion.fileUrl)}
                               className="p-1 rounded-full bg-blue-500/30 hover:bg-blue-500 hover:text-blue-100 border border-blue-500/30"
                             >
                               <Download size={12} />
@@ -309,7 +309,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                         }`}
                     >
                       <Briefcase size={12} className="mx-1" />
-                      {t("Programs")}:{" "}
+                      {t("Programs")}:{""}
                       {department.developmentPrograms?.length || 0}
                     </span>
                   </div>
@@ -319,7 +319,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                         }`}
                     >
                       <Link size={12} className="mx-1" />
-                      <span>{department.parent_department}</span>
+                      <span>{department.parent_department.id}</span>
                     </div>
                   )}
                 </div>
@@ -384,7 +384,7 @@ const DepartmentDisplay: React.FC<DepartmentDisplayProps> = ({
                     {department.parent_department && (
                       <div className="text-xs mt-1 flex items-center justify-center opacity-70">
                         <Link size={10} className="mx-1" />
-                        {department.parent_department}
+                        {department.parent_department.id}
                       </div>
                     )}
                   </td>

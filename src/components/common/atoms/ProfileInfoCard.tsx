@@ -9,18 +9,21 @@ interface PersonalInfoCardProps {
 }
 
 const PersonalInfoCard: React.FC<PersonalInfoCardProps> = ({ icon: Icon, label, value }) => {
-    const {t} = useLanguage()
-    const {isLightMode} = useCustomTheme()
-    return(
-  <div className="flex items-center gap-4 p-3 bg-secondary rounded-lg  transition-all">
-    <div className="p-2 bg-tblack rounded-lg">
-      <Icon className="w-5 h-5 text-twhite" />
+  const {t, currentLanguage} = useLanguage()
+  const {isLightMode} = useCustomTheme()
+  const isRTL = currentLanguage === "ar";
+  
+  return(
+    <div className={`flex items-center gap-4 p-4 bg-secondary rounded-lg border border-gray-700 hover:border-gray-600 transition-all duration-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className="p-3 bg-tblack rounded-lg shadow-md">
+        <Icon className="w-5 h-5 text-twhite" />
+      </div>
+      <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <p className={`text-sm ${isLightMode ? "text-slate-600":"text-gray-400"}`}>{t(label)}</p>
+        <p className="text-twhite font-semibold text-lg">{value || t("Not Available")}</p>
+      </div>
     </div>
-    <div className="flex-1">
-      <p className={ `text-sm  ${isLightMode ? "text-slate-600":"text-slate-400" }`}>{t(label)}</p>
-      <p className="text-twhite font-medium">{value || t("Not Available")}</p>
-    </div>
-  </div>
-)};
+  )
+};
 
 export default PersonalInfoCard

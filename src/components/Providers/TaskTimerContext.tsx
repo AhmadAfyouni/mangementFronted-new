@@ -6,6 +6,7 @@ type TimerContextType = {
   startTimer: (taskId: string) => void;
   pauseTimer: (taskId: string) => void;
   setElapsedTime: (taskId: string, elapsedTime: number) => void;
+  resetTimerState: (taskId: string) => void;
 };
 
 const TaskTimerContext = createContext<TimerContextType | undefined>(undefined);
@@ -27,10 +28,25 @@ export const TaskTimerProvider: React.FC<{ children: React.ReactNode }> = ({
   const setElapsedTime = (taskId: string, elapsedTime: number) => {
     setTimers((prev) => ({ ...prev, [taskId]: elapsedTime }));
   };
+  
+  // Reset the timer state completely for a task
+  const resetTimerState = (taskId: string) => {
+    setIsRunning((prev) => {
+      const newState = { ...prev };
+      delete newState[taskId];
+      return newState;
+    });
+    
+    setTimers((prev) => {
+      const newTimers = { ...prev };
+      delete newTimers[taskId];
+      return newTimers;
+    });
+  };
 
   return (
     <TaskTimerContext.Provider
-      value={{ timers, isRunning, startTimer, pauseTimer, setElapsedTime }}
+      value={{ timers, isRunning, startTimer, pauseTimer, setElapsedTime, resetTimerState }}
     >
       {children}
     </TaskTimerContext.Provider>

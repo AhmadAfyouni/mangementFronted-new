@@ -210,7 +210,7 @@ const LogsModal: React.FC<LogsModalProps> = ({ logs, isOpen, onClose }) => {
                                 log.action
                               )} capitalize`}
                             >
-                              {t(log.action).replace("_", " ")}
+                              {t(log.action).replace("_", "")}
                             </span>
                           </div>
                           <span className="text-xs text-tmid">

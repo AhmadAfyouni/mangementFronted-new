@@ -14,7 +14,7 @@ const ProjectTasks = ({ params: { id } }: { params: { id: string } }) => {
     endpoint: "/tasks/get-project-tasks-by-dept",
     onSuccessMessage: "project task fetched successfully!",
     invalidateQueryKeys: ["projectTasks"],
-    onSuccessFn: () => {},
+    onSuccessFn: () => { },
     requestType: "post",
   });
 

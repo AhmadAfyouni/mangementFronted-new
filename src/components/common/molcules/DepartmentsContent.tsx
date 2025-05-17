@@ -7,6 +7,7 @@ import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
 import { DepartmentType } from "@/types/DepartmentType.type";
+import { Briefcase, Building2, FileText, Users } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { DevelopmentProgramsModal, FilesReportsModal, TextModal } from "./departments/DepartmentsComponents";
@@ -43,12 +44,15 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     "/departments/add-department"
   );
 
+
+
   // State for modals
   const [textModal, setTextModal] = useState<TextModalState>({
     isOpen: false,
     content: "",
     title: "",
   });
+
 
 
   // State for Files & Reports and Development Programs modals
@@ -93,7 +97,24 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
 
   // Function to open file
   const handleOpenFile = (url: string) => {
-    window.open(url, "_blank");
+    if (!url) return;
+
+    // Make sure the URL is properly formatted
+    let fullUrl = url;
+
+    // Check if URL starts with http:// or https://
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      fullUrl = `https://${url}`;
+    }
+
+    // Prevent duplicate URL issues
+    if (fullUrl.includes('http://http://') || fullUrl.includes('https://https://')) {
+      fullUrl = fullUrl.replace('http://http://', 'http://');
+      fullUrl = fullUrl.replace('https://https://', 'https://');
+    }
+
+    console.log('Opening URL:', fullUrl);
+    window.open(fullUrl, "_blank");
   };
 
   // Filter visible columns for better organization
@@ -102,8 +123,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     { id: "category", label: "Category" },
     { id: "parent", label: "Parent Department" },
     { id: "goal", label: "Goal" },
-    { id: "description", label: "Description" },
-    { id: "mainTasks", label: "Main Tasks" },
     { id: "files", label: "Files & Reports" },
     { id: "programs", label: "Development Programs" },
   ];
@@ -129,177 +148,189 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     return pages;
   };
 
+  // Get the appropriate color based on category
+  const getCategoryStyles = (category: string) => {
+    if (category === 'primary-department') {
+      return {
+        bg: isLightMode ? 'bg-blue-100' : 'bg-blue-900/30',
+        text: 'text-blue-500',
+        icon: <Building2 className="w-4 h-4 text-blue-500" />
+      };
+    } else if (category === 'secondary-department') {
+      return {
+        bg: isLightMode ? 'bg-purple-100' : 'bg-purple-900/30',
+        text: 'text-purple-500',
+        icon: <Briefcase className="w-4 h-4 text-purple-500" />
+      };
+    } else {
+      return {
+        bg: isLightMode ? 'bg-green-100' : 'bg-green-900/30',
+        text: 'text-green-500',
+        icon: <Users className="w-4 h-4 text-green-500" />
+      };
+    }
+  };
+
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
-      <div className="overflow-x-auto rounded-lg shadow-md">
-        <table className="min-w-full bg-main text-twhite rounded-lg shadow-md border-collapse">
-          <thead
-            className={`${isLightMode ? "bg-darkest text-tblackAF" : "bg-tblack text-twhite"
-              } sticky top-0 z-10`}
-          >
-            <tr>
+    <div className={`${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} rounded-xl shadow-md p-4 md:p-6 flex flex-col gap-6 col-span-12`}>
+      <div className="overflow-x-auto rounded-xl shadow-md">
+        <table className="min-w-full bg-main rounded-xl shadow-lg border-separate border-spacing-0">
+          <thead>
+            <tr className={`${isLightMode ? "bg-darkest text-tblackAF" : "bg-tblack text-twhite"} sticky top-0 z-10`}>
               {visibleColumns.map((column) => (
                 <th
                   key={column.id}
-                  className="text-start py-3 px-4 uppercase font-semibold text-sm"
+                  className="text-start py-4 px-5 first:rounded-tl-xl last:rounded-tr-xl uppercase font-semibold text-sm"
                 >
                   {t(column.label)}
                 </th>
               ))}
-              {(isAdmin || hasEditPermission) && (
-                <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
-                  {t("Actions")}
-                </th>
-              )}
+              <th className="text-center py-4 px-5 uppercase font-semibold text-sm rounded-tr-xl">
+                {t("Actions")}
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-800">
             {departmentsData && departmentsData.length > 0 ? (
-              departmentsData.map((department) => (
-                <tr
-                  key={department.id}
-                  className={`${isLightMode
-                    ? "hover:bg-darker text-blackAF hover:text-tblackAF border-b border-gray-200"
-                    : "hover:bg-slate-700 text-twhite border-b border-gray-800"
-                    } transition-colors`}
-                >
-                  {/* Name */}
-                  <td className="py-4 px-4">
-                    <div className="font-medium">{department.name}</div>
-                  </td>
+              departmentsData.map((department) => {
+                const categoryStyles = getCategoryStyles(department.category);
 
-                  {/* Category */}
-                  <td className="py-4 px-4">
-                    <div className="inline-block py-1 px-3 rounded-full bg-blue-500 bg-opacity-20 text-blue-400 text-xs">
-                      {department.category}
-                    </div>
-                  </td>
-
-                  {/* Parent Department */}
-                  <td className="py-4 px-4">
-                    {department.parent_department
-                      ? departmentsData.find(
-                        (dep) => dep.id === department.parent_department
-                      )?.name || "-"
-                      : "—"}
-                  </td>
-
-                  {/* Goal */}
-                  <td className="py-4 px-4">
-                    {handleLongText(
-                      department.goal,
-                      `${department.name} - ${t("Goal")}`
-                    )}
-                  </td>
-
-                  {/* Description */}
-                  <td className="py-4 px-4">
-                    {handleLongText(
-                      department.description,
-                      `${department.name} - ${t("Description")}`
-                    )}
-                  </td>
-
-                  {/* Main Tasks */}
-                  <td className="py-4 px-4">
-                    {handleLongText(
-                      department.mainTasks,
-                      `${department.name} - ${t("Main Tasks")}`
-                    )}
-                  </td>
-
-                  {/* Files & Reports - Now shows a button to open modal */}
-                  <td className="py-4 px-4">
-                    <button
-                      onClick={() =>
-                        setFilesReportsModal({ isOpen: true, department })
-                      }
-                      className={`px-4 py-2 rounded-md transition-colors ${isLightMode
-                        ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        : "bg-blue-900/20 text-blue-400 hover:bg-blue-900/30"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        <span>{t("View Files & Reports")}</span>
+                return (
+                  <tr
+                    key={department.id}
+                    className={`${isLightMode
+                      ? "hover:bg-gray-100 text-gray-800 divide-gray-200"
+                      : "hover:bg-dark text-twhite divide-gray-800"
+                      } transition-all duration-200`}
+                  >
+                    {/* Name */}
+                    <td className="py-4 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${categoryStyles.bg}`}>
+                          {categoryStyles.icon}
+                        </div>
+                        <div>
+                          <div className="font-semibold">{department.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {t("ID")}: {department.id.substring(0, 8)}...
+                          </div>
+                        </div>
                       </div>
-                    </button>
-                  </td>
+                    </td>
 
-                  {/* Development Programs - Now shows a button to open modal */}
-                  <td className="py-4 px-4">
-                    <button
-                      onClick={() =>
-                        setDevelopmentProgramsModal({
-                          isOpen: true,
-                          department,
-                        })
-                      }
-                      className={`px-4 py-2 rounded-md transition-colors ${isLightMode
-                        ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                        : "bg-emerald-900/20 text-emerald-400 hover:bg-emerald-900/30"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                        <span>{t("View Programs")}</span>
+                    {/* Category */}
+                    <td className="py-4 px-5">
+                      <div className={`inline-flex items-center gap-1.5 py-1 px-3 rounded-full ${categoryStyles.bg} ${categoryStyles.text} text-xs font-medium`}>
+                        {department.category}
                       </div>
-                    </button>
-                  </td>
+                    </td>
 
-                  {/* Actions */}
-                  {(isAdmin || hasEditPermission) && (
-                    <td className="py-4 px-4">
-                      <div className="flex gap-2 justify-center">
+                    {/* Parent Department */}
+                    <td className="py-4 px-5">
+                      {department.parent_department
+                        ? (
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <span>
+                              {departmentsData.find(
+                                (dep) => dep.id === department.parent_department?.id
+                              )?.name || "-"}
+                            </span>
+                          </div>
+                        )
+                        : (
+                          <div className="text-gray-500 font-medium">
+                            {t("Main Department")}
+                          </div>
+                        )
+                      }
+                    </td>
+
+                    {/* Goal */}
+                    <td className="py-4 px-5">
+                      {handleLongText(
+                        department.goal,
+                        `${department.name} - ${t("Goal")}`
+                      )}
+                    </td>
+
+                    {/* Files & Reports */}
+                    <td className="py-4 px-5">
+                      <button
+                        onClick={() =>
+                          setFilesReportsModal({ isOpen: true, department })
+                        }
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 shadow-sm ${isLightMode
+                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:shadow"
+                          : "bg-blue-900/20 text-blue-400 hover:bg-blue-900/30 hover:shadow"
+                          }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          <span>
+                            {department.supportingFiles?.length || 0} {t("Files")}, {department.requiredReports?.length || 0} {t("Reports")}
+                          </span>
+                        </div>
+                      </button>
+                    </td>
+
+                    {/* Development Programs */}
+                    <td className="py-4 px-5">
+                      <button
+                        onClick={() =>
+                          setDevelopmentProgramsModal({
+                            isOpen: true,
+                            department,
+                          })
+                        }
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 shadow-sm ${isLightMode
+                          ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:shadow"
+                          : "bg-emerald-900/20 text-emerald-400 hover:bg-emerald-900/30 hover:shadow"
+                          }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="w-4 h-4" />
+                          <span>
+                            {department.developmentPrograms?.length || 0} {t("Programs")}
+                          </span>
+                        </div>
+                      </button>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-4 px-5">
+                      <div className="flex justify-center gap-2">
+                        {/* Edit Button */}
                         {(isAdmin || hasEditPermission) && (
                           <NavigateButton
                             data={department}
-                            className="cursor-pointer p-2 w-10 h-10 flex justify-center items-center rounded-full bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30 transition-colors"
+                            className="cursor-pointer p-2 w-10 h-10 flex justify-center items-center rounded-lg bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30 transition-colors shadow hover:shadow-md"
                           >
                             <Image
                               src={PencilIcon}
                               alt="edit icon"
-                              height={18}
-                              width={18}
+                              height={20}
+                              width={20}
                             />
                           </NavigateButton>
                         )}
                       </div>
                     </td>
-                  )}
-                </tr>
-              ))
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td
-                  colSpan={visibleColumns.length + (isAdmin || hasEditPermission ? 1 : 0)}
-                  className="py-6 px-4 text-center text-gray-400"
+                  colSpan={visibleColumns.length + 1}
+                  className="py-8 px-5 text-center"
                 >
-                  {t("No departments found matching your search criteria.")}
+                  <div className="flex flex-col items-center justify-center">
+                    <Building2 className="w-12 h-12 text-gray-400 mb-3" />
+                    <p className="text-gray-400 text-lg font-medium">
+                      {t("No departments found matching your search criteria.")}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -307,18 +338,17 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
         </table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Improved Pagination Controls */}
       {departmentsData && departmentsData.length > 0 && (
-        <div className={`flex flex-col md:flex-row justify-between items-center mt-4 px-2 ${isLightMode ? "text-blackAF" : "text-twhite"
-          }`}>
-          <div className="mb-4 md:mb-0">
+        <div className={`flex flex-col md:flex-row justify-between items-center px-2 ${isLightMode ? "text-blackAF" : "text-twhite"}`}>
+          <div className="mb-4 md:mb-0 bg-secondary py-2 px-4 rounded-lg shadow-sm">
             <span>{t("Showing")} </span>
             <select
               value={pagination.itemsPerPage}
               onChange={(e) => pagination.onItemsPerPageChange(Number(e.target.value))}
-              className={`px-2 py-1 rounded mx-1 ${isLightMode
+              className={`px-3 py-1 rounded-md mx-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLightMode
                 ? "bg-white text-black border border-gray-300"
-                : "bg-tblack text-white border border-gray-700"
+                : "bg-dark text-white border border-gray-700"
                 }`}
             >
               <option value={5}>5</option>
@@ -329,15 +359,15 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
             <span>{t("of")} {pagination.totalItems} {t("items")}</span>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center bg-secondary py-1 px-2 rounded-lg shadow-sm">
             <button
               onClick={() => pagination.onPageChange(1)}
               disabled={pagination.currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${pagination.currentPage === 1
+              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === 1
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
+                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
+                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
                 }`}
             >
               «
@@ -346,11 +376,11 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
             <button
               onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
               disabled={pagination.currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${pagination.currentPage === 1
+              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === 1
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
+                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
+                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
                 }`}
             >
               ‹
@@ -360,13 +390,13 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
               <button
                 key={page}
                 onClick={() => pagination.onPageChange(page)}
-                className={`mx-1 px-3 py-1 rounded ${pagination.currentPage === page
+                className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === page
                   ? isLightMode
-                    ? "bg-tmid text-main"
-                    : "bg-tmid text-main"
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "bg-blue-600 text-white shadow-md"
                   : isLightMode
-                    ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                    : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
+                    ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
+                    : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
                   }`}
               >
                 {page}
@@ -376,11 +406,11 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
             <button
               onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
-              className={`mx-1 px-3 py-1 rounded ${pagination.currentPage === pagination.totalPages
+              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === pagination.totalPages
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
+                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
+                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
                 }`}
             >
               ›
@@ -389,11 +419,11 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
             <button
               onClick={() => pagination.onPageChange(pagination.totalPages)}
               disabled={pagination.currentPage === pagination.totalPages}
-              className={`mx-1 px-3 py-1 rounded ${pagination.currentPage === pagination.totalPages
+              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === pagination.totalPages
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
+                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
+                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
                 }`}
             >
               »

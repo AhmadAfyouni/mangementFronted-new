@@ -43,6 +43,7 @@ const NewHeader = ({
   const activeEntity = useSelector((state: RootState) => state.globalSearch.activeEntity);
   const searchQueries = useSelector((state: RootState) => state.globalSearch.queries);
   const pathname = usePathname();
+  const dispatch = useDispatch<AppDispatch>();
 
   // Determine current entity based on path
   useEffect(() => {
@@ -58,10 +59,9 @@ const NewHeader = ({
         dispatch(setSearchQuery({ entity: "employees", query: searchText }));
       }
     }
-  }, [pathname]);
+  }, [pathname, activeEntity, searchText, dispatch]);
 
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { isLightMode, toggleThemes } = useCustomTheme();
   const { toggleLanguage, getDir } = useLanguage();
@@ -293,26 +293,6 @@ const NewHeader = ({
                 </li>
               </RouteWrapper>
 
-              <RouteWrapper
-                href="/notifications"
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                }}
-              >
-                <li
-                  className={`
-                    px-4 py-3
-                    cursor-pointer
-                    transition-colors duration-200
-                    ${isLightMode
-                      ? "hover:bg-darkest hover:text-tblackAF"
-                      : "hover:bg-tblack"
-                    }
-                  `}
-                >
-                  {t("Notifications")}
-                </li>
-              </RouteWrapper>
 
               <RouteWrapper
                 href={"/auth"}

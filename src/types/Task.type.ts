@@ -149,7 +149,7 @@ export type ListTask = {
 };
 
 type TaskEmployeeType = {
-  id: string;
+  _id: string;
   name: string;
   national_id: string;
   dob: string;
@@ -231,6 +231,39 @@ type Section = {
   __v: number;
 };
 
+// Define interfaces for the department-related types
+interface DepartmentFile {
+  currentVersion: {
+    fileUrl: string;
+    version: number;
+    createdAt: string;
+    description?: string;
+  };
+  versions?: Array<{
+    fileUrl: string;
+    version: number;
+    createdAt: string;
+    description?: string;
+  }>;
+}
+
+interface NumericOwner {
+  category: string;
+  count: number;
+}
+
+interface RequiredReport {
+  name: string;
+  templateFile: string;
+}
+
+interface DevelopmentProgram {
+  name: string;
+  programFile: string;
+  objective?: string;
+  notes?: string;
+}
+
 export type ReceiveTaskType = {
   id: string;
   name: string;
@@ -249,7 +282,19 @@ export type ReceiveTaskType = {
   timeLogs: TimeLog[];
   section: Section;
   parent_task?: string;
+  subtasks: ReceiveTaskType[],
   rate?: number;
+  department?: {
+    _id: string,
+    name: string,
+    goal: string,
+    category: string,
+    mainTasks: string,
+    supportingFiles: DepartmentFile[],
+    numericOwners: NumericOwner[],
+    requiredReports: RequiredReport[],
+    developmentPrograms: DevelopmentProgram[],
+  },
 };
 
 export type ExtendedReceiveTaskType = {
