@@ -1,30 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { useSearchParams } from "next/navigation";
-// import { FieldValues, UseFormReset } from "react-hook-form";
-
-// function useQueryData<T extends FieldValues>(
-//   reset: UseFormReset<T>,
-//   paramName: string = "data"
-// ) {
-//   const searchParams = useSearchParams();
-//   const [queryData, setQueryData] = useState<T | null>(null);
-
-//   useEffect(() => {
-//     const dataParam = searchParams.get(paramName);
-//     if (dataParam) {
-//       const parsedData = JSON.parse(decodeURIComponent(dataParam)) as T;
-//       setQueryData(parsedData);
-//       reset(parsedData);
-//     } else {
-//       reset();
-//     }
-//   }, [reset, searchParams, paramName]);
-
-//   return queryData;
-// }
-
-// export default useQueryData;
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FieldValues, UseFormReset } from "react-hook-form";
@@ -46,16 +19,16 @@ function useQueryData<T extends FieldValues>(
           console.log('Retrieved data from session storage:', parsedData);
 
           // Process parent_department to ensure it's properly structured
-          if (parsedData && 'parent_department' in parsedData) {
+          if (parsedData && typeof parsedData === 'object' && 'parent_department' in parsedData) {
             // Handle different data structures for parent_department
-            const parentDept = parsedData.parent_department;
+            const parentDept = (parsedData as any).parent_department;
             if (parentDept && typeof parentDept === 'object' && 'id' in parentDept) {
               // Already in the right format
               console.log('Parent department in object format:', parentDept);
             } else if (parentDept && typeof parentDept === 'string') {
               // Convert string to object format
               console.log('Converting parent department from string to object:', parentDept);
-              parsedData.parent_department = { id: parentDept };
+              (parsedData as any).parent_department = { id: parentDept };
             }
           }
 

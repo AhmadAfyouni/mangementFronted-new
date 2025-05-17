@@ -25,7 +25,7 @@ export const useAddDeptLogic = (reset: UseFormReset<DepartmentFormInputs>) => {
     DepartmentFormInputs,
     "parent_department_id"
   > & {
-    parent_department: string;
+    parent_department: string | { id: string };
   };
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -54,10 +54,11 @@ export const useAddDeptLogic = (reset: UseFormReset<DepartmentFormInputs>) => {
         ...departmentData,
         supportingFiles: departmentData.supportingFiles ?? [],
         // Ensure we extract the ID correctly from parent_department
-        parent_department_id: departmentData.parent_department ?
-          (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ?
-            departmentData.parent_department.id : departmentData.parent_department :
-          '',
+        parent_department_id: departmentData.parent_department
+          ? (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null)
+            ? (departmentData.parent_department as { id: string }).id
+            : departmentData.parent_department as string
+          : '',
         // Make sure category is correctly set
         category: departmentData.category || ''
       });
