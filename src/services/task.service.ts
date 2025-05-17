@@ -5,7 +5,6 @@ import {
   ReceiveTaskType,
 } from "@/types/Task.type";
 import { apiClient } from "@/utils/axios/usage";
-import { AxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 import { DropResult } from "react-beautiful-dnd";
 

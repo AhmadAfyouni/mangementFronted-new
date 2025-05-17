@@ -10,20 +10,18 @@ import {
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import { useRedux } from "@/hooks/useRedux";
 import useTimeTicker from "@/hooks/useTimeTicker";
 import {
   formatDate,
   getPriorityBorderColor,
   isDueSoon,
 } from "@/services/task.service";
-import { RootState } from "@/state/store";
-import { ReceiveTaskType } from "@/types/Task.type";
+import { ExtendedReceiveTaskType } from "@/types/Task.type";
+import { Clock, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 import PageSpinner from "../ui/PageSpinner";
-import { User, Clock } from "lucide-react";
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
@@ -35,7 +33,7 @@ const formatTime = (totalSeconds: number) => {
 };
 
 const ListRow: React.FC<{
-  task: ReceiveTaskType;
+  task: ExtendedReceiveTaskType;
   level: number;
 }> = ({ task, level }) => {
   const router = useRouter();
@@ -49,9 +47,10 @@ const ListRow: React.FC<{
     startTaskTicker,
     isMakingAPICall,
   } = useTimeTicker(task.id, task.timeLogs);
-  const { selector: userId } = useRedux(
-    (state: RootState) => state.user.userInfo?.id
-  );
+
+
+  console.log("is making api call : ", isMakingAPICall);
+
 
   const handleTaskClick = () => {
     router.push(`/tasks/${task.id}`);
@@ -124,7 +123,7 @@ const ListRow: React.FC<{
       {/* Actions */}
       <div className="flex items-center justify-between py-4 px-6">
         <div className="flex items-center space-x-3">
-          <div className="bg-secondary/30 px-3 py-1.5 rounded-lg border border-secondary/20 shadow-inner shadow-black/20 hover:bg-secondary/40 transition-all duration-300">
+          <div className="bg-secondary/30 px-3 py-1.5 rounded-lg  shadow shadow-black/20 hover:bg-secondary/40 transition-all duration-300">
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-400" />
@@ -150,8 +149,10 @@ const ListRow: React.FC<{
               <div className="flex space-x-1">
                 {!isTaskRunning ? (
                   <button
-                    disabled={isMakingAPICall || task?.status !== "ONGOING"}
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${task?.status === "ONGOING"
+                    disabled={isMakingAPICall
+                      // || task?.status !== "ONGOING"
+                    }
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isMakingAPICall
                       ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
                       : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
                       }`}
@@ -194,7 +195,7 @@ const ListRow: React.FC<{
                   </button>
                 ) : (
                   <button
-                    disabled={isMakingAPICall}
+                    // disabled={isMakingAPICall}
                     className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10 flex items-center gap-1.5 transition-all duration-300"
                     onClick={async (e) => {
                       e.stopPropagation();

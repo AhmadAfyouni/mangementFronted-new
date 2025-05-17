@@ -1,7 +1,7 @@
 import useLanguage from "@/hooks/useLanguage";
+import { CalendarClock } from "lucide-react";
 import { useState } from "react";
 import { formatTime } from "./ListTaskDetails";
-import { CalendarClock } from "lucide-react";
 
 // Format time log function with improved date handling
 export const formatTimeLog = (
@@ -22,6 +22,7 @@ export const formatTimeLog = (
       end = new Date(); // Use current time as fallback
     }
   } catch (e) {
+    console.log(e);
     isInvalidEnd = true;
     end = new Date(); // Use current time as fallback
   }

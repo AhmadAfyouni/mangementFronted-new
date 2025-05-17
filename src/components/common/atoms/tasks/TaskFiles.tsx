@@ -1,29 +1,21 @@
-import React, { useState } from 'react';
-import { PaperClipIcon } from '@/assets';
-import Image from 'next/image';
-import { useFileManager } from '@/hooks/useFileManager';
-import useCustomTheme from '@/hooks/useCustomTheme';
-import useLanguage from '@/hooks/useLanguage';
-import useSnackbar from '@/hooks/useSnackbar';
 import { FileManager } from '@/components/common/atoms/fileManager';
 import { TaskFormInputs } from "@/types/Task.type";
-import { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import React from 'react';
+import { UseFormGetValues, UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 interface TaskFilesProps {
   register: UseFormRegister<TaskFormInputs>;
-  errors: FieldErrors<TaskFormInputs>;
-  isLightMode: boolean;
   t: (key: string) => string;
   setValue: UseFormSetValue<TaskFormInputs>;
+  getValues: UseFormGetValues<TaskFormInputs>;
   taskId?: string;
 }
 
 const TaskFiles: React.FC<TaskFilesProps> = ({
   register,
-  errors,
-  isLightMode,
   t,
   setValue,
+  getValues,
   taskId
 }) => {
   // Register files array in the form
@@ -31,8 +23,10 @@ const TaskFiles: React.FC<TaskFilesProps> = ({
 
   // Handle file upload completion
   const handleUploadComplete = (fileId: string, fileUrl: string) => {
-    // Update form value
-    const currentFiles = Array.isArray(setValue("files")) ? setValue("files") : [];
+    // Get the current files from the form
+    const currentFiles = getValues("files") || [];
+
+    // Update form value with new file URL
     setValue("files", [...currentFiles, fileUrl]);
   };
 
@@ -51,6 +45,7 @@ const TaskFiles: React.FC<TaskFilesProps> = ({
   // If taskId is available, use our new FileManager component
   return (
     <FileManager
+      fileType=''
       entityType="task"
       entityId={taskId}
       title={t("Attachments")}

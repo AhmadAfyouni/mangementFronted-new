@@ -1,4 +1,4 @@
-import { FileObject } from "@/components/common/atoms/departments/DeptAdditionalSection";
+import { FileObject } from "@/types/FileManager.type";
 import { tokenService } from "@/utils/axios/tokenService";
 import axios from "axios";
 

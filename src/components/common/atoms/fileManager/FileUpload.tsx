@@ -10,12 +10,13 @@ import { FileObject } from '@/types/FileManager.type';
 interface FileUploadProps {
   entityType: string;
   entityId: string;
-  fileType?: string;
+  fileType: string;
   description?: string;
   multiple?: boolean;
   onUploadComplete?: (fileId: string, fileUrl: string) => void;
   buttonText?: string;
   acceptedFileTypes?: string;
+  inputId?: string; // Added inputId prop for unique identification
 }
 
 /**
@@ -24,13 +25,16 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({
   entityType,
   entityId,
-  fileType = 'document',
+  fileType,
   description = '',
   multiple = false,
   onUploadComplete,
   buttonText,
-  acceptedFileTypes
+  acceptedFileTypes,
+  inputId = 'file-upload-input' // Default value for backward compatibility
 }) => {
+  // Console log for debugging
+  console.log(`FileUpload component initialized with fileType: ${fileType || 'not specified'}`);
   const { t } = useLanguage();
   const { isLightMode } = useCustomTheme();
   const { setSnackbarConfig: showSnackbar } = useSnackbar();
@@ -48,6 +52,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(`File selected in input with ID: ${inputId}, fileType: ${fileType}`);
+    
     if (e.target.files && e.target.files.length > 0) {
       const filesArray: FileObject[] = Array.from(e.target.files).map(file => ({
         name: file.name,
@@ -67,14 +73,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleUpload = async (files: FileObject[] = selectedFiles) => {
     if (files.length === 0) {
       showSnackbar({
-
-        open: true, message: t('Please select a file to upload'),
+        open: true, 
+        message: t('Please select a file to upload'),
         severity: 'warning'
       });
       return;
     }
 
     try {
+      // Log the fileType being used for upload
+      console.log(`Uploading file with fileType: ${fileType || 'not specified'}`);
+      
+      // Show loading spinner during upload
+      showSnackbar({
+        open: true, 
+        message: t('Uploading file...'),
+        severity: 'info'
+      });
+      
       // Upload each file
       for (const fileObj of files) {
         const result = await uploadFileAsync({
@@ -82,22 +98,30 @@ const FileUpload: React.FC<FileUploadProps> = ({
           name: fileObj.name,
           entityType,
           entityId,
-          fileType,
+          fileType, // Using the fileType as passed from the parent component
           description
         });
+        
+        console.log(`Upload completed with fileType: ${fileType || 'not specified'}`);
+        console.log('Upload result:', result);
 
-        showSnackbar({
-
-          open: true, message: t('File uploaded successfully'),
-          severity: 'success'
-        });
-
-        // Call callback if provided
-        if (onUploadComplete) {
-          onUploadComplete(
-            result.data.fileId,
-            result.data.fileUrl
-          );
+        // Force immediate UI refresh
+        if (result?.data?.fileId) {
+          // Show success notification
+          showSnackbar({
+            open: true, 
+            message: t('File uploaded successfully'),
+            severity: 'success'
+          });
+          
+          console.log('Triggering onUploadComplete with file ID:', result.data.fileId);
+          // Call callback if provided
+          if (onUploadComplete) {
+            onUploadComplete(
+              result.data.fileId,
+              result.data.fileUrl
+            );
+          }
         }
       }
 
@@ -132,13 +156,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
-          id="file-upload-input"
+          id={inputId}
           multiple={multiple}
           accept={acceptedFileTypes}
           disabled={isUploading}
         />
         <label
-          htmlFor="file-upload-input"
+          htmlFor={inputId}
           className={`
             flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer
             ${isLightMode

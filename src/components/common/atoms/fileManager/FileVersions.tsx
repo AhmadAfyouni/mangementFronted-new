@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { useFileVersions, useSetCurrentVersion } from '@/hooks/fileManager';
 import useCustomTheme from '@/hooks/useCustomTheme';
 import useLanguage from '@/hooks/useLanguage';
 import useSnackbar from '@/hooks/useSnackbar';
 import { constructFileUrl } from '@/utils/url';
-import { ExternalLink, Check } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 interface FileVersionsProps {
   fileId: string;
@@ -36,7 +35,7 @@ const FileVersions: React.FC<FileVersionsProps> = ({ fileId }) => {
     setCurrentVersion(
       { versionId, fileId },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           setSnackbarConfig({
             open: true,
             message: t('Version set as current successfully'),

@@ -1,16 +1,14 @@
 import {
   DeleteResponse,
-  FilesByEntityResponse,
-  FileEntity,
   FileObject,
+  FilesByEntityResponse,
   FileUploadInput,
   FileUploadResponse,
-  FileUploadWithFile,
   FileVersionsResponse,
   SetCurrentVersionResponse
 } from "@/types/FileManager.type";
-import FileUploadService from "./fileUpload.service";
 import { apiClient } from "@/utils/axios/usage";
+import FileUploadService from "./fileUpload.service";
 
 class FileManagerService {
   // Use the main API URL for file management operations instead of file storage URL
@@ -24,7 +22,7 @@ class FileManagerService {
   static async uploadFile(uploadData: FileObject & {
     entityType: string;
     entityId: string;
-    fileType?: string;
+    fileType: string; // Changed from optional to required
     description?: string;
   }): Promise<FileUploadResponse> {
     try {
@@ -43,9 +41,12 @@ class FileManagerService {
         originalName: uploadData.name,
         entityType: uploadData.entityType,
         entityId: uploadData.entityId,
-        fileType: uploadData.fileType || 'document',
+        fileType: uploadData.fileType, // Use the fileType as provided, no default
         description: uploadData.description,
       };
+
+      // Log the file data being sent to the API
+      console.log('File data being sent to API:', fileData);
 
       const response = await apiClient.post<FileUploadResponse>(
         `${this.baseUrl}${this.filesApiPath}/upload`,
@@ -100,7 +101,7 @@ class FileManagerService {
   static async getFilesByEntity(
     entityType: string,
     entityId: string,
-    fileType?: string
+    fileType: string // Changed from optional to required
   ): Promise<FilesByEntityResponse> {
     try {
       const url = fileType

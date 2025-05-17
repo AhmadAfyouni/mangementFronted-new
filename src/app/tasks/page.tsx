@@ -13,8 +13,6 @@ import {
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
-import { useRedux } from "@/hooks/useRedux";
-import { RootState } from "@/state/store";
 import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
@@ -27,7 +25,6 @@ const TasksView: React.FC = () => {
   const [myProj, setMyProj] = useState(false);
   const [myDept, setMyDept] = useState(false);
   const [selectedProj, setSelectedProj] = useState<string | null>(null);
-  const [selectedDept, setSelectedDept] = useState<string | null>(null);
 
   const { t } = useLanguage();
   const isAdmin = useRolePermissions("admin");
@@ -57,9 +54,6 @@ const TasksView: React.FC = () => {
       }`,
   });
 
-  const { selector } = useRedux(
-    (state: RootState) => state.user.userInfo?.department.id
-  );
 
   const { data: sections, isLoading: isSectionsLoading } = useCustomQuery<
     SectionType[]
@@ -95,7 +89,6 @@ const TasksView: React.FC = () => {
               onChange={(e) => {
                 const value = e.target.value;
 
-                setSelectedDept(value);
                 const deptOption = `departmentId=${value}`;
                 const projOption = selectedProj
                   ? `&projectId=${selectedProj}`
@@ -146,7 +139,6 @@ const TasksView: React.FC = () => {
                   setSelectedOption(value);
                 }
                 setSelectedProj(null);
-                setSelectedDept(null);
               }}
             >
               {canViewTasks && <option value="">{t("My Tasks")}</option>}

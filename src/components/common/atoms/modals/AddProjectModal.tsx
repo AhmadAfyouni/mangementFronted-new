@@ -2,16 +2,159 @@
 // @ts-nocheck
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import useCustomTheme from "@/hooks/useCustomTheme";
+import useLanguage from "@/hooks/useLanguage";
 import { addProjectSchema } from "@/schemas/project.shema";
 import { ProjectType } from "@/types/Project.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
-import { selectStyle } from "@/utils/SelectStyle";
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Building2,
+  Calendar,
+  CheckSquare,
+  Edit2,
+  FileText,
+  FolderOpen,
+  Loader2,
+  Plus,
+  Type,
+  X
+} from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import Select from "react-select";
+
+// Custom Select component that renders the dropdown directly in a portal
+const SelectWithPortal = ({ options, value, onChange, placeholder, isMulti }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState(value || []);
+  const controlRef = useRef(null);
+  const [controlRect, setControlRect] = useState(null);
+  const { t } = useTranslation();
+
+  // Update the control position when it opens
+  useEffect(() => {
+    if (isOpen && controlRef.current) {
+      const rect = controlRef.current.getBoundingClientRect();
+      setControlRect(rect);
+    }
+  }, [isOpen]);
+
+  // Handle option selection
+  const handleSelectOption = useCallback((option) => {
+    if (isMulti) {
+      // Check if option is already selected
+      const isSelected = selectedOptions.some(o => o.value === option.value);
+      let newValue;
+
+      if (isSelected) {
+        // Remove the option
+        newValue = selectedOptions.filter(o => o.value !== option.value);
+      } else {
+        // Add the option
+        newValue = [...selectedOptions, option];
+      }
+
+      setSelectedOptions(newValue);
+      onChange(newValue);
+    } else {
+      setSelectedOptions([option]);
+      onChange([option]);
+      setIsOpen(false);
+    }
+  }, [isMulti, onChange, selectedOptions]);
+
+  // Close the dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (controlRef.current && !controlRef.current.contains(event.target)) {
+        // Check if the click is inside the dropdown portal
+        const portal = document.getElementById('select-dropdown-portal');
+        if (portal && !portal.contains(event.target)) {
+          setIsOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Render the main control
+  return (
+    <div className="relative">
+      {/* Main control */}
+      <div
+        ref={controlRef}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 flex items-center justify-between cursor-pointer hover:border-indigo-500 transition-colors"
+        style={{
+          minHeight: '50px',
+        }}
+      >
+        <div className="flex flex-wrap gap-1 max-w-[calc(100%-24px)]">
+          {selectedOptions.length > 0 ? (
+            selectedOptions.map(option => (
+              <div
+                key={option.value}
+                className="bg-indigo-600 text-white px-2 py-1 rounded-md text-sm flex items-center gap-1"
+              >
+                {option.label}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectOption(option);
+                  }}
+                  className="ml-1 hover:bg-indigo-700 rounded-full w-4 h-4 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+            ))
+          ) : (
+            <span className="text-gray-400">{placeholder || t("Select...")}</span>
+          )}
+        </div>
+        <div className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Dropdown portal */}
+      {isOpen && controlRect && createPortal(
+        <div
+          id="select-dropdown-portal"
+          className="fixed bg-dark border border-gray-700 rounded-lg shadow-lg overflow-auto z-[999999]"
+          style={{
+            width: controlRect.width,
+            maxHeight: '200px',
+            top: controlRect.top - 210, // Position above the control
+            left: controlRect.left,
+          }}
+        >
+          {options.map(option => {
+            const isSelected = selectedOptions.some(o => o.value === option.value);
+            return (
+              <div
+                key={option.value}
+                className={`px-4 py-3 cursor-pointer hover:bg-secondary ${isSelected ? 'bg-indigo-600 text-white' : 'text-twhite'}`}
+                onClick={() => handleSelectOption(option)}
+              >
+                {option.label}
+              </div>
+            );
+          })}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+};
 
 const AddProjectModal: React.FC<{
   isOpen: boolean;
@@ -28,18 +171,14 @@ const AddProjectModal: React.FC<{
     resolver: yupResolver(addProjectSchema(!!projectData)),
     context: { isEditing: !!projectData },
   });
-  const { isLightMode } = useCustomTheme();
-  // const isAdmin = useRolePermissions("admin");
-  // const isPrimary = useRolePermissions("primary_user");
+  const { getDir } = useLanguage()
+  const isRTL = getDir() == "rtl"
 
   const { data: departments, isError: isDeptError } = useCustomQuery<
     DeptTree[]
   >({
     queryKey: ["departments"],
-    url: `/department/${
-      // isAdmin || isPrimary ? "get-departments" : "view"
-      "get-level-one"
-      }`,
+    url: `/department/get-level-one`,
   });
 
   const { mutate: addOrUpdateProject, isPending } = useCreateMutation({
@@ -89,7 +228,7 @@ const AddProjectModal: React.FC<{
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000]"
             onClick={onClose}
           />
 
@@ -99,104 +238,114 @@ const AddProjectModal: React.FC<{
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 flex items-center justify-center z-50"
+            className="fixed inset-0 flex items-center justify-center z-[1001]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className={`w-[90%] max-w-lg ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-              <div className="bg-secondary rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-gray-700 bg-dark/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {projectData ? (
-                      <Edit2 className="w-5 h-5 text-blue-400" />
-                    ) : (
-                      <FolderOpen className="w-5 h-5 text-purple-400" />
-                    )}
-                    <h2 className="text-xl font-bold text-twhite">
-                      {projectData ? t("Update Project") : t("Create New Project")}
-                    </h2>
+            <div className={`w-[90%] max-w-2xl ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <div className="bg-main rounded-2xl shadow-2xl border border-secondary overflow-hidden">
+                {/* Header */}
+                <div className="px-8 py-5 bg-gradient-to-r from-secondary to-secondary/80 border-b border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-xl ${projectData ? 'bg-blue-600/20' : 'bg-purple-600/20'}`}>
+                        {projectData ? (
+                          <Edit2 className="w-6 h-6 text-blue-400" />
+                        ) : (
+                          <FolderOpen className="w-6 h-6 text-purple-400" />
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-twhite">
+                          {projectData ? t("Update Project") : t("Create New Project")}
+                        </h2>
+                        <p className="text-sm text-gray-400 mt-1">
+                          {projectData
+                            ? t("Update project details and information")
+                            : t("Fill in the details to create a new project")}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onClose}
+                      className="p-2 hover:bg-dark/50 rounded-lg transition-colors"
+                    >
+                      <X className="w-6 h-6 text-gray-400" />
+                    </button>
                   </div>
-                  <button
-                    onClick={onClose}
-                    className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5 text-gray-400" />
-                  </button>
                 </div>
-              </div>
 
-              {/* Content */}
-              <form
-                onSubmit={handleSubmit(async (data) => {
-                  addOrUpdateProject({
-                    ...data,
-                    departments: selectedDepartments,
-                  });
-                })}
-                className="p-6"
-              >
-                <div className="space-y-4">
-                  {/* Project Name Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">
-                      {t("Project Name")}
-                    </label>
-                    <input
-                      type="text"
-                      {...register("name")}
-                      className={`w-full px-4 py-3 rounded-lg bg-dark text-twhite border 
-                        ${errors.name ? 'border-red-500' : 'border-gray-700'} 
-                        focus:border-blue-500 focus:outline-none transition-colors
-                        ${isLightMode ? 'bg-darker text-tblackAF' : ''}`}
-                      placeholder={t("Enter project name")}
-                    />
-                    {errors.name && (
-                      <p className="text-red-400 mt-1 text-sm">
-                        {errors.name.message}
-                      </p>
-                    )}
-                  </div>
+                {/* Content */}
+                <form
+                  onSubmit={handleSubmit(async (data) => {
+                    addOrUpdateProject({
+                      ...data,
+                      departments: selectedDepartments,
+                    });
+                  })}
+                  className="px-8 py-6"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Project Name Field */}
+                    <div className="md:col-span-2">
+                      <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <Type className="w-4 h-4 text-purple-400" />
+                        {t("Project Name")}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          {...register("name")}
+                          className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors"
+                          placeholder={t("Enter project name")}
+                        />
+                        {errors.name && (
+                          <div className="absolute right-3 top-3.5 text-red-500">
+                            <CheckSquare className="w-5 h-5" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.name && (
+                        <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+                          <CheckSquare className="w-3.5 h-3.5" />
+                          {errors.name.message}
+                        </p>
+                      )}
+                    </div>
 
-                  {/* Description Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">
-                      {t("Description")}
-                    </label>
-                    <textarea
-                      {...register("description")}
-                      rows={3}
-                      className={`w-full px-4 py-3 rounded-lg bg-dark text-twhite border 
-                        ${errors.description ? 'border-red-500' : 'border-gray-700'} 
-                        focus:border-blue-500 focus:outline-none transition-colors resize-none
-                        ${isLightMode ? 'bg-darker text-tblackAF' : ''}`}
-                      placeholder={t("Enter project description")}
-                    />
-                    {errors.description && (
-                      <p className="text-red-400 mt-1 text-sm">
-                        {errors.description.message}
-                      </p>
-                    )}
-                  </div>
+                    {/* Description Field */}
+                    <div className="md:col-span-2">
+                      <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-blue-400" />
+                        {t("Description")}
+                      </label>
+                      <textarea
+                        {...register("description")}
+                        rows={4}
+                        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors resize-none"
+                        placeholder={t("Enter project description")}
+                      />
+                      {errors.description && (
+                        <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+                          <CheckSquare className="w-3.5 h-3.5" />
+                          {errors.description.message}
+                        </p>
+                      )}
+                    </div>
 
-                  {/* Dates Row */}
-                  <div className="grid grid-cols-2 gap-4">
                     {/* Start Date Field */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">
-                        <Calendar className="inline w-4 h-4 mr-1" />
+                      <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-green-400" />
                         {t("Start Date")}
                       </label>
                       <input
                         type="date"
                         {...register("startDate")}
-                        className={`w-full px-4 py-3 rounded-lg bg-dark text-twhite border 
-                          ${errors.startDate ? 'border-red-500' : 'border-gray-700'} 
-                          focus:border-blue-500 focus:outline-none transition-colors
-                          ${isLightMode ? 'bg-darker text-tblackAF' : ''}`}
+                        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors"
                       />
                       {errors.startDate && (
-                        <p className="text-red-400 mt-1 text-sm">
+                        <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+                          <CheckSquare className="w-3.5 h-3.5" />
                           {errors.startDate.message}
                         </p>
                       )}
@@ -204,121 +353,90 @@ const AddProjectModal: React.FC<{
 
                     {/* End Date Field */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">
-                        <Calendar className="inline w-4 h-4 mr-1" />
+                      <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-yellow-400" />
                         {t("End Date")}
                       </label>
                       <input
                         type="date"
                         {...register("endDate")}
-                        className={`w-full px-4 py-3 rounded-lg bg-dark text-twhite border 
-                          ${errors.endDate ? 'border-red-500' : 'border-gray-700'} 
-                          focus:border-blue-500 focus:outline-none transition-colors
-                          ${isLightMode ? 'bg-darker text-tblackAF' : ''}`}
+                        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-yellow-500 focus:ring focus:ring-yellow-500/20 focus:outline-none transition-colors"
                       />
                       {errors.endDate && (
-                        <p className="text-red-400 mt-1 text-sm">
+                        <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+                          <CheckSquare className="w-3.5 h-3.5" />
                           {errors.endDate.message}
                         </p>
                       )}
                     </div>
+
+                    {/* Departments Field - Using our custom SelectWithPortal */}
+                    {departments && !isDeptError && (
+                      <div className="md:col-span-2">
+                        <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-indigo-400" />
+                          {t("Departments")}
+                        </label>
+                        <SelectWithPortal
+                          options={
+                            departments && departments.length > 0
+                              ? departments.map((dept) => ({
+                                value: dept.id,
+                                label: dept.name,
+                              }))
+                              : []
+                          }
+                          value={selectedDepartments.map((id) => ({
+                            value: id,
+                            label:
+                              departments && departments.find((dept) => dept.id === id)?.name || "",
+                          }))}
+                          onChange={(selectedOptions) => {
+                            setSelectedDepartments(
+                              selectedOptions.map((option) => option.value)
+                            );
+                          }}
+                          placeholder={t("Select Departments...")}
+                          isMulti={true}
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  {/* Departments Field */}
-                  {departments && !isDeptError && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">
-                        <Building2 className="inline w-4 h-4 mr-1" />
-                        {t("Departments")}
-                      </label>
-                      <Select
-                        isMulti
-                        value={selectedDepartments.map((id) => ({
-                          value: id,
-                          label:
-                            departments && departments.find((dept) => dept.id === id)?.name || "",
-                        }))}
-                        options={
-                          departments && departments.length > 0
-                            ? departments.map((dept) => ({
-                              value: dept.id,
-                              label: dept.name,
-                            }))
-                            : []
-                        }
-                        onChange={(selectedOptions) => {
-                          setSelectedDepartments(
-                            selectedOptions.map((option) => option.value)
-                          );
-                        }}
-                        className="text-sm"
-                        placeholder={t("Select Departments...")}
-                        styles={{
-                          ...selectStyle,
-                          control: (base) => ({
-                            ...base,
-                            backgroundColor: isLightMode ? '#1f2937' : '#111827',
-                            borderColor: '#374151',
-                            minHeight: '48px',
-                            '&:hover': {
-                              borderColor: '#3b82f6',
-                            },
-                          }),
-                          menu: (base) => ({
-                            ...base,
-                            backgroundColor: isLightMode ? '#1f2937' : '#111827',
-                          }),
-                          option: (base, state) => ({
-                            ...base,
-                            backgroundColor: state.isSelected
-                              ? '#3b82f6'
-                              : state.isFocused
-                              ? '#1f2937'
-                              : 'transparent',
-                            '&:hover': {
-                              backgroundColor: '#1f2937',
-                            },
-                          }),
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer */}
-                <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-5 py-2 rounded-lg bg-gray-700 text-twhite hover:bg-gray-600 transition-colors"
-                    disabled={isPending}
-                  >
-                    {t("Cancel")}
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className={`px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2
+                  {/* Footer */}
+                  <div className="mt-8 pt-4 border-t border-gray-700 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-5 py-2.5 rounded-lg bg-dark hover:bg-gray-700 text-twhite hover:text-white transition-colors border border-gray-700"
+                      disabled={isPending}
+                    >
+                      {t("Cancel")}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className={`px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg
                       ${projectData
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-purple-600 hover:bg-purple-700 text-white'
-                      }
-                      ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        {projectData ? t("Updating...") : t("Creating...")}
-                      </>
-                    ) : (
-                      <>
-                        {projectData ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                        {projectData ? t("Update Project") : t("Create Project")}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                          : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }
+                      ${isPending ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {projectData ? t("Updating...") : t("Creating...")}
+                        </>
+                      ) : (
+                        <>
+                          {projectData ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                          {projectData ? t("Update Project") : t("Create Project")}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </motion.div>

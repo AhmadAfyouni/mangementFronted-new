@@ -1,19 +1,19 @@
 "use client";
 
+import { SubtasksIcon, TasksIcon } from "@/assets";
+import useCustomTheme from "@/hooks/useCustomTheme";
+import useLanguage from "@/hooks/useLanguage";
 import {
   formatDate,
   getPriorityBorderColor,
   isDueSoon,
 } from "@/services/task.service";
-import { ReceiveTaskType } from "@/types/Task.type";
+import { ExtendedReceiveTaskType } from "@/types/Task.type";
+import Image from "next/image";
 import React, { useState } from "react";
 import ListTaskDetails from "./ListTaskDetails";
-import useLanguage from "@/hooks/useLanguage";
-import Image from "next/image";
-import { SubtasksIcon, TasksIcon } from "@/assets";
-import useCustomTheme from "@/hooks/useCustomTheme";
 const HomeListRow: React.FC<{
-  task: ReceiveTaskType;
+  task: ExtendedReceiveTaskType;
   level: number;
 }> = ({ task, level }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,8 +38,8 @@ const HomeListRow: React.FC<{
         >
           <div
             className={` w-1/2  flex items-center  gap-2  px-6 py-4 text-twhite       ${isLightMode
-                ? "group-hover:text-tblackAF"
-                : "group-hover:text-twhite"
+              ? "group-hover:text-tblackAF"
+              : "group-hover:text-twhite"
               }   `}
           >
             <Image
@@ -56,15 +56,15 @@ const HomeListRow: React.FC<{
 
           <div
             className={`px-6 py-4 text-tdark      ${isLightMode
-                ? "group-hover:text-tblackAF"
-                : "group-hover:text-twhite"
+              ? "group-hover:text-tblackAF"
+              : "group-hover:text-twhite"
               }   `}
           >
             {t(task.status)}
             <span
               className={`px-6 py-4       ${isLightMode
-                  ? "group-hover:text-tblackAF"
-                  : "group-hover:text-twhite"
+                ? "group-hover:text-tblackAF"
+                : "group-hover:text-twhite"
                 }   ${task.is_over_due ? "text-red-500" : "text-tdark"} ${isDueSoon(task.due_date) ? "flash" : ""
                 }`}
             >

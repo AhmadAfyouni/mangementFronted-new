@@ -1,22 +1,31 @@
 "use client";
 
+import useLanguage from "@/hooks/useLanguage";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import dagre from "dagre";
-import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Briefcase, Building2, ChevronRight, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import ReactFlow, {
   Background,
+  Controls,
   Edge,
   Handle,
   Node,
   NodeProps,
   Position,
-  Controls,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import CustomModal from "../atoms/modals/CustomModal";
-import useLanguage from "@/hooks/useLanguage";
-import { motion } from "framer-motion";
-import { Building2, Users, Briefcase, ChevronRight } from "lucide-react";
+
+// Create an interface for employee data
+interface DepartmentEmployee {
+  id?: string;
+  name?: string;
+  title?: string;
+  email?: string;
+  [key: string]: unknown;
+}
 
 type DepartmentHierarchyTreeProps = {
   data: DeptTree[];
@@ -84,12 +93,11 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
   data,
   nodeStyles,
   nodeColors = { target: "#3b82f6", source: "#3b82f6" },
-  width = "100%",
   lightMode = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { t, currentLanguage } = useLanguage();
-  const [selectedDept, setSelectedDept] = useState<{ name: string; emps: any[] } | null>(null);
+  const [selectedDept, setSelectedDept] = useState<{ name: string; emps: DepartmentEmployee[] } | null>(null);
 
   const CustomNode = ({ data, selected }: NodeProps) => {
     const employeeCount = data.emps?.length || 0;
@@ -217,20 +225,27 @@ const DepartmentHierarchyTree: React.FC<DepartmentHierarchyTreeProps> = ({
           title={`${selectedDept.name} - ${t("Employees")}`}
           content={
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
-              {selectedDept.emps.map((emp, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-dark rounded-lg hover:bg-gray-800 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                    {emp.name.charAt(0).toUpperCase()}
+              {selectedDept.emps.length > 0 ? (
+                selectedDept.emps.map((emp, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-dark rounded-lg hover:bg-gray-800 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                      {emp.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-twhite">{emp.name || t("Unknown")}</h4>
+                      <p className="text-sm text-gray-400 flex items-center gap-1">
+                        <Briefcase className="w-3 h-3" />
+                        {emp.title || t("No Title")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-twhite">{emp.name}</h4>
-                    <p className="text-sm text-gray-400 flex items-center gap-1">
-                      <Briefcase className="w-3 h-3" />
-                      {emp.title}
-                    </p>
-                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Users className="w-12 h-12 text-gray-500 mb-3" />
+                  <p className="text-gray-400">{t("No employees in this department")}</p>
                 </div>
-              ))}
+              )}
             </div>
           }
           language={currentLanguage as "en" | "ar"}

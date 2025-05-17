@@ -1,9 +1,8 @@
-import { Paperclip, XCircle, AlertCircle, ExternalLink } from "lucide-react";
-import useLanguage from "@/hooks/useLanguage";
 import { FileManager } from '@/components/common/atoms/fileManager';
-import useCustomTheme from "@/hooks/useCustomTheme";
+import useLanguage from "@/hooks/useLanguage";
+import { constructFileUrl, getFilenameFromUrl, isFileManagerUrl } from '@/utils/url';
+import { AlertCircle, ExternalLink, Paperclip, XCircle } from "lucide-react";
 import { useState } from "react";
-import { constructFileUrl, isFileManagerUrl, getFilenameFromUrl } from '@/utils/url';
 
 interface TaskFilesProps {
   taskId: string;
@@ -20,9 +19,6 @@ export const TaskFiles: React.FC<TaskFilesProps> = ({
 }) => {
   const { t } = useLanguage();
   const [loadingError, setLoadingError] = useState<boolean>(false);
-
-  // File management server URL (used for new file system)
-  const fileManagerServerUrl = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
 
   // Function to handle file viewing with error handling
   const handleFileView = (file: string) => {
@@ -61,6 +57,7 @@ export const TaskFiles: React.FC<TaskFilesProps> = ({
 
       {/* New File Management System */}
       <FileManager
+        fileType=''
         entityType="task"
         entityId={taskId}
         allowManage={true}

@@ -1,8 +1,7 @@
-import { ArrowLeft, Clock, AlertCircle, Edit2, Check, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { ReceiveTaskType } from "@/types/Task.type";
-import { formatDate, getPriorityColor } from "@/services/task.service";
 import useLanguage from "@/hooks/useLanguage";
+import { formatDate, getPriorityColor } from "@/services/task.service";
+import { ReceiveTaskType } from "@/types/Task.type";
+import { AlertCircle, Check, Clock, Edit2, X } from "lucide-react";
 import { useState } from "react";
 
 interface TaskHeaderProps {

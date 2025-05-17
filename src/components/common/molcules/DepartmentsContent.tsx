@@ -1,4 +1,4 @@
-import { PencilIcon, EyeIcon } from "@/assets";
+import { PencilIcon } from "@/assets";
 import {
   usePermissions,
   useRolePermissions,
@@ -7,11 +7,10 @@ import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
 import { DepartmentType } from "@/types/DepartmentType.type";
+import { Briefcase, Building2, FileText, Users } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { DevelopmentProgramsModal, FilesReportsModal, TextModal } from "./departments/DepartmentsComponents";
-import { Building2, Users, Briefcase, FileText, Eye } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
@@ -39,7 +38,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
 }) => {
   const { t } = useLanguage();
   const { isLightMode } = useCustomTheme();
-  const router = useRouter();
   const isAdmin = useRolePermissions("admin");
   const hasEditPermission = usePermissions(["department_updatesss"]);
   const { NavigateButton } = useSetPageData<DepartmentType>(
@@ -47,10 +45,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
   );
 
 
-  // Function to navigate to department details
-  const handleViewDetails = (department: DepartmentType) => {
-    router.push(`/departments/department-details?id=${department.id}`);
-  };
 
   // State for modals
   const [textModal, setTextModal] = useState<TextModalState>({
@@ -59,25 +53,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     title: "",
   });
 
-  // Helper function to extract file URL from either string or object
-  const getFileUrl = (fileData: any): string | undefined => {
-    if (!fileData) return undefined;
-
-    // If it's a string, return it directly
-    if (typeof fileData === 'string') return fileData;
-
-    // If it's an object with currentVersion, get the URL from it
-    if (fileData.currentVersion?.fileUrl) {
-      return fileData.currentVersion.fileUrl;
-    }
-
-    // If it's an object but not in the expected format, try to find any URL property
-    if (typeof fileData === 'object') {
-      if (fileData.fileUrl) return fileData.fileUrl;
-    }
-
-    return undefined;
-  };
 
 
   // State for Files & Reports and Development Programs modals
@@ -217,9 +192,8 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
           </thead>
           <tbody className="divide-y divide-gray-800">
             {departmentsData && departmentsData.length > 0 ? (
-              departmentsData.map((department, index) => {
+              departmentsData.map((department) => {
                 const categoryStyles = getCategoryStyles(department.category);
-                const isLast = index === departmentsData.length - 1;
 
                 return (
                   <tr

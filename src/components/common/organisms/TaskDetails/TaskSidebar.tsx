@@ -1,14 +1,18 @@
-import Image from "next/image";
-import { SubtasksIcon } from "@/assets";
 import useLanguage from "@/hooks/useLanguage";
-import { ExtendedReceiveTaskType } from "@/types/Task.type";
-import { Star, Target, Layers } from "lucide-react";
+import { ReceiveTaskType } from "@/types/Task.type";
+import { Layers, Star, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface TaskSidebarProps {
-  task: any;
-  allTasks?: any[];
+  task: ReceiveTaskType;
+  allTasks?: ReceiveTaskType[];
   onAddSubtask: () => void;
+}
+
+interface Subtask {
+  id: string;
+  name: string;
+  [key: string]: unknown;
 }
 
 export const TaskSidebar: React.FC<TaskSidebarProps> = ({
@@ -20,10 +24,10 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
   const router = useRouter();
 
   // Ensure subtasks is an array
-  const subtasks = Array.isArray(task.subtasks)
+  const subtasks: Subtask[] = Array.isArray(task.subtasks)
     ? task.subtasks
-    : Array.isArray(task.subTasks)
-      ? task.subTasks
+    : Array.isArray((task as unknown as { subTasks?: Subtask[] }).subTasks)
+      ? (task as unknown as { subTasks: Subtask[] }).subTasks
       : [];
 
   const handleTaskClick = (taskId: string) => {
@@ -41,7 +45,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
         {subtasks.length > 0 ? (
           <div className="space-y-2">
-            {subtasks.map((subtask: any, index: number) => (
+            {subtasks.map((subtask: Subtask, index: number) => (
               <div
                 key={index}
                 className="group flex items-center gap-2 p-3 bg-dark rounded-lg cursor-pointer 
@@ -99,7 +103,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
           </h2>
           <div className="p-3 bg-dark rounded-lg">
             <span className="text-twhite">
-              {allTasks?.find((t: any) => t.id === task.parent_task)?.name || t("No Parent Task")}
+              {allTasks?.find((t: ReceiveTaskType) => t.id === task.parent_task)?.name || t("No Parent Task")}
             </span>
           </div>
         </div>

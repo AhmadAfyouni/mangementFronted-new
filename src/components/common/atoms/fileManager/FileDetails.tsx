@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import useLanguage from '@/hooks/useLanguage';
-import useCustomTheme from '@/hooks/useCustomTheme';
-import { FileEntity } from '@/types/FileManager.type';
 import { useFileDelete } from '@/hooks/fileManager';
+import useCustomTheme from '@/hooks/useCustomTheme';
+import useLanguage from '@/hooks/useLanguage';
 import useSnackbar from '@/hooks/useSnackbar';
-import FileVersions from './FileVersions';
+import { FileEntity } from '@/types/FileManager.type';
 import { constructFileUrl } from '@/utils/url';
-import { Download, ExternalLink, Trash2, X, FileText, File, FileIcon, FileBoxIcon } from 'lucide-react';
+import { Download, ExternalLink, FileBoxIcon, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import FileVersions from './FileVersions';
 
 interface FileDetailsProps {
   file: FileEntity;
@@ -67,11 +67,6 @@ const FileDetails: React.FC<FileDetailsProps> = ({
       });
       setConfirmDelete(false);
     }
-  };
-
-  // Function to get file icon based on file type
-  const getFileTypeIcon = () => {
-    return <FileText className="h-12 w-12 text-primary" />;
   };
 
   return (

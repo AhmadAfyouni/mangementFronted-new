@@ -2,15 +2,14 @@ import { useFilesByEntity } from '@/hooks/fileManager';
 import useCustomTheme from '@/hooks/useCustomTheme';
 import useLanguage from '@/hooks/useLanguage';
 import { FileEntity } from '@/types/FileManager.type';
-import { constructFileUrl } from '@/utils/url';
 import { useState } from 'react';
 
 interface FileListProps {
   entityType: string;
   entityId: string;
-  fileType?: string;
+  fileType: string; // Changed from optional to required
   title?: string;
-  viewOnly?: boolean;
+  viewOnly?: boolean; // Added viewOnly prop
   onFileSelected?: (file: FileEntity) => void;
 }
 
@@ -37,8 +36,17 @@ const FileList: React.FC<FileListProps> = ({
     error
   } = useFilesByEntity(entityType, entityId, fileType);
 
+  // Console log for debugging
+  console.log(`FileList for ${entityType}/${entityId}/${fileType} - Files count: ${filesData?.data?.files?.length || 0}`);
+
   // Handle file selection
   const handleFileClick = (file: FileEntity) => {
+    if (viewOnly) {
+      // In view-only mode, just toggle selection for viewing details
+      setSelectedFileId(prevId => prevId === file.id ? null : file.id);
+      return;
+    }
+
     if (onFileSelected) {
       onFileSelected(file);
     } else {
@@ -80,8 +88,9 @@ const FileList: React.FC<FileListProps> = ({
 
   return (
     <div className={`${isLightMode ? 'bg-white' : 'bg-dark'} p-4 rounded-lg`}>
-      <h3 className={`font-semibold ${isLightMode ? 'text-dark' : 'text-twhite'} mb-3`}>
-        {title || t('Files')}
+      <h3 className={`font-semibold ${isLightMode ? 'text-dark' : 'text-twhite'} mb-3 flex justify-between items-center`}>
+        <span>{title || t('Files')}</span>
+        {viewOnly && <span className={`text-xs px-2 py-1 rounded-full ${isLightMode ? 'bg-gray-200 text-gray-600' : 'bg-gray-700 text-gray-300'}`}>{t('View Only')}</span>}
       </h3>
 
       {files.length === 0 ? (
@@ -94,7 +103,8 @@ const FileList: React.FC<FileListProps> = ({
             <div
               key={file.id}
               className={`
-                p-3 rounded-md cursor-pointer transition-colors
+                p-3 rounded-md transition-colors
+                ${viewOnly ? 'cursor-default' : 'cursor-pointer'}
                 ${selectedFileId === file.id
                   ? (isLightMode ? 'bg-blue-100' : 'bg-blue-900')
                   : (isLightMode ? 'bg-gray-100 hover:bg-gray-200' : 'bg-tblack hover:bg-darker')

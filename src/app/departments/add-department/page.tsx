@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+
 "use client";
 
 import AddCategoryField from "@/components/common/atoms/departments/AddCategoryField";
@@ -17,10 +18,10 @@ import {
   handleAddNumericOwner,
   handleManualSubmit,
 } from "@/services/department.service";
+import { ArrowLeft, Briefcase, Building2, FileText, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "react-i18next";
 import React, { useEffect } from "react";
-import { ArrowLeft, Building2, Briefcase, FileText, Save, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const AddDept = () => {
   const { t } = useTranslation();
@@ -59,7 +60,6 @@ const AddDept = () => {
     setNewCategory,
     setRequiredCategoryOptions,
     setSupportingFiles,
-    supportingFiles,
   } = useAddDeptLogic(reset);
 
   const { mutate: addDepartment, isPending: isPendingDepartment } =
@@ -67,8 +67,8 @@ const AddDept = () => {
       endpoint: departmentData
         ? `/department/updateDepartment/${departmentData.id}`
         : `/department/create-department`,
-      onSuccessMessage: departmentData 
-        ? "Department updated successfully!" 
+      onSuccessMessage: departmentData
+        ? "Department updated successfully!"
         : "Department created successfully!",
       invalidateQueryKeys: ["departments"],
       onSuccessFn: () => {
@@ -98,9 +98,9 @@ const AddDept = () => {
 
       // Initialize parent department correctly
       if (departmentData.parent_department) {
-        const parentId = typeof departmentData.parent_department === 'object' 
-        ? (departmentData.parent_department as {id: string})?.id 
-        : departmentData.parent_department as string;
+        const parentId = typeof departmentData.parent_department === 'object'
+          ? (departmentData.parent_department as { id: string })?.id
+          : departmentData.parent_department as string;
 
         console.log('Setting parent_department_id to:', parentId);
         setValue('parent_department_id', parentId);
@@ -120,7 +120,7 @@ const AddDept = () => {
   };
 
   // Get category icon based on category value
-  const getCategoryIcon = (category) => {
+  const getCategoryIcon = (category: string) => {
     if (category === 'primary-department') {
       return <Building2 className="w-5 h-5 text-blue-400" />;
     } else if (category === 'secondary-department') {
@@ -134,7 +134,7 @@ const AddDept = () => {
     <GridContainer>
       <div className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"} p-8 rounded-xl shadow-lg w-full col-span-full text-twhite`}>
         {/* Back button */}
-        <button 
+        <button
           onClick={handleBack}
           className="mb-6 flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
@@ -144,12 +144,12 @@ const AddDept = () => {
 
         {/* Header with icon */}
         <div className="flex items-center gap-4 mb-8 border-b border-gray-800 pb-6">
-          <div className={`p-4 rounded-xl ${departmentData && departmentData.category ? 
-            departmentData.category === 'primary-department' ? 'bg-blue-900/30' : 
-            departmentData.category === 'secondary-department' ? 'bg-purple-900/30' : 
-            'bg-green-900/30' : 'bg-blue-900/30'}`}>
-            {departmentData && departmentData.category ? 
-              getCategoryIcon(departmentData.category) : 
+          <div className={`p-4 rounded-xl ${departmentData && departmentData.category ?
+            departmentData.category === 'primary-department' ? 'bg-blue-900/30' :
+              departmentData.category === 'secondary-department' ? 'bg-purple-900/30' :
+                'bg-green-900/30' : 'bg-blue-900/30'}`}>
+            {departmentData && departmentData.category ?
+              getCategoryIcon(departmentData.category) :
               <Building2 className="w-5 h-5 text-blue-400" />}
           </div>
           <div>
@@ -157,8 +157,8 @@ const AddDept = () => {
               {departmentData ? t("Update Department") : t("Create Department")}
             </h1>
             <p className="text-gray-400 text-sm mt-1">
-              {departmentData 
-                ? t("Update the details for this department") 
+              {departmentData
+                ? t("Update the details for this department")
                 : t("Fill in the details to create a new department")}
             </p>
           </div>
@@ -231,10 +231,10 @@ const AddDept = () => {
               <DeptFormInput
                 type="select"
                 label={t("Parent Department")}
-                value={departmentData?.parent_department ? 
-                (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ? 
-                (departmentData.parent_department as { id: string }).id : departmentData.parent_department as string : 
-                ''}
+                value={departmentData?.parent_department ?
+                  (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ?
+                    (departmentData.parent_department as { id: string }).id : departmentData.parent_department as string :
+                  ''}
                 onChange={(e) => setValue("parent_department_id", e.target.value)}
                 placeholder={t("Select a parent department")}
                 selectOptions={
@@ -306,21 +306,21 @@ const AddDept = () => {
                 type="button"
                 onClick={handleBack}
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm
-                  ${isLightMode 
-                    ? "bg-gray-200 text-gray-800 hover:bg-gray-300" 
+                  ${isLightMode
+                    ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     : "bg-dark text-gray-300 hover:bg-gray-800"}
                 `}
               >
                 {t("Cancel")}
               </button>
-              
+
               <button
                 type="submit"
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow hover:shadow-md
                   flex items-center gap-2
                   ${isPendingDepartment ? "opacity-70 cursor-not-allowed" : ""}
-                  ${isLightMode 
-                    ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  ${isLightMode
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
                     : "bg-blue-600 text-white hover:bg-blue-700"}
                 `}
                 disabled={isPendingDepartment}

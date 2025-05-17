@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 
 // Base type for file objects from backend
 export interface FileBase {
@@ -93,7 +92,7 @@ export interface FileUploadInput {
   originalName: string;
   entityType: string;
   entityId: string;
-  fileType?: string;
+  fileType: string; // Changed from optional to required
   description?: string;
   createdBy?: string;
 }
@@ -104,7 +103,7 @@ export interface FileUploadWithFile {
   fileName: string; // Add fileName separately since we can't access file.name directly
   entityType: string;
   entityId: string;
-  fileType?: string;
+  fileType: string; // Changed from optional to required
   description?: string;
 }
 

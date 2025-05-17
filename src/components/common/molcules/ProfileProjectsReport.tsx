@@ -1,12 +1,11 @@
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate, isDueSoon } from "@/services/task.service";
 import { ProjectType } from "@/types/Project.type";
+import { Building2, Calendar, Folder, Target, Users } from "lucide-react";
 import PageSpinner from "../atoms/ui/PageSpinner";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
-import { Folder, Users, Building2, Calendar, Target } from "lucide-react";
 
 export const collabColors = [
   "bg-gradient-to-br from-purple-500 to-purple-700",
@@ -23,7 +22,6 @@ const ProfileProjectsReport = ({
 }) => {
   const { t, currentLanguage } = useLanguage();
   const isAdmin = useRolePermissions("admin");
-  const { isLightMode } = useCustomTheme();
   const isRTL = currentLanguage === "ar";
 
   const { data: projects, isLoading } = useCustomQuery<ProjectType[]>({

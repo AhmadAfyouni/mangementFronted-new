@@ -1,275 +1,328 @@
 "use client";
 
-import { useRedux } from "@/hooks/useRedux";
-import { RootState } from "@/state/store";
+import useLanguage from "@/hooks/useLanguage";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import dagre from "dagre";
+import { Briefcase, Building2, Crown, Shield, User } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
-  applyEdgeChanges,
-  applyNodeChanges,
   Background,
+  Controls,
   Edge,
-  EdgeChange,
   Handle,
   Node,
   NodeChange,
-  NodeProps,
   Position,
-  Controls,
-  MiniMap,
+  applyNodeChanges
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { motion } from "framer-motion";
-import { User, Briefcase, Building2, Crown, Shield } from "lucide-react";
 
-type EmployeeHierarchyTreeProps = {
-  data: EmpTree[];
-  nodeStyles?: (isLightMode: boolean, isManager?: boolean) => string;
-  nodeColors?: { target: string; source: string };
-  height?: number;
-  width?: string;
-  lightMode?: boolean;
-};
+interface NodeData {
+  label: string;
+  is_manager: boolean;
+  parentId: string | null;
+  department: string;
+  title: string;
+}
 
-const generateLayout = (data: EmpTree[]) => {
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
+interface CustomNodeProps {
+  data: NodeData;
+}
 
-  dagreGraph.setGraph({
-    rankdir: "TB",
-    align: "UL",
-    ranksep: 100,
-    nodesep: 60,
-    marginx: 100,
-    marginy: 100,
-  });
+// Custom node component styled to match department tree
+const CustomNode = ({ data }: CustomNodeProps) => {
+  const isManager = data.is_manager;
+  const isTopLevel = !data.parentId;
 
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
+  // Define colors based on role
+  const borderColor = isManager ? "#ef4444" : isTopLevel ? "#10b981" : "#3b82f6";
+  const bgGradient = isManager
+    ? "linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.3))"
+    : isTopLevel
+      ? "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3))"
+      : "linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.3))";
 
-  data.forEach((item) => {
-    dagreGraph.setNode(item.id, { label: item.name, width: 200, height: 80 });
+  const iconBgColor = isManager
+    ? "rgba(239, 68, 68, 0.2)"
+    : isTopLevel
+      ? "rgba(16, 185, 129, 0.2)"
+      : "rgba(59, 130, 246, 0.2)";
 
-    nodes.push({
-      id: item.id,
-      type: "custom",
-      data: {
-        label: `${item.name}`,
-        title: item.title,
-        is_manager: item.is_manager,
-        department: item.department,
-        parentId: item.parentId,
-      },
-      position: { x: 0, y: 0 },
-    });
+  const iconColor = isManager ? "#ef4444" : isTopLevel ? "#10b981" : "#3b82f6";
+  const handleColor = isManager ? "#ef4444" : isTopLevel ? "#10b981" : "#3b82f6";
+  const badgeColor = isManager ? "#ef4444" : "#10b981";
 
-    if (item.parentId) {
-      dagreGraph.setEdge(item.parentId, item.id);
-      edges.push({
-        id: `e-${item.parentId}-${item.id}`,
-        source: item.parentId,
-        target: item.id,
-        animated: true,
-        style: {
-          stroke: "#6b7280",
-          strokeWidth: 2,
-        },
-      });
-    }
-  });
-
-  dagre.layout(dagreGraph);
-
-  nodes.forEach((node) => {
-    const { x, y } = dagreGraph.node(node.id);
-    node.position = { x: x - 100, y: y - 40 };
-  });
-
-  return { nodes, edges };
-};
-
-const EmployeeHierarchyTree: React.FC<EmployeeHierarchyTreeProps> = ({
-  data,
-  nodeStyles,
-  nodeColors = { target: "#3b82f6", source: "#3b82f6" },
-  width = "100%",
-  lightMode = false,
-}) => {
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-  const [tooltipNode, setTooltipNode] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [dept, setDept] = useState<string>("");
-
-  const CustomNode = ({ data, selected }: NodeProps) => {
-    const isHovered = hoveredNode === data.id;
-    const showTooltip = tooltipNode === data.id;
-    const isTopLevel = !data.parentId;
-
-    const roleClass = data.is_manager
-      ? "bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-500/50"
-      : isTopLevel
-        ? "bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/50"
-        : "bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/50";
-
-    const defaultNodeStyles = `
-      relative min-w-[200px] p-4 cursor-pointer transition-all duration-300
-      ${lightMode ? "bg-white" : "bg-secondary"}
-      ${roleClass}
-      ${isHovered ? "scale-105 shadow-xl" : "shadow-md"}
-      border-2 rounded-xl
-      ${selected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
-    `;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.02 }}
-        className={nodeStyles ? nodeStyles(lightMode, data.is_manager) : defaultNodeStyles}
-        onMouseEnter={() => {
-          setHoveredNode(data.id);
-          setDept(data.department);
-          setTooltipNode(data.id);
-        }}
-        onMouseLeave={() => {
-          setHoveredNode(null);
-          setTooltipNode(null);
-        }}
-      >
-        {/* Employee Info */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className={`relative p-2 rounded-lg ${data.is_manager ? "bg-red-500/20" : isTopLevel ? "bg-green-500/20" : "bg-blue-500/20"
-            }`}>
-            {data.is_manager ? (
-              <Crown className="w-5 h-5 text-red-400" />
-            ) : isTopLevel ? (
-              <Shield className="w-5 h-5 text-green-400" />
-            ) : (
-              <User className="w-5 h-5 text-blue-400" />
-            )}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-twhite text-base leading-tight">{data.label}</h3>
-            <p className="text-sm text-gray-300 flex items-center gap-1">
-              <Briefcase className="w-3 h-3" />
-              {data.title}
-            </p>
+  return (
+    <div
+      style={{
+        background: "#1f2937",
+        backgroundImage: bgGradient,
+        color: "white",
+        border: `2px solid ${borderColor}`,
+        padding: "16px",
+        borderRadius: "12px",
+        width: "240px",
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        position: "relative",
+        transition: "transform 0.2s, box-shadow 0.2s",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+      }}
+    >
+      {/* Employee Info - Icon and Name/Title */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+        <div
+          style={{
+            background: iconBgColor,
+            padding: "10px",
+            borderRadius: "8px",
+            marginRight: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isManager ? (
+            <Crown size={20} color={iconColor} />
+          ) : isTopLevel ? (
+            <Shield size={20} color={iconColor} />
+          ) : (
+            <User size={20} color={iconColor} />
+          )}
+        </div>
+        <div>
+          <div style={{
+            fontWeight: "bold",
+            fontSize: "16px",
+            marginBottom: "4px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "170px"
+          }}>{data.label}</div>
+          <div style={{
+            fontSize: "12px",
+            color: "#9ca3af",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
+          }}>
+            <Briefcase size={12} />
+            {data.title || "No Title"}
           </div>
         </div>
+      </div>
 
-        {/* Role Badge */}
-        {(data.is_manager || isTopLevel) && (
-          <div className="absolute -top-2 -right-2">
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${data.is_manager ? "bg-red-500 text-white" : "bg-green-500 text-white"
-              }`}>
-              {data.is_manager ? "Manager" : "Head"}
-            </span>
-          </div>
-        )}
+      {/* Department */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        fontSize: "12px",
+        color: "#d1d5db",
+        marginTop: "8px",
+        gap: "4px"
+      }}>
+        <Building2 size={14} />
+        <span style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
+        }}>{data.department || "No Department"}</span>
+      </div>
 
-        {/* Department Tooltip */}
-        {showTooltip && dept && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute w-fit text-nowrap px-3 py-2 text-sm text-twhite bg-secondary rounded-lg shadow-lg 
-                       left-full bottom-full -translate-x-5 translate-y-2 transform ml-2 z-50"
-          >
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              {dept}
-            </div>
-            <div className="absolute left-0 bottom-0 w-3 h-3 bg-secondary transform rotate-45 translate-y-1.5 translate-x-4" />
-          </motion.div>
-        )}
+      {/* Role Badge */}
+      {(isManager || isTopLevel) && (
+        <div style={{
+          position: "absolute",
+          top: "-10px",
+          right: "-10px",
+          backgroundColor: badgeColor,
+          color: "white",
+          padding: "2px 8px",
+          borderRadius: "9999px",
+          fontSize: "12px",
+          fontWeight: "bold",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
+        }}>
+          {isManager ? "Manager" : "Head"}
+        </div>
+      )}
 
-        {/* Handles */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{
-            background: nodeColors.target,
-            top: -6,
-          }}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{
-            background: nodeColors.source,
-            bottom: -6,
-          }}
-        />
-      </motion.div>
-    );
-  };
+      {/* Handles for connections */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{
+          background: handleColor,
+          width: "12px",
+          height: "12px",
+          border: "2px solid #1e293b",
+          top: "-6px",
+        }}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{
+          background: handleColor,
+          width: "12px",
+          height: "12px",
+          border: "2px solid #1e293b",
+          bottom: "-6px",
+        }}
+      />
+    </div>
+  );
+};
 
-  const nodeTypes = { custom: CustomNode };
+interface EmployeesHierarchyTreeProps {
+  data: EmpTree[];
+  width?: string;
+  lightMode?: boolean;
+}
 
+const EmployeesHierarchyTree = ({ data, width = "100%" }: EmployeesHierarchyTreeProps) => {
+  const { t } = useLanguage();
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const { nodes: generatedNodes, edges: generatedEdges } = generateLayout(data);
-      setNodes(generatedNodes);
-      setEdges(generatedEdges);
-    }
-  }, [data]);
-
+  // Handle node changes
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
 
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
+  // Generate the layout using dagre
+  useEffect(() => {
+    if (!data || data.length === 0) return;
 
-  const { selector } = useRedux((state: RootState) => state.wrapper);
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    dagreGraph.setGraph({
+      rankdir: "TB",
+      nodesep: 80,
+      ranksep: 120,
+      marginx: 50,
+      marginy: 50
+    });
+
+    // Create nodes
+    const newNodes: Node[] = [];
+    const newEdges: Edge[] = [];
+
+    data.forEach((emp: EmpTree) => {
+      // Add node to dagre graph for layout calculation
+      dagreGraph.setNode(emp.id, { width: 240, height: 110 });
+
+      // Add node to our React Flow nodes array
+      newNodes.push({
+        id: emp.id,
+        type: "custom", // Use our custom node
+        position: { x: 0, y: 0 }, // Initial position, will be updated by dagre
+        data: {
+          label: emp.name,
+          is_manager: emp.is_manager,
+          parentId: emp.parentId,
+          department: emp.department,
+          title: emp.title,
+        },
+      });
+
+      // If the employee has a parent, create an edge
+      if (emp.parentId) {
+        dagreGraph.setEdge(emp.parentId, emp.id);
+
+        newEdges.push({
+          id: `e-${emp.parentId}-${emp.id}`,
+          source: emp.parentId,
+          target: emp.id,
+          animated: true,
+          style: {
+            stroke: "#6b7280",
+            strokeWidth: 2
+          },
+        });
+      }
+    });
+
+    // Calculate layout with dagre
+    dagre.layout(dagreGraph);
+
+    // Apply the layout to the nodes
+    const nodesWithPositions = newNodes.map((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - 120,
+          y: nodeWithPosition.y - 55,
+        },
+      };
+    });
+
+    setNodes(nodesWithPositions);
+    setEdges(newEdges);
+  }, [data]);
+
+  const nodeTypes = {
+    custom: CustomNode,
+  };
 
   return (
-    <div className={`relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden ${selector.isLoading ? "blur-sm" : ""
-      }`}>
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <User className="w-5 h-5 text-gray-400" />
-        <h3 className="text-lg font-bold text-twhite">Employee Hierarchy</h3>
+    <div style={{
+      width,
+      height: "700px",
+      background: "#0f172a",
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.1)"
+    }}>
+      <div style={{
+        position: "absolute",
+        top: "16px",
+        left: "16px",
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: "8px"
+      }}>
+        <User style={{ width: "20px", height: "20px", color: "#60a5fa" }} />
+        <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "white" }}>
+          {t("Employee Hierarchy")}
+        </h3>
       </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}
-        className="!bg-transparent"
+        style={{ background: "#0f172a" }}
+        proOptions={{ hideAttribution: true }}
       >
-        <Background
-          gap={20}
-          size={1}
-          color={lightMode ? "#e5e7eb" : "#374151"}
-        />
+        <Background color="#374151" gap={20} size={1} />
         <Controls
-          className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
-          showInteractive={false}
-        />
-        <MiniMap
-          className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
-          nodeColor={node => {
-            if (node.data?.is_manager) return "#ef4444";
-            if (!node.data?.parentId) return "#10b981";
-            return "#3b82f6";
+          style={{
+            border: "1px solid #374151",
+            borderRadius: "8px",
+            backgroundColor: "#1f2937",
           }}
-          maskColor={lightMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"}
+          showInteractive={false}
         />
       </ReactFlow>
     </div>
   );
 };
 
-export default EmployeeHierarchyTree;
+export default EmployeesHierarchyTree;

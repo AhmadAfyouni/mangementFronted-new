@@ -1,17 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { XIcon } from "@/assets";
-import useCustomTheme from "@/hooks/useCustomTheme";
-import useLanguage from "@/hooks/useLanguage";
 import { FileManager } from '@/components/common/atoms/fileManager';
 import { useFileUpload } from '@/hooks/fileManager';
-import { DepartmentFormInputs } from "@/types/DepartmentType.type";
-import { FileObject } from "./DeptAdditionalSection.d";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import { UseFormGetValues, UseFormRegister } from "react-hook-form";
+import useLanguage from "@/hooks/useLanguage";
 import useSnackbar from "@/hooks/useSnackbar";
 import FileUploadService from "@/services/fileUpload.service";
-import { Briefcase, Users, FileText, Plus, Trash, Edit, ExternalLink } from "lucide-react";
+import { DepartmentFormInputs, FileData } from "@/types/DepartmentType.type";
+import { Briefcase, Edit, ExternalLink, FileText, Plus, Trash, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { UseFormGetValues, UseFormRegister } from "react-hook-form";
 
 interface DeptAdditionalSectionProps {
   register: UseFormRegister<DepartmentFormInputs>;
@@ -61,14 +57,11 @@ const DeptAdditionalSection = ({
   setValue,
   getValues,
   departmentId,
-  isLightMode: propIsLightMode,
 }: DeptAdditionalSectionProps) => {
   const { t } = useLanguage();
-  const { isLightMode: themeIsLightMode } = useCustomTheme();
-  const isLightMode = propIsLightMode !== undefined ? propIsLightMode : themeIsLightMode;
 
   const { setSnackbarConfig } = useSnackbar();
-  const [supportingFileUrls, setSupportingFileUrls] = useState<string[]>([]);
+  const [supportingFileUrls, setSupportingFileUrls] = useState<FileData[]>([]);
 
   // Track edit mode for each file type
   const [reportEditMode, setReportEditMode] = useState<FileEditMode>({});
@@ -119,7 +112,7 @@ const DeptAdditionalSection = ({
       setReportEditMode(newReportEditMode);
       prevReportsLength.current = requiredReportsFields.length;
     }
-  }, [requiredReportsFields.length]);
+  }, [requiredReportsFields, reportEditMode]);
 
   useEffect(() => {
     // Only update if the array length changed (adding/removing fields)
@@ -138,7 +131,7 @@ const DeptAdditionalSection = ({
       setProgramEditMode(newProgramEditMode);
       prevProgramsLength.current = developmentProgramsFields.length;
     }
-  }, [developmentProgramsFields.length]);
+  }, [developmentProgramsFields, programEditMode]);
 
   // Function to process file URL for display
   const processPublicUrl = (fileUrl: string) => {
@@ -158,6 +151,14 @@ const DeptAdditionalSection = ({
       console.log("Error processing URL:", e);
       return fileUrl;
     }
+  };
+
+  // Helper function to safely get file URL from a FileData object or string
+  const getFileUrl = (fileData: FileData | string): string => {
+    if (typeof fileData === 'string') {
+      return fileData;
+    }
+    return fileData?.currentVersion?.fileUrl || '';
   };
 
   // Function to check if string is a valid URL or valid file path
@@ -195,8 +196,34 @@ const DeptAdditionalSection = ({
   const handleSupportingFileUpload = async (input: React.ChangeEvent<HTMLInputElement> | string) => {
     // If called from FileManager component with fileUrl directly
     if (typeof input === 'string') {
-      // Make sure we're storing the public URL
-      const newUrls = [...supportingFileUrls, input];
+      // Create a proper FileData object from the string URL
+      const fileDataObj: FileData = {
+        _id: Date.now().toString(), // Generate temporary ID
+        originalName: input.split('/').pop() || 'file',
+        entityType: 'department',
+        entityId: departmentId || 'new',
+        fileType: 'supporting',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        __v: 0,
+        currentVersion: {
+          _id: Date.now().toString(),
+          fileId: Date.now().toString(),
+          fileUrl: input,
+          originalName: input.split('/').pop() || 'file',
+          version: 1,
+          fileType: 'supporting',
+          isCurrentVersion: true,
+          description: '',
+          createdBy: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          __v: 0,
+          id: Date.now().toString()
+        }
+      };
+      // Make sure we're storing the public URL as a FileData object
+      const newUrls = [...supportingFileUrls, fileDataObj];
       console.log('Adding URL from FileManager:', input);
       setSupportingFileUrls(newUrls);
       setValue("supportingFiles", newUrls);
@@ -209,11 +236,38 @@ const DeptAdditionalSection = ({
       if (file) {
         try {
           // Upload file directly and get the public URL
-          const publicUrl = await handleDirectFileUpload(file, `Supporting file for department`);
+          const publicUrl = await handleDirectFileUpload(file);
           console.log('Supporting file uploaded, adding URL:', publicUrl);
 
-          // Store the public URL in both state and form value
-          const newUrls = [...supportingFileUrls, publicUrl];
+          // Create a proper FileData object
+          const fileDataObj: FileData = {
+            _id: Date.now().toString(), // Generate temporary ID
+            originalName: file.name,
+            entityType: 'department',
+            entityId: departmentId || 'new',
+            fileType: 'supporting',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            __v: 0,
+            currentVersion: {
+              _id: Date.now().toString(),
+              fileId: Date.now().toString(),
+              fileUrl: publicUrl,
+              originalName: file.name,
+              version: 1,
+              fileType: 'supporting',
+              isCurrentVersion: true,
+              description: '',
+              createdBy: '',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              __v: 0,
+              id: Date.now().toString()
+            }
+          };
+
+          // Store the FileData object in both state and form value
+          const newUrls = [...supportingFileUrls, fileDataObj];
           setSupportingFileUrls(newUrls);
           setValue("supportingFiles", newUrls);
 
@@ -233,6 +287,7 @@ const DeptAdditionalSection = ({
 
   // Function to remove a supporting file
   const removeSupportingFile = (index: number) => {
+    // No changes needed here as we're working with indices
     const newUrls = [...supportingFileUrls];
     newUrls.splice(index, 1);
     setSupportingFileUrls(newUrls);
@@ -242,7 +297,7 @@ const DeptAdditionalSection = ({
   const { uploadFileAsync } = useFileUpload();
 
   // Using direct file upload for files when creating a new department
-  const handleDirectFileUpload = async (file: File, description: string) => {
+  const handleDirectFileUpload = async (file: File) => {
     try {
       // Use the file upload service directly instead of the entity-based upload
       const fileUrl = await FileUploadService.uploadSingleFile(
@@ -285,7 +340,7 @@ const DeptAdditionalSection = ({
           console.log('Report file uploaded through API, URL:', fileUrl);
         } else {
           // For new department, use direct file upload to get public URL
-          fileUrl = await handleDirectFileUpload(file, `Template for ${requiredReportsFields[index].name}`);
+          fileUrl = await handleDirectFileUpload(file);
           console.log('Report file uploaded directly, URL:', fileUrl);
         }
 
@@ -328,7 +383,7 @@ const DeptAdditionalSection = ({
           console.log('Program file uploaded through API, URL:', fileUrl);
         } else {
           // For new department, use direct file upload to get public URL
-          fileUrl = await handleDirectFileUpload(file, `Program for ${developmentProgramsFields[index].name || 'Development Program'}`);
+          fileUrl = await handleDirectFileUpload(file);
           console.log('Program file uploaded directly, URL:', fileUrl);
         }
 
@@ -358,17 +413,18 @@ const DeptAdditionalSection = ({
   };
 
   // Function to handle opening a file
-  const handleOpenFile = (fileUrl: string) => {
-    if (!fileUrl) return;
+  const handleOpenFile = (fileUrl: string | FileData) => {
+    const url = getFileUrl(fileUrl);
+    if (!url) return;
 
     try {
       // Determine if URL needs the base URL prepended
-      let fullUrl = fileUrl;
+      let fullUrl = url;
 
       // If it's a relative path, prepend the base URL
-      if (fileUrl.startsWith('/public-files/')) {
+      if (url.startsWith('/public-files/')) {
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
-        fullUrl = `${baseUrl}${fileUrl}`;
+        fullUrl = `${baseUrl}${url}`;
       }
 
       // Open in a new tab
@@ -496,7 +552,7 @@ const DeptAdditionalSection = ({
                   >
                     <div className="flex items-center flex-1 min-w-0 gap-2">
                       <FileText className="w-4 h-4 text-green-400 flex-shrink-0" />
-                      <span className="truncate">{processPublicUrl(fileUrl)}</span>
+                      <span className="truncate">{processPublicUrl(getFileUrl(fileUrl))}</span>
                     </div>
                     <button
                       type="button"

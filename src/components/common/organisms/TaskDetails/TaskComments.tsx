@@ -1,12 +1,11 @@
-import React, { useState } from "react";
-import Image from "next/image";
-import { MessageSquare, Paperclip, Send, Edit2, Trash2, X, Check, Download, User, AlertTriangle, Upload, FileText, ExternalLink } from "lucide-react";
-import useLanguage from "@/hooks/useLanguage";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
-import { formatDistanceToNow } from "date-fns";
-import { enUS, ar } from "date-fns/locale";
+import useLanguage from "@/hooks/useLanguage";
 import { useRedux } from "@/hooks/useRedux";
 import { RootState } from "@/state/store";
+import { formatDistanceToNow } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
+import { AlertTriangle, Check, Edit2, ExternalLink, FileText, MessageSquare, Paperclip, Send, Trash2, Upload, User, X } from "lucide-react";
+import React, { useState } from "react";
 
 interface Comment {
   id: string;
@@ -56,9 +55,10 @@ const DeleteConfirmationModal = ({
   title: string;
   message: string;
 }) => {
-  if (!isOpen) return null;
-
+  // Always call hooks at the top level, even if we return early
   const { t } = useLanguage();
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -201,8 +201,6 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({
     (state: RootState) => state.user.userInfo?.id
   );
 
-  // Get the base server URL for attachment paths
-  const baseServerUrl = process.env.NEXT_PUBLIC_API_URL || "";
   const fileStorageUrl = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
 
   // State for the delete confirmation modal

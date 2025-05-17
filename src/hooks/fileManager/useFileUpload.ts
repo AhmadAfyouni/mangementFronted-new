@@ -15,7 +15,7 @@ export const useFileUpload = () => {
     FileObject & {
       entityType: string;
       entityId: string;
-      fileType?: string;
+      fileType: string; // Changed from optional to required
       description?: string;
     },
     unknown

@@ -42,14 +42,14 @@ export interface DepartmentType {
   supportingFiles: FileData[];
   requiredReports: {
     name: string;
-    templateFileId: FileData | string;
+    templateFileId: FileData;
     _id: string;
   }[];
   developmentPrograms: {
     programName: string;
     objective: string;
     notes: string;
-    programFileId: FileData | string;
+    programFileId: FileData;
     _id: string;
   }[];
   numericOwners: { category: string; count: number }[];
@@ -67,7 +67,7 @@ export interface DepartmentFormInputs {
   mainTasks: string;
   parent_department_id?: string;
   numericOwners: { category: string; count: number }[];
-  supportingFiles: string[];
+  supportingFiles: FileData[];
   requiredReports: { name: string; templateFile: string }[];
   developmentPrograms: {
     programName: string;

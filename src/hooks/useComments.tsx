@@ -1,12 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useMokkBar } from "@/components/Providers/Mokkbar";
+import FileUploadService from "@/services/fileUpload.service";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useRef, useState } from "react";
 import useCustomQuery from "./useCustomQuery";
-import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useLanguage from "./useLanguage";
-import { useQueryClient } from "@tanstack/react-query";
-import FileUploadService from "@/services/fileUpload.service";
-import { FileObject } from "@/types/FileManager.type";
 
 export interface Comment {
   id: string;

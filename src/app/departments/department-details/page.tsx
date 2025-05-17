@@ -14,7 +14,7 @@ const DepartmentDetails = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLightMode } = useCustomTheme();
-  const departmentId = searchParams.get("id");
+  const departmentId = searchParams.get("id") ?? "";
   const [department, setDepartment] = useState<DepartmentType | null>(null);
 
   // Fetch department data
@@ -39,22 +39,22 @@ const DepartmentDetails = () => {
   // Handle file opening
   const handleOpenFile = (url: string) => {
     if (!url) return;
-    
+
     // Make sure the URL is properly formatted
     let fullUrl = url;
-    
+
     // Check if URL starts with http:// or https://
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.110.121:8011';
       fullUrl = `${baseUrl}${url}`;
     }
-    
+
     // Prevent duplicate URL issues
     if (fullUrl.includes('http://http://') || fullUrl.includes('https://https://')) {
       fullUrl = fullUrl.replace('http://http://', 'http://');
       fullUrl = fullUrl.replace('https://https://', 'https://');
     }
-    
+
     window.open(fullUrl, "_blank");
   };
 
@@ -109,7 +109,7 @@ const DepartmentDetails = () => {
               <p className="text-gray-400 mt-2">
                 {t("The department you're looking for doesn't exist or has been deleted.")}
               </p>
-              <button 
+              <button
                 onClick={handleBack}
                 className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 mx-auto"
               >
@@ -127,7 +127,7 @@ const DepartmentDetails = () => {
     <GridContainer>
       <div className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"} p-8 rounded-xl shadow-lg w-full col-span-full text-twhite`}>
         {/* Back Button */}
-        <button 
+        <button
           onClick={handleBack}
           className="mb-6 flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
@@ -144,17 +144,16 @@ const DepartmentDetails = () => {
             <div>
               <h1 className="text-2xl font-bold mb-1">{department.name}</h1>
               <div className="flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  department.category === 'primary-department' ? 'bg-blue-900/40 text-blue-400' :
-                  department.category === 'secondary-department' ? 'bg-purple-900/40 text-purple-400' : 
-                  'bg-green-900/40 text-green-400'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${department.category === 'primary-department' ? 'bg-blue-900/40 text-blue-400' :
+                  department.category === 'secondary-department' ? 'bg-purple-900/40 text-purple-400' :
+                    'bg-green-900/40 text-green-400'
+                  }`}>
                   {department.category}
                 </span>
                 {department.parent_department && (
                   <div className="flex items-center gap-1 text-sm text-gray-400">
                     <MapPin className="w-3 h-3" />
-                    <span>{department.parent_department.name || t("Parent Department")}</span>
+                    <span>{department.parent_department.id || t("Parent Department")}</span>
                   </div>
                 )}
               </div>

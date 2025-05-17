@@ -1,13 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import AddSubTaskModal from "@/components/common/atoms/modals/AddSubTaskModal";
+import StarRating from "@/components/common/atoms/tasks/StarsRating";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
-import StarRating from "@/components/common/atoms/tasks/StarsRating";
-import AddSubTaskModal from "@/components/common/atoms/modals/AddSubTaskModal";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
-import { useRolePermissions } from "@/hooks/useCheckPermissions";
 import useComments from "@/hooks/useComments";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
@@ -18,15 +15,17 @@ import { updateTaskData } from "@/services/task.service";
 import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // Import the refactored components
-import { TaskHeader } from "@/components/common/organisms/TaskDetails/TaskHeader";
-import { TaskInfoCard } from "@/components/common/organisms/TaskDetails/TaskInfoCard";
+import { TaskComments } from "@/components/common/organisms/TaskDetails/TaskComments";
 import { TaskDescription } from "@/components/common/organisms/TaskDetails/TaskDescription";
 import { TaskFiles } from "@/components/common/organisms/TaskDetails/TaskFiles";
-import { TaskComments } from "@/components/common/organisms/TaskDetails/TaskComments";
-import { TaskTimeTracking } from "@/components/common/organisms/TaskDetails/TaskTimeTracking";
+import { TaskHeader } from "@/components/common/organisms/TaskDetails/TaskHeader";
+import { TaskInfoCard } from "@/components/common/organisms/TaskDetails/TaskInfoCard";
 import { TaskSidebar } from "@/components/common/organisms/TaskDetails/TaskSidebar";
+import { TaskTimeTracking } from "@/components/common/organisms/TaskDetails/TaskTimeTracking";
 import { AxiosError } from "axios";
 
 export default function TaskDetailsPage() {
@@ -60,7 +59,6 @@ export default function TaskDetailsPage() {
   const [description, setDescription] = useState<string>();
   const [taskName, setTaskName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [fileViewError, setFileViewError] = useState<string | null>(null);
 
   // Set initial values when task data is loaded
   useEffect(() => {
@@ -115,7 +113,7 @@ export default function TaskDetailsPage() {
 
   const handleUpdate = async () => {
     try {
-      const res = await updateTaskData(taskId, {
+      await updateTaskData(taskId, {
         name: taskName!,
         status: selectedStatus!,
         priority: selectedPriority!,
@@ -204,12 +202,9 @@ export default function TaskDetailsPage() {
   // Enhanced file handling with error handling
   const handleViewFileWithErrorHandling = (fileUrl: string) => {
     try {
-      setFileViewError(null);
       handleViewFile(fileUrl);
     } catch (error) {
       console.error("Error viewing file:", error);
-      setFileViewError(t("Failed to load file. Network error or file may be unavailable."));
-
       setSnackbarConfig({
         message: t("Failed to view file. Please try again."),
         open: true,

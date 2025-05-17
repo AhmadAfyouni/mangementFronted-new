@@ -304,10 +304,10 @@ Main Tasks: ${department.mainTasks}
                               className={`text-sm truncate max-w-[80%] ${isLightMode ? "text-tblackAF" : "text-twhite"
                                 }`}
                             >
-                              {file.split("/").pop()}
+                              {file.currentVersion.fileUrl.split("/").pop()}
                             </span>
                             <button
-                              onClick={() => handleFileDownload(file)}
+                              onClick={() => handleFileDownload(file.currentVersion.fileUrl)}
                               className={`p-2 rounded-full ${isLightMode
                                 ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
                                 : "bg-blue-500/30 hover:bg-blue-500/50 text-blue-300"
@@ -425,10 +425,10 @@ Main Tasks: ${department.mainTasks}
                           />
                           <div>
                             <div className="font-medium">
-                              {department.parent_department}
+                              {department.parent_department.id}
                             </div>
                             <div className="text-xs opacity-70 mt-1">
-                              ID: {department.parent_department}
+                              ID: {department.parent_department.id}
                             </div>
                           </div>
                         </div>
@@ -481,10 +481,10 @@ Main Tasks: ${department.mainTasks}
                               >
                                 {report.name}
                               </div>
-                              {report.templateFile && (
+                              {report.templateFileId && (
                                 <button
                                   onClick={() =>
-                                    handleFileDownload(report.templateFile)
+                                    handleFileDownload(report.templateFileId.currentVersion.fileUrl)
                                   }
                                   className={`p-2 rounded-full ${isLightMode
                                     ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"
@@ -499,10 +499,10 @@ Main Tasks: ${department.mainTasks}
                               className={`text-xs mt-2 ${isLightMode ? "text-tblackAF" : "text-twhite"
                                 }`}
                             >
-                              {report.templateFile ? (
+                              {report.templateFileId ? (
                                 <span className="flex items-center">
                                   <FileText size={12} className="mx-1" />
-                                  {report.templateFile.split("/").pop()}
+                                  {report.templateFileId.currentVersion.fileUrl.split("/").pop()}
                                 </span>
                               ) : (
                                 <span>{t("No template file available")}</span>
@@ -571,10 +571,10 @@ Main Tasks: ${department.mainTasks}
                                   {t("Objective")}: {program.objective}
                                 </div>
                               </div>
-                              {program.programFile && (
+                              {program.programFileId && (
                                 <button
                                   onClick={() =>
-                                    handleFileDownload(program.programFile)
+                                    handleFileDownload(program.programFileId.currentVersion.fileUrl)
                                   }
                                   className={`p-2 rounded-full ${isLightMode
                                     ? "bg-blue-500/30 hover:bg-blue-500/50 text-blue-600"

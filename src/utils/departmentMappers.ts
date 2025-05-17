@@ -1,4 +1,4 @@
-import { DepartmentFormInputs, DepartmentType } from "@/types/DepartmentType.type";
+import { DepartmentFormInputs, DepartmentType, FileData } from "@/types/DepartmentType.type";
 
 /**
  * Maps the API response department data to the form structure
@@ -10,23 +10,23 @@ import { DepartmentFormInputs, DepartmentType } from "@/types/DepartmentType.typ
 * @param fileData The file data from API
 * @returns The public URL of the file
 */
-const extractFileUrl = (fileData: any): string => {
-if (!fileData) return "";
+const extractFileUrl = (fileData: FileData): string => {
+  if (!fileData) return "";
 
-// If it's a string, return it directly
-if (typeof fileData === 'string') return fileData;
+  // If it's a string, return it directly
+  if (typeof fileData === 'string') return fileData;
 
-// If it's an object with currentVersion, get the URL from it
-if (fileData?.currentVersion?.fileUrl) {
-return fileData.currentVersion.fileUrl;
-}
+  // If it's an object with currentVersion, get the URL from it
+  if (fileData?.currentVersion?.fileUrl) {
+    return fileData.currentVersion.fileUrl;
+  }
 
-// If it has a fileUrl property directly
-if (fileData?.fileUrl) {
-return fileData.fileUrl;
-}
+  // If it has a fileUrl property directly
+  if (fileData?.currentVersion.fileUrl) {
+    return fileData.currentVersion.fileUrl;
+  }
 
-return "";
+  return "";
 };
 
 /**
@@ -35,23 +35,23 @@ return "";
 * @returns Formatted department data for the form
 */
 export const mapDepartmentToFormInputs = (department: DepartmentType): DepartmentFormInputs => {
-return {
-id: department.id,
-name: department.name,
-description: department.mainTasks || "", // Using mainTasks as description if available
-goal: department.goal || "",
-category: department.category || "",
-mainTasks: department.mainTasks || "",
-  parent_department_id: department.parent_department?.id || undefined,
+  return {
+    id: department.id,
+    name: department.name,
+    description: department.mainTasks || "", // Using mainTasks as description if available
+    goal: department.goal || "",
+    category: department.category || "",
+    mainTasks: department.mainTasks || "",
+    parent_department_id: department.parent_department?.id || undefined,
     numericOwners: department.numericOwners || [],
     supportingFiles: department.supportingFiles || [],
-    
+
     // Map required reports with their file URLs from templateFileId
     requiredReports: department.requiredReports?.map(report => ({
       name: report.name,
       templateFile: extractFileUrl(report.templateFileId)
     })) || [],
-    
+
     // Map development programs with their file URLs from programFileId
     developmentPrograms: department.developmentPrograms?.map(program => ({
       programName: program.programName,

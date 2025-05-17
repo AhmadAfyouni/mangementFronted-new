@@ -13,7 +13,7 @@ import FileManagerService from "@/services/fileManager.service";
 export const useFilesByEntity = (
   entityType: string,
   entityId: string,
-  fileType?: string,
+  fileType: string, // Changed from optional to required
   enabled: boolean = true
 ) => {
   const queryKey = fileType 
@@ -26,6 +26,7 @@ export const useFilesByEntity = (
       return await FileManagerService.getFilesByEntity(entityType, entityId, fileType);
     },
     enabled: !!entityId && !!entityType && enabled,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    staleTime: 0, // Always consider data stale to force refresh
+    refetchInterval: 2000, // Refetch every 2 seconds when the component is visible
   });
 };

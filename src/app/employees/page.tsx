@@ -1,33 +1,29 @@
-// EmployeesView.tsx
 "use client";
 
 import { TableIcon, TreeIcon } from "@/assets";
-import EmployeeHierarchyTree from "@/components/common/atoms/EmployeesHierarchyTree";
-import TasksTab from "@/components/common/atoms/tasks/TasksTab";
+import EmployeesHierarchyTree from "@/components/common/atoms/EmployeesHierarchyTree";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 import EmployeesContent from "@/components/common/molcules/EmployeesContent";
 import {
-  usePermissions,
-  useRolePermissions,
+  useRolePermissions
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
+import useCustomTheme from "@/hooks/useCustomTheme";
 import { EmployeeType } from "@/types/EmployeeType.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
-import React, { useState } from "react";
+import { Plus, TreeDeciduous, Users } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Image from "next/image";
 
-const EmployeesView: React.FC = () => {
+const Page = () => {
   const [activeTab, setActiveTab] = useState<string>("table");
+  const { isLightMode } = useCustomTheme();
 
   const isAdmin = useRolePermissions("admin");
-  const isPrimary = useRolePermissions("primary_user");
-  const empLink = isAdmin ? "get-all-emps" : "get-my-emps";
-  const [selectedOption, setSelectedOption] = useState(empLink);
   const { t } = useTranslation();
-  const canViewSpecific = usePermissions(["emp_view_specific"]);
-  const showSelect = isAdmin || canViewSpecific || isPrimary;
 
   const { data: employees, isLoading } = useCustomQuery<{
     info: EmployeeType[];
@@ -39,70 +35,115 @@ const EmployeesView: React.FC = () => {
 
   return (
     <GridContainer>
-      <div className="col-span-full flex flex-col md:flex-row justify-between items-center mb-5 gap-5">
-        <h1 className="text-3xl font-bold text-twhite text-center ">
-          {t("Employees Management")}
-        </h1>
+      {/* Header Section */}
+      <div className={`col-span-full ${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} p-6 rounded-xl shadow-lg mb-6`}>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl ${isLightMode ? 'bg-blue-100' : 'bg-blue-900/30'}`}>
+              <Users className="w-6 h-6 text-blue-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-twhite">
+                {t("Employees Management")}
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">
+                {employees ? t("Managing {{count}} employees", { count: employees.info.length }) : t("Loading employees...")}
+              </p>
+            </div>
+          </div>
 
-        <div className="flex justify-center items-center gap-5 flex-wrap">
-          {showSelect && (
-            <select
-              className="bg-secondary outline-none border-none text-twhite rounded-lg px-4 py-2 focus:outline-none transition duration-200"
-              value={selectedOption}
-              onChange={(e) => setSelectedOption(e.target.value)}
-            >
-              {isAdmin && (
-                <option value="get-all-emps">{t("All Employees")}</option>
-              )}
-              {canViewSpecific && (
-                <option value="view">{t("View Accessible Employees")}</option>
-              )}
-              {isPrimary && (
-                <option value="get-my-emps">
-                  {t("My Department Employees")}
-                </option>
-              )}
-            </select>
-          )}
-
+          {/* Add Employee Button */}
           {isAdmin && (
             <RouteWrapper href="/employees/add-employee">
-              <div className="bg-secondary text-twhite px-6 py-2 rounded-lg hover:bg-opacity-90 transition duration-200">
+              <button className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors shadow hover:shadow-md ${isLightMode
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}>
+                <Plus className="w-4 h-4" />
                 {t("Add Employee")}
-              </div>
+              </button>
             </RouteWrapper>
           )}
         </div>
       </div>
+
+      {/* View Tabs */}
+      <div className="col-span-full mb-4">
+        <div className={`bg-secondary p-2 rounded-lg inline-flex shadow-md`}>
+          <button
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'table'
+              ? isLightMode
+                ? 'bg-blue-500 text-white'
+                : 'bg-blue-600 text-white'
+              : isLightMode
+                ? 'text-gray-700 hover:bg-gray-200'
+                : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            onClick={() => setActiveTab('table')}
+          >
+            <Image src={TableIcon.src} alt="Table" width={20} height={20} />
+            <span>{t("Table View")}</span>
+          </button>
+          <button
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'tree'
+              ? isLightMode
+                ? 'bg-blue-500 text-white'
+                : 'bg-blue-600 text-white'
+              : isLightMode
+                ? 'text-gray-700 hover:bg-gray-200'
+                : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            onClick={() => setActiveTab('tree')}
+          >
+            <Image src={TreeIcon.src} alt="Tree" width={20} height={20} />
+            <span>{t("Tree")}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Content Area */}
       <div className="col-span-full">
         {isLoading ? (
-          <>
-            <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5">
+          <div className={`${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} rounded-xl shadow-md p-8 flex items-center justify-center`}>
+            <div className="flex flex-col items-center justify-center gap-4">
               <PageSpinner />
+              <p className="text-gray-400">{t("Loading employees data...")}</p>
             </div>
-          </>
+          </div>
         ) : !employees || employees.info.length === 0 ? (
-          <>
-            {""}
-            <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5">
-              {t("No Employees")}
-            </div>
-          </>
+          <div className={`${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} rounded-xl shadow-md p-16 flex flex-col items-center justify-center`}>
+            <Users className="w-16 h-16 text-gray-400 mb-4" />
+            <h2 className="text-xl font-semibold text-twhite mb-2">{t("No Employees Found")}</h2>
+            <p className="text-gray-400 text-center max-w-md mb-6">
+              {t("There are no employees in the system yet. Add employees to get started with employee management.")}
+            </p>
+            {isAdmin && (
+              <RouteWrapper href="/employees/add-employee">
+                <button className={`flex items-center gap-2 px-6 py-3 rounded-lg shadow hover:shadow-md transition-colors ${isLightMode
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}>
+                  <Plus className="w-5 h-5" />
+                  {t("Add First Employee")}
+                </button>
+              </RouteWrapper>
+            )}
+          </div>
         ) : (
           <>
-            <TasksTab
-              tabs={[
-                { id: "table", label: "Table", icon: TableIcon },
-                { id: "tree", label: "Tree", icon: TreeIcon },
-              ]}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-            {activeTab == "table" && (
+            {activeTab === "table" && (
               <EmployeesContent employeesData={employees.info} />
             )}
-            {activeTab == "tree" && employees && (
-              <EmployeeHierarchyTree data={employees.tree} width="100%" />
+            {activeTab === "tree" && employees && (
+              <div className={`${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} p-6 rounded-xl shadow-lg`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <TreeDeciduous className="w-5 h-5 text-blue-400" />
+                  <h2 className="text-lg font-semibold text-twhite">{t("Organization Chart")}</h2>
+                </div>
+                <div className="bg-main rounded-xl overflow-hidden shadow-inner">
+                  <EmployeesHierarchyTree data={employees.tree} width="100%" lightMode={isLightMode} />
+                </div>
+              </div>
             )}
           </>
         )}
@@ -111,4 +152,4 @@ const EmployeesView: React.FC = () => {
   );
 };
 
-export default EmployeesView;
+export default Page;

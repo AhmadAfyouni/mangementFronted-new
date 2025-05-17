@@ -9,17 +9,17 @@
  */
 export const constructFileUrl = (fileUrl: string): string => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-  
+
   // Return the URL as is if it's already a complete URL
   if (fileUrl && fileUrl.startsWith('http')) {
     return fileUrl;
   }
-  
+
   // Ensure correct formatting between base URL and file path
   if (!fileUrl) return '';
-  
-  return fileUrl.startsWith('/') 
-    ? `${baseUrl}${fileUrl}` 
+
+  return fileUrl.startsWith('/')
+    ? `${baseUrl}${fileUrl}`
     : `${baseUrl}/${fileUrl}`;
 };
 
@@ -30,7 +30,7 @@ export const constructFileUrl = (fileUrl: string): string => {
  */
 export const isFileManagerUrl = (fileUrl: string): boolean => {
   const fileManagerUrl = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || '';
-  return fileUrl && fileUrl.startsWith(fileManagerUrl);
+  return Boolean(fileUrl && fileUrl.startsWith(fileManagerUrl));
 };
 
 /**
@@ -40,15 +40,15 @@ export const isFileManagerUrl = (fileUrl: string): boolean => {
  */
 export const getFilenameFromUrl = (fileUrl: string): string => {
   if (!fileUrl) return 'Unknown File';
-  
+
   // Extract the filename from the URL path
   const parts = fileUrl.split('/');
   let filename = parts[parts.length - 1];
-  
+
   // Remove any query parameters
   if (filename.includes('?')) {
     filename = filename.split('?')[0];
   }
-  
+
   return decodeURIComponent(filename);
 };

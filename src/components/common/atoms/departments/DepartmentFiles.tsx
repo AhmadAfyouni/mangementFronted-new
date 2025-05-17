@@ -1,9 +1,7 @@
-import React from 'react';
-import { PaperClipIcon } from '@/assets';
+import { FileManager } from '@/components/common/atoms/fileManager';
 import useCustomTheme from '@/hooks/useCustomTheme';
 import useLanguage from '@/hooks/useLanguage';
-import { File } from '@/types/FileManager.type';
-import { FileManager } from '@/components/common/atoms/fileManager';
+import React from 'react';
 
 interface DepartmentFilesProps {
   departmentId: string;
@@ -12,12 +10,12 @@ interface DepartmentFilesProps {
 /**
  * Component to manage files associated with a department
  */
-const DepartmentFiles: React.FC<DepartmentFilesProps> = ({ 
-  departmentId 
+const DepartmentFiles: React.FC<DepartmentFilesProps> = ({
+  departmentId
 }) => {
   const { t } = useLanguage();
   const { isLightMode } = useCustomTheme();
-  
+
   if (!departmentId) {
     return (
       <div className={`p-4 rounded-lg ${isLightMode ? 'bg-white' : 'bg-dark'}`}>
@@ -27,7 +25,7 @@ const DepartmentFiles: React.FC<DepartmentFilesProps> = ({
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Supporting Files */}
@@ -39,7 +37,7 @@ const DepartmentFiles: React.FC<DepartmentFilesProps> = ({
         description={t('Supporting department documentation')}
         acceptedFileTypes=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
       />
-      
+
       {/* Report Templates */}
       <FileManager
         entityType="department"
@@ -49,7 +47,7 @@ const DepartmentFiles: React.FC<DepartmentFilesProps> = ({
         description={t('Templates for required reports')}
         acceptedFileTypes=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
       />
-      
+
       {/* Development Program Files */}
       <FileManager
         entityType="department"

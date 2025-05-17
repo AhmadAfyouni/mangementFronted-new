@@ -1,15 +1,15 @@
-import { useState } from 'react';
 import {
+  useFileDelete,
   useFilesByEntity,
   useFileUpload,
   useFileVersions,
-  useFileDelete,
-  useVersionDelete,
-  useSetCurrentVersion
+  useSetCurrentVersion,
+  useVersionDelete
 } from '@/hooks/fileManager';
-import { FileEntity, FileObject, FileVersion } from '@/types/FileManager.type';
-import useSnackbar from '@/hooks/useSnackbar';
 import useLanguage from '@/hooks/useLanguage';
+import useSnackbar from '@/hooks/useSnackbar';
+import { FileEntity, FileObject } from '@/types/FileManager.type';
+import { useState } from 'react';
 
 interface UseFileManagerProps {
   entityType: string;
@@ -32,7 +32,7 @@ export const useFileManager = ({
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 
   // Fetch files query
-  const filesQuery = useFilesByEntity(entityType, entityId, fileType);
+  const filesQuery = useFilesByEntity(entityType, entityId, fileType ?? "");
 
   // Fetch versions query - only enabled if a file is selected
   const versionsQuery = useFileVersions(

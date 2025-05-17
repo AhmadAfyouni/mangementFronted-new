@@ -28,7 +28,7 @@ import {
   updateTaskData,
 } from "@/services/task.service";
 import { RootState } from "@/state/store";
-import { ReceiveTaskType } from "@/types/Task.type";
+import { ExtendedReceiveTaskType, ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import React, { useRef, useState, useEffect } from "react";
@@ -47,7 +47,7 @@ export const formatTime = (totalSeconds: number) => {
 const ListTaskDetails: React.FC<{
   isOpen: boolean;
   onClose: (e: React.MouseEvent<HTMLDivElement>) => void;
-  task?: ReceiveTaskType;
+  task?: ExtendedReceiveTaskType;
 }> = ({ onClose, task, isOpen }) => {
   const priorityOptions: ("LOW" | "MEDIUM" | "HIGH" | undefined)[] = [
     "LOW",

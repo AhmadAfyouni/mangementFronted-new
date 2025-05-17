@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FieldValues, UseFormReset } from "react-hook-form";
+
+// Define an interface for data that might have a parent_department field
+interface DataWithParentDept {
+  parent_department?: {
+    id: string;
+    [key: string]: unknown;
+  } | string;
+  [key: string]: unknown;
+}
 
 function useQueryData<T extends FieldValues>(
   reset: UseFormReset<FieldValues>,
@@ -20,15 +29,21 @@ function useQueryData<T extends FieldValues>(
 
           // Process parent_department to ensure it's properly structured
           if (parsedData && typeof parsedData === 'object' && 'parent_department' in parsedData) {
-            // Handle different data structures for parent_department
-            const parentDept = (parsedData as any).parent_department;
+            // Use type assertion with a more specific interface
+            const dataWithParent = parsedData as unknown as DataWithParentDept;
+            const parentDept = dataWithParent.parent_department;
+
             if (parentDept && typeof parentDept === 'object' && 'id' in parentDept) {
               // Already in the right format
               console.log('Parent department in object format:', parentDept);
             } else if (parentDept && typeof parentDept === 'string') {
               // Convert string to object format
               console.log('Converting parent department from string to object:', parentDept);
-              (parsedData as any).parent_department = { id: parentDept };
+              dataWithParent.parent_department = { id: parentDept };
+              // Cast back to T for the setter
+              setQueryData(dataWithParent as unknown as T);
+              reset(dataWithParent as unknown as FieldValues);
+              return; // Early return since we've already set the data
             }
           }
 
