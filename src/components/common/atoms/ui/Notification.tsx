@@ -63,6 +63,14 @@ const Notification = ({
     requestType: "get",
   });
 
+  // Separate mutation for marking all notifications as read
+  const { mutate: markAllAsReadMutation, isPending: isMarkingAllAsRead } = useCreateMutation({
+    endpoint: `/notifications/mark-all-read`,
+    onSuccessMessage: "All notifications marked as read!",
+    invalidateQueryKeys: ["notifications"],
+    requestType: "get",
+  });
+
   console.log("notifications : ", notifications);
 
   // Count unread notifications
@@ -113,7 +121,10 @@ const Notification = ({
 
   // Function to mark all notifications as read
   const markAllAsRead = () => {
-    // Implement mark all as read functionality if needed
+    if (unreadCount === 0 || isMarkingAllAsRead) return;
+
+    // Try the dedicated endpoint first
+    markAllAsReadMutation({});
   };
 
   // Format date for display
@@ -164,9 +175,13 @@ const Notification = ({
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                disabled={isMarkingAllAsRead}
+                className={`text-xs transition-colors duration-200 ${isMarkingAllAsRead
+                  ? "text-gray-500 cursor-not-allowed"
+                  : "text-blue-400 hover:text-blue-300"
+                  }`}
               >
-                {t("Mark all as read")}
+                {isMarkingAllAsRead ? t("Marking...") : t("Mark all as read")}
               </button>
             )}
           </div>
@@ -189,16 +204,14 @@ const Notification = ({
                       className={`
                       p-3 cursor-pointer transition-colors duration-200
                       ${!notification.isRead ? "bg-slate-700/20" : ""}
-                      ${
-                        isLightMode
+                      ${isLightMode
                           ? "hover:bg-slate-700/20 hover:text-tblackAF"
                           : "hover:bg-tblack"
-                      }
-                      ${
-                        clickedNotificationId === notification._id && isPending
+                        }
+                      ${clickedNotificationId === notification._id && isPending
                           ? "opacity-50"
                           : ""
-                      }
+                        }
                     `}
                       onClick={() => {
                         if (!notification.isRead && !isPending) {
@@ -208,11 +221,10 @@ const Notification = ({
                     >
                       <div className="flex items-start gap-2">
                         <div
-                          className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
-                            !notification.isRead
-                              ? "bg-red-500"
-                              : "bg-transparent"
-                          }`}
+                          className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead
+                            ? "bg-red-500"
+                            : "bg-transparent"
+                            }`}
                         ></div>
                         <div className="flex-1">
                           <h4 className="font-semibold text-sm">

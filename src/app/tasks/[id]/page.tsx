@@ -248,13 +248,17 @@ export default function TaskDetailsPage() {
 
   return (
     <GridContainer>
-      <div className={`col-span-full min-h-screen bg-main p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`col-span-full min-h-screen p-6 ${isRTL ? 'rtl' : 'ltr'} ${task.parent_task
+        ? 'bg-gradient-to-br from-main via-main to-slate-900/10'
+        : 'bg-main'
+        }`} dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="max-w-7xl mx-auto">
           <TaskHeader
             task={task}
             onUpdate={handleUpdate}
             taskName={taskName}
             onNameChange={setTaskName}
+            allTasks={allTasks}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -272,6 +276,7 @@ export default function TaskDetailsPage() {
                 isPriorityMenuOpen={isPriorityMenuOpen}
                 setStatusMenuOpen={setStatusMenuOpen}
                 setPriorityMenuOpen={setPriorityMenuOpen}
+                allTasks={allTasks}
               />
 
               <TaskDescription
@@ -321,6 +326,7 @@ export default function TaskDetailsPage() {
                 timeLogs={task.timeLogs}
                 totalTimeSpent={task.totalTimeSpent}
                 isLightMode={isLightMode}
+                isSubtask={!!task.parent_task}
               />
 
               <TaskSidebar

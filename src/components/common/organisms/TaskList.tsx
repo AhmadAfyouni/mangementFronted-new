@@ -131,11 +131,14 @@ const ListTasks = ({
               const renderMobileTaskCard = (taskItem: any, level: number = 0) => (
                 <div
                   key={taskItem.id}
-                  className={`bg-dark rounded-lg p-4 border-l-4 hover:bg-secondary/50 transition-all duration-300 cursor-pointer ${taskItem.status === "DONE" ? "border-green-400" :
+                  className={`rounded-lg p-4 border-l-4 hover:bg-secondary/50 transition-all duration-300 cursor-pointer ${taskItem.parent_task
+                    ? "bg-slate-500/5 border-slate-400"
+                    : "bg-dark border-gray-400"
+                    } ${taskItem.status === "DONE" ? "border-green-400" :
                       taskItem.status === "ONGOING" ? "border-blue-400" :
                         taskItem.status === "ON_TEST" ? "border-yellow-400" :
-                          "border-gray-400"
-                    } ${level > 0 ? `ml-${level * 4} mt-2` : ""}`}
+                          taskItem.parent_task ? "border-slate-400" : "border-gray-400"
+                    } ${level > 0 ? `mt-2` : ""}`}
                   onClick={() => window.location.href = `/tasks/${taskItem.id}`}
                   style={{ marginLeft: level > 0 ? `${level * 16}px` : '0' }}
                 >
@@ -144,11 +147,12 @@ const ListTasks = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         {taskItem.parent_task ? (
-                          <span className="text-xs bg-secondary/50 px-2 py-1 rounded text-gray-400">
-                            📋 {t("Subtask")}
+                          <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full font-medium">
+                            🔗 {t("Subtask")}
                           </span>
                         ) : null}
-                        <h3 className="text-twhite font-semibold text-base">{taskItem.name}</h3>
+                        <h3 className={`font-semibold text-base ${taskItem.parent_task ? 'text-slate-200' : 'text-twhite'
+                          }`}>{taskItem.name}</h3>
                       </div>
                       {taskItem.assignee && (
                         <div className="flex items-center gap-1 text-gray-400 text-sm">
@@ -159,9 +163,9 @@ const ListTasks = ({
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${taskItem.status === "DONE" ? "bg-green-500/20 text-green-400" :
-                          taskItem.status === "ONGOING" ? "bg-blue-500/20 text-blue-400" :
-                            taskItem.status === "ON_TEST" ? "bg-yellow-500/20 text-yellow-400" :
-                              "bg-gray-500/20 text-gray-400"
+                        taskItem.status === "ONGOING" ? "bg-blue-500/20 text-blue-400" :
+                          taskItem.status === "ON_TEST" ? "bg-yellow-500/20 text-yellow-400" :
+                            "bg-gray-500/20 text-gray-400"
                         }`}>
                         {t(taskItem.status)}
                       </span>

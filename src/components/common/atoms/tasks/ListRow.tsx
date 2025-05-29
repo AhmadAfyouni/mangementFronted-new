@@ -73,8 +73,11 @@ const ListRow: React.FC<{
 
   return (
     <div
-      className={`hidden md:grid grid-cols-5 bg-dark hover:bg-secondary/50 cursor-pointer transition-all duration-300 ${isRTL ? "border-r-4" : "border-l-4"
-        } ${getPriorityBorderColor(task.priority)} my-1 hover:shadow-md hover:shadow-black/20 group`}
+      className={`hidden md:grid grid-cols-5 hover:bg-secondary/50 cursor-pointer transition-all duration-300 ${isRTL ? "border-r-4" : "border-l-4"
+        } ${getPriorityBorderColor(task.priority)} my-1 hover:shadow-md hover:shadow-black/20 group ${task.parent_task
+          ? 'bg-slate-500/5 hover:bg-slate-500/10'
+          : 'bg-dark'
+        }`}
       onClick={handleTaskClick}
     >
       {/* Task Name */}
@@ -90,7 +93,15 @@ const ListRow: React.FC<{
           className={isLightMode ? `bg-darker w-[25px] h-[25px] p-1 rounded-md` : ""}
         />
         <div className="flex-1">
-          <span className="text-twhite font-medium group-hover:text-blue-300 transition-colors duration-300">{task.name}</span>
+          <div className="flex items-center gap-2">
+            {task.parent_task && (
+              <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full font-medium">
+                {t("Subtask")}
+              </span>
+            )}
+            <span className={`font-medium group-hover:text-blue-300 transition-colors duration-300 ${task.parent_task ? 'text-slate-200' : 'text-twhite'
+              }`}>{task.name}</span>
+          </div>
           {task.assignee && (
             <div className="flex items-center gap-1 mt-1">
               <User className="w-3 h-3 text-gray-400" />
