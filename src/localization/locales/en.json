@@ -329,6 +329,10 @@
     "Time Actions": "Time Actions",
     "Start": "Start",
     "Pause": "Pause",
+    "wait": "Wait",
+    "running": "Running",
+    "Failed to start the timer. Please try again.": "Failed to start the timer. Please try again.",
+    "Failed to pause the timer. Please try again.": "Failed to pause the timer. Please try again.",
     "Add subtask": "Add Subtask",
 
     "SubTasks": "Subtasks",

@@ -39,18 +39,19 @@ const useHierarchy = () => {
 
   const renderTaskWithSubtasks = (
     task: ExtendedReceiveTaskType,
-    level: number
+    level: number,
+    sectionName?: string
   ) => {
     if (renderedTasks.has(task.id)) return null;
     renderedTasks.add(task.id);
 
     return (
       <React.Fragment key={task.id}>
-        <ListRow task={task} level={level} />
+        <ListRow task={task} level={level} sectionName={sectionName} />
 
         {task.subTasks &&
           task.subTasks.map((subTask) =>
-            renderTaskWithSubtasks(subTask, level + 1)
+            renderTaskWithSubtasks(subTask, level + 1, sectionName)
           )}
       </React.Fragment>
     );

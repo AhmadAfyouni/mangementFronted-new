@@ -1,0 +1,214 @@
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { TimeLog } from "@/types/Task.type";
+
+interface UseTaskTimerReturn {
+    // Timer state
+    elapsedTime: number;
+    isRunning: boolean;
+    totalTimeSpent: number;
+
+    // Actions
+    startTimer: () => Promise<{ success: boolean; error?: any }>;
+    pauseTimer: () => Promise<{ success: boolean; error?: any }>;
+
+    // Loading state
+    isLoading: boolean;
+}
+
+/**
+ * Ultra-perfect task timer hook
+ * - Simple and reliable
+ * - Single source of truth
+ * - Automatic sync with backend
+ * - Clean error handling
+ * - Optimized performance
+ */
+const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerReturn => {
+    const queryClient = useQueryClient();
+
+    // Core timer state
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalTimeSpent, setTotalTimeSpent] = useState(0);
+
+    // Refs for cleanup and consistency
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const startTimeRef = useRef<number | null>(null);
+
+    // Calculate initial state from timeLogs
+    const calculateInitialState = useCallback(() => {
+        if (!timeLogs || timeLogs.length === 0) {
+            return { isRunning: false, elapsedTime: 0, totalTimeSpent: 0 };
+        }
+
+        // Find the last incomplete time log (running timer)
+        const runningLog = timeLogs.find(log => log.start && !log.end);
+
+        // Calculate total time spent from completed logs
+        const completedTime = timeLogs
+            .filter(log => log.start && log.end)
+            .reduce((total, log) => {
+                const start = new Date(log.start).getTime();
+                const end = new Date(log.end!).getTime();
+                return total + Math.floor((end - start) / 1000);
+            }, 0);
+
+        if (runningLog) {
+            // Timer is running
+            const startTime = new Date(runningLog.start).getTime();
+            const currentElapsed = Math.floor((Date.now() - startTime) / 1000);
+
+            return {
+                isRunning: true,
+                elapsedTime: currentElapsed,
+                totalTimeSpent: completedTime,
+                startTime
+            };
+        }
+
+        return {
+            isRunning: false,
+            elapsedTime: 0,
+            totalTimeSpent: completedTime
+        };
+    }, [timeLogs]);
+
+    // Initialize state when timeLogs change
+    useEffect(() => {
+        const initialState = calculateInitialState();
+
+        setIsRunning(initialState.isRunning);
+        setElapsedTime(initialState.elapsedTime);
+        setTotalTimeSpent(initialState.totalTimeSpent);
+
+        if (initialState.isRunning && initialState.startTime) {
+            startTimeRef.current = initialState.startTime;
+        }
+    }, [calculateInitialState]);
+
+    // Timer interval effect
+    useEffect(() => {
+        if (isRunning && startTimeRef.current) {
+            intervalRef.current = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTimeRef.current!) / 1000);
+                setElapsedTime(elapsed);
+            }, 1000);
+        } else {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        }
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [isRunning]);
+
+    // API call helper
+    const makeApiCall = useCallback(async (action: 'start' | 'pause') => {
+        try {
+            const token = Cookies.get("access_token");
+            if (!token) {
+                throw new Error("Authentication token not found");
+            }
+
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/tasks/${action}/${taskId}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.status === 200) {
+                // Invalidate all relevant queries for perfect sync
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+                    queryClient.invalidateQueries({ queryKey: ["task", taskId] }),
+                    queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+                ]);
+
+                return { success: true };
+            }
+
+            throw new Error(`API call failed with status ${response.status}`);
+        } catch (error) {
+            console.error(`Error ${action}ing timer:`, error);
+            return { success: false, error };
+        }
+    }, [taskId, queryClient]);
+
+    // Start timer action
+    const startTimer = useCallback(async () => {
+        if (isLoading || isRunning) {
+            return { success: false, error: "Timer already running or loading" };
+        }
+
+        setIsLoading(true);
+
+        // Optimistic update
+        const now = Date.now();
+        setIsRunning(true);
+        setElapsedTime(0);
+        startTimeRef.current = now;
+
+        const result = await makeApiCall('start');
+
+        if (!result.success) {
+            // Revert optimistic update on failure
+            setIsRunning(false);
+            setElapsedTime(0);
+            startTimeRef.current = null;
+        }
+
+        setIsLoading(false);
+        return result;
+    }, [isLoading, isRunning, makeApiCall]);
+
+    // Pause timer action
+    const pauseTimer = useCallback(async () => {
+        if (isLoading || !isRunning) {
+            return { success: false, error: "Timer not running or loading" };
+        }
+
+        setIsLoading(true);
+
+        // Optimistic update
+        const finalElapsed = elapsedTime;
+        setIsRunning(false);
+        setTotalTimeSpent(prev => prev + finalElapsed);
+        setElapsedTime(0);
+        startTimeRef.current = null;
+
+        const result = await makeApiCall('pause');
+
+        if (!result.success) {
+            // Revert optimistic update on failure
+            setIsRunning(true);
+            setTotalTimeSpent(prev => prev - finalElapsed);
+            setElapsedTime(finalElapsed);
+            startTimeRef.current = Date.now() - (finalElapsed * 1000);
+        }
+
+        setIsLoading(false);
+        return result;
+    }, [isLoading, isRunning, elapsedTime, makeApiCall]);
+
+    return {
+        elapsedTime,
+        isRunning,
+        totalTimeSpent,
+        startTimer,
+        pauseTimer,
+        isLoading
+    };
+};
+
+export default useTaskTimer; 

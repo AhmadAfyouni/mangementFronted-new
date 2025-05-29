@@ -49,6 +49,8 @@ export const useDashboard = () => {
         return useQuery({
             queryKey: dashboardKeys.dailyTasks(),
             queryFn: () => dashboardService.getDailyTasks(),
+            staleTime: 0, // Always consider data stale for real-time updates
+            gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
         });
     };
 
@@ -63,6 +65,8 @@ export const useDashboard = () => {
         return useQuery({
             queryKey: dashboardKeys.myTasks(),
             queryFn: () => dashboardService.getMyTasks(),
+            staleTime: 0, // Always consider data stale for real-time updates
+            gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
         });
     };
 

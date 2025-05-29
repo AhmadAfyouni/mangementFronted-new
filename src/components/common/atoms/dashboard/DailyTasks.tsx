@@ -1,57 +1,62 @@
-import { useDashboard } from "@/hooks/useDashboard";
+import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useLanguage from "@/hooks/useLanguage";
-import useTimeTicker from "@/hooks/useTimeTicker";
-import { DailyTask } from "@/types/dashboard.type";
-import { Pause, Play } from "lucide-react";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import useTaskTimer from "@/hooks/useTaskTimer";
+import { ReceiveTaskType } from "@/types/Task.type";
+import { Clock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import PageSpinner from "../ui/PageSpinner";
+import useCustomQuery from "@/hooks/useCustomQuery";
+import { useRolePermissions } from "@/hooks/useCheckPermissions";
 
 interface TaskItemProps {
-    task: DailyTask;
-    onTaskStateChange: (taskId: string, isRunning: boolean) => void;
-    isAnyTaskRunning: boolean;
-    runningTaskId: string | null;
+    task: ReceiveTaskType;
 }
+
+const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
 const DailyTasks: React.FC = () => {
     const { t } = useLanguage();
-    const { useDailyTasks } = useDashboard();
-    const { data: dailyTasks, isLoading, refetch } = useDailyTasks();
-    const [runningTaskId, setRunningTaskId] = useState<string | null>(null);
+    const isAdmin = useRolePermissions("admin");
+    const isPrimary = useRolePermissions("primary_user");
 
-    // Memoize activeTasks to prevent it from changing on every render
-    const activeTasks = useMemo(() => 
-        dailyTasks?.filter(task => task.status !== "Completed") || []
-    , [dailyTasks]);
+    // Use the same query as the main tasks table
+    const { data: tasksData, isLoading, refetch } = useCustomQuery<{
+        info: ReceiveTaskType[];
+        tree: any[];
+    }>({
+        queryKey: ["tasks", ""],
+        url: `/tasks/tree?`,
+    });
 
-    // Function to handle task state changes globally
-    const handleTaskStateChange = useCallback((taskId: string, isRunning: boolean) => {
-        if (isRunning) {
-            setRunningTaskId(taskId);
-        } else if (runningTaskId === taskId) {
-            setRunningTaskId(null);
-        }
-    }, [runningTaskId]);
+    // Get today's tasks (tasks due today or ongoing tasks)
+    const dailyTasks = useMemo(() => {
+        if (!tasksData?.info) return [];
 
-    // Check if any task is currently running
-    const isAnyTaskRunning = runningTaskId !== null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Initial check for any running tasks when component mounts
-    useEffect(() => {
-        const checkForRunningTasks = async () => {
-            await refetch();
-            const runningTask = activeTasks.find(task =>
-                task.timeLogs &&
-                task.timeLogs.length > 0 &&
-                !task.timeLogs[task.timeLogs.length - 1].end
-            );
+        return tasksData.info.filter(task => {
+            // Include ongoing tasks or tasks due today
+            if (task.status === "ONGOING") return true;
 
-            if (runningTask) {
-                setRunningTaskId(runningTask.id);
+            if (task.due_date) {
+                const dueDate = new Date(task.due_date);
+                dueDate.setHours(0, 0, 0, 0);
+                return dueDate.getTime() === today.getTime();
             }
-        };
 
-        checkForRunningTasks();
-    }, [activeTasks, refetch]);
+            return false;
+        }).filter(task => task.status !== "DONE"); // Exclude completed tasks
+    }, [tasksData?.info]);
 
     // Periodically refresh data to keep in sync with other components
     useEffect(() => {
@@ -85,14 +90,11 @@ const DailyTasks: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-                {activeTasks.length > 0 ? (
-                    activeTasks.map((task) => (
+                {dailyTasks.length > 0 ? (
+                    dailyTasks.map((task) => (
                         <TaskItem
                             key={task.id}
                             task={task}
-                            onTaskStateChange={handleTaskStateChange}
-                            isAnyTaskRunning={isAnyTaskRunning}
-                            runningTaskId={runningTaskId}
                         />
                     ))
                 ) : (
@@ -105,72 +107,18 @@ const DailyTasks: React.FC = () => {
     );
 };
 
-const TaskItem: React.FC<TaskItemProps> = ({
-    task,
-    onTaskStateChange,
-    isAnyTaskRunning,
-    runningTaskId
-}) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     const { t } = useLanguage();
-    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const { setSnackbarConfig } = useMokkBar();
 
     const {
         elapsedTime,
-        isTaskRunning,
-        startTaskTicker,
-        pauseTaskTicker,
-        isMakingAPICall
-    } = useTimeTicker(task.id, task.timeLogs || []);
-
-    const formatElapsedTime = (seconds: number) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} h`;
-    };
-
-    // Sync local state with the time ticker state
-    useEffect(() => {
-        // Update the parent component about this task's running state
-        // This ensures that the parent knows if a task is already running when the component mounts
-        if (isTaskRunning) {
-            onTaskStateChange(task.id, true);
-        }
-
-        // Update the paused state
-        setIsPaused(!isTaskRunning && elapsedTime > 0);
-    }, [isTaskRunning, elapsedTime, task.id, onTaskStateChange]);
-
-    // Check if this task is allowed to start (only if no other task is running or this is the running task)
-    const canStart = !isAnyTaskRunning || runningTaskId === task.id;
-
-    const handleStartTask = async () => {
-        if (isMakingAPICall || !canStart) return;
-        try {
-            await startTaskTicker();
-            onTaskStateChange(task.id, true);
-        } catch (error) {
-            console.error("Error starting task:", error);
-        }
-    };
-
-    const handlePauseTask = async () => {
-        if (isMakingAPICall) return;
-        try {
-            await pauseTaskTicker();
-            onTaskStateChange(task.id, false);
-        } catch (error) {
-            console.error("Error pausing task:", error);
-        }
-    };
-
-    // Determine button text and state based on task status
-    const getButtonText = () => {
-        if (isTaskRunning) return t('out');
-        if (!canStart) return t('wait'); // Show "wait" when another task is running
-        return t('in');
-    };
+        isRunning,
+        totalTimeSpent,
+        startTimer,
+        pauseTimer,
+        isLoading,
+    } = useTaskTimer(task.id, task.timeLogs || []);
 
     // Custom color for task item based on priority
     const getColorClass = () => {
@@ -186,59 +134,120 @@ const TaskItem: React.FC<TaskItemProps> = ({
         }
     };
 
+    const handleStartTask = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (task?.status === "ONGOING") {
+            try {
+                const result = await startTimer();
+                if (!result.success) {
+                    setSnackbarConfig({
+                        message: t("Failed to start the timer. Please try again."),
+                        open: true,
+                        severity: "error",
+                    });
+                }
+            } catch (error) {
+                console.error("Error starting timer:", error);
+                setSnackbarConfig({
+                    message: t("Failed to start the timer. Please try again."),
+                    open: true,
+                    severity: "error",
+                });
+            }
+        } else {
+            setSnackbarConfig({
+                message: t("Task Status must be ONGOING"),
+                open: true,
+                severity: "warning",
+            });
+        }
+    };
+
+    const handlePauseTask = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            const result = await pauseTimer();
+            if (!result.success) {
+                setSnackbarConfig({
+                    message: t("Failed to pause the timer. Please try again."),
+                    open: true,
+                    severity: "error",
+                });
+            }
+        } catch (error) {
+            console.error("Error pausing timer:", error);
+            setSnackbarConfig({
+                message: t("Failed to pause the timer. Please try again."),
+                open: true,
+                severity: "error",
+            });
+        }
+    };
+
     return (
-        <div className={`flex items-center bg-main rounded-xl py-4 px-2 transition-colors ${
-            isTaskRunning ? "ring-2 ring-primary ring-opacity-50" : ""
-        } ${getColorClass()}`}>
+        <div className={`flex items-center bg-main rounded-xl py-4 px-2 transition-colors ${isRunning ? "ring-2 ring-primary ring-opacity-50" : ""
+            } ${getColorClass()}`}>
             {/* Task details */}
             <div className="flex-1 px-3">
                 <h3 className="text-base font-medium text-twhite">{task.name}</h3>
-                <div className="flex items-center">
-                    <p className="text-sm text-tmid mr-2">
-                        {formatElapsedTime(elapsedTime)}
-                    </p>
-                    {isTaskRunning && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary">
-                            {t('running')}
-                        </span>
-                    )}
+                <div className="flex flex-col">
+                    {/* Time tracking section - exactly like main tasks table */}
+                    <div className="bg-secondary/30 px-3 py-1.5 rounded-lg shadow shadow-black/20 hover:bg-secondary/40 transition-all duration-300 mt-2">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-blue-400" />
+                                <span className="text-sm font-medium text-gray-300">
+                                    {formatTime(task?.totalTimeSpent || totalTimeSpent)}
+                                </span>
+                            </div>
+                            {isRunning && (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot"></div>
+                                    <span className="text-xs text-green-400">
+                                        {formatTime(elapsedTime)} {t("running")}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Action buttons based on task state */}
+            {/* Action buttons - exactly like main tasks table */}
             <div className="flex items-center gap-2">
-                {(isTaskRunning || isPaused) && (
-                    <button
-                        onClick={isTaskRunning ? handlePauseTask : handleStartTask}
-                        disabled={isMakingAPICall || (isPaused && !canStart)}
-                        className={`p-2 rounded-full shadow transition-colors ${
-                            isMakingAPICall || (isPaused && !canStart)
-                                ? "bg-dark text-tdark cursor-not-allowed"
-                                : "bg-secondary hover:bg-dark text-icons"
-                        }`}
-                        title={isTaskRunning ? t('pause') : t('resume')}
-                    >
-                        {isTaskRunning ? (
-                            <Pause size={18} />
+                {task?.status !== "DONE" && (
+                    <div className="flex space-x-1">
+                        {!isRunning ? (
+                            <button
+                                disabled={isLoading}
+                                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
+                                    ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
+                                    : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
+                                    }`}
+                                onClick={handleStartTask}
+                            >
+                                <span className="text-sm font-medium">{t("Start")}</span>
+                            </button>
                         ) : (
-                            <Play size={18} />
+                            <button
+                                className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10 flex items-center gap-1.5 transition-all duration-300"
+                                onClick={handlePauseTask}
+                            >
+                                {isLoading ? (
+                                    <PageSpinner size="small" />
+                                ) : (
+                                    <span className="text-sm font-medium">{t("Pause")}</span>
+                                )}
+                            </button>
                         )}
-                    </button>
+                    </div>
                 )}
 
-                <button
-                    onClick={isTaskRunning ? handlePauseTask : handleStartTask}
-                    disabled={isMakingAPICall || (!isTaskRunning && !canStart)}
-                    className={`px-4 py-2 rounded-full shadow text-base transition-colors ${
-                        isMakingAPICall || (!isTaskRunning && !canStart && isAnyTaskRunning)
-                            ? "bg-dark text-tdark cursor-not-allowed"
-                            : isTaskRunning
-                                ? "bg-danger hover:bg-danger/80 text-twhite"
-                                : "bg-primary hover:bg-primary/80 text-twhite"
-                    }`}
-                >
-                    {getButtonText()}
-                </button>
+                {task?.status === "DONE" && (
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-sm border border-green-500/20 shadow-sm shadow-green-500/10 transition-all duration-300">
+                        <span className="font-medium">{t("Completed")}</span>
+                    </span>
+                )}
             </div>
         </div>
     );
