@@ -1,6 +1,6 @@
 import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
-import { DailyTimelineResponse, TimelineEntry } from "@/types/dashboard.type";
+import { DailyTimelineResponse } from "@/types/dashboard.type";
 import { Clock } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 

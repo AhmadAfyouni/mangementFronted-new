@@ -10,49 +10,49 @@ import { useMokkBar } from "@/components/Providers/Mokkbar";
 import PageSpinner from "../ui/PageSpinner";
 
 const MyTasks: React.FC = () => {
+    const { t } = useLanguage();
+    type TaskStatus = "all" | MyTask['status'];
+
+    const [activeFilter, setActiveFilter] = useState<TaskStatus>('all');
+
+    const { useMyTasks } = useDashboard();
+    const { data: myTasks, isLoading: isLoadingMyTasks, error } = useMyTasks();
+
+    // Filter options
+    const filters: TaskStatus[] = ['all', 'PENDING', 'ONGOING', 'DONE'];
+
+    // Memoized functions to prevent re-renders
+    const getStatusColor = useCallback((status: string): string => {
+        switch (status) {
+            case 'DONE':
+                return 'bg-green-100 text-green-800';
+            case 'ONGOING':
+                return 'bg-amber-100 text-amber-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    }, []);
+
+    const formatDate = useCallback((dateString: string) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } catch {
+            return '';
+        }
+    }, []);
+
+    const formatTime = useCallback((totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    }, []);
+
     try {
-        const { t } = useLanguage();
-        type TaskStatus = "all" | MyTask['status'];
-
-        const [activeFilter, setActiveFilter] = useState<TaskStatus>('all');
-
-        const { useMyTasks } = useDashboard();
-        const { data: myTasks, isLoading: isLoadingMyTasks, error } = useMyTasks();
-
-        // Filter options
-        const filters: TaskStatus[] = ['all', 'PENDING', 'ONGOING', 'DONE'];
-
-        // Memoized functions to prevent re-renders
-        const getStatusColor = useCallback((status: string): string => {
-            switch (status) {
-                case 'DONE':
-                    return 'bg-green-100 text-green-800';
-                case 'ONGOING':
-                    return 'bg-amber-100 text-amber-800';
-                default:
-                    return 'bg-gray-100 text-gray-800';
-            }
-        }, []);
-
-        const formatDate = useCallback((dateString: string) => {
-            if (!dateString) return '';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            } catch {
-                return '';
-            }
-        }, []);
-
-        const formatTime = useCallback((totalSeconds: number) => {
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${hours.toString().padStart(2, "0")}:${minutes
-                .toString()
-                .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-        }, []);
-
         // Handle error state
         if (error) {
             return (
@@ -168,7 +168,6 @@ const MyTasks: React.FC = () => {
                                         <TaskRow
                                             key={task.id}
                                             task={task}
-                                            index={index}
                                             isLast={index === filteredTasks.length - 1}
                                             formatDate={formatDate}
                                             getStatusColor={getStatusColor}
@@ -206,39 +205,22 @@ const MyTasks: React.FC = () => {
 // Memoized TaskRow component to prevent unnecessary re-renders
 const TaskRow = memo<{
     task: MyTask;
-    index: number;
     isLast: boolean;
     formatDate: (dateString: string) => string;
     getStatusColor: (status: string) => string;
     formatTime: (totalSeconds: number) => string;
     t: (key: string) => string;
-}>(({ task, index, isLast, formatDate, getStatusColor, formatTime, t }) => {
+}>(({ task, isLast, formatDate, getStatusColor, formatTime, t }) => {
     const { setSnackbarConfig } = useMokkBar();
 
-    // Add error handling for useTaskTimer
-    let timerData;
-    try {
-        timerData = useTaskTimer(task.id, task.timeLogs || []);
-    } catch (error) {
-        console.error("Error in useTaskTimer:", error);
-        timerData = {
-            elapsedTime: 0,
-            isRunning: false,
-            totalTimeSpent: 0,
-            pauseTimer: async () => ({ success: false }),
-            startTimer: async () => ({ success: false }),
-            isLoading: false,
-        };
-    }
-
+    // Use useTaskTimer hook directly - hooks must be called unconditionally
     const {
         elapsedTime,
         isRunning,
-        totalTimeSpent,
         pauseTimer,
         startTimer,
         isLoading,
-    } = timerData;
+    } = useTaskTimer(task.id, task.timeLogs || []);
 
     return (
         <tr

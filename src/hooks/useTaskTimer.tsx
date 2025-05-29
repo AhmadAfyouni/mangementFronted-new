@@ -11,8 +11,8 @@ interface UseTaskTimerReturn {
     totalTimeSpent: number;
 
     // Actions
-    startTimer: () => Promise<{ success: boolean; error?: any }>;
-    pauseTimer: () => Promise<{ success: boolean; error?: any }>;
+    startTimer: () => Promise<{ success: boolean; message?: string }>;
+    pauseTimer: () => Promise<{ success: boolean; message?: string }>;
 
     // Loading state
     isLoading: boolean;
@@ -146,60 +146,59 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
     }, [taskId, queryClient]);
 
     // Start timer action
-    const startTimer = useCallback(async () => {
-        if (isLoading || isRunning) {
-            return { success: false, error: "Timer already running or loading" };
-        }
-
+    const startTimer = useCallback(async (): Promise<{ success: boolean; message?: string }> => {
         setIsLoading(true);
+        try {
+            const response = await fetch(`/api/tasks/${taskId}/start-timer`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
 
-        // Optimistic update
-        const now = Date.now();
-        setIsRunning(true);
-        setElapsedTime(0);
-        startTimeRef.current = now;
-
-        const result = await makeApiCall('start');
-
-        if (!result.success) {
-            // Revert optimistic update on failure
-            setIsRunning(false);
-            setElapsedTime(0);
-            startTimeRef.current = null;
+            const result = await response.json();
+            if (result.success) {
+                setIsRunning(true);
+                setElapsedTime(0);
+                startTimeRef.current = Date.now();
+                return { success: true };
+            } else {
+                return { success: false, message: result.message };
+            }
+        } catch (error) {
+            console.error("Error starting timer:", error);
+            return { success: false, message: "Failed to start timer" };
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
-        return result;
-    }, [isLoading, isRunning, makeApiCall]);
+    }, [taskId]);
 
     // Pause timer action
-    const pauseTimer = useCallback(async () => {
-        if (isLoading || !isRunning) {
-            return { success: false, error: "Timer not running or loading" };
-        }
-
+    const pauseTimer = useCallback(async (): Promise<{ success: boolean; message?: string }> => {
         setIsLoading(true);
+        try {
+            const finalElapsed = elapsedTime;
+            setIsRunning(false);
+            setTotalTimeSpent(prev => prev + finalElapsed);
+            setElapsedTime(0);
+            startTimeRef.current = null;
 
-        // Optimistic update
-        const finalElapsed = elapsedTime;
-        setIsRunning(false);
-        setTotalTimeSpent(prev => prev + finalElapsed);
-        setElapsedTime(0);
-        startTimeRef.current = null;
+            const result = await makeApiCall('pause');
 
-        const result = await makeApiCall('pause');
+            if (!result.success) {
+                // Revert optimistic update on failure
+                setIsRunning(true);
+                setTotalTimeSpent(prev => prev - finalElapsed);
+                setElapsedTime(finalElapsed);
+                startTimeRef.current = Date.now() - (finalElapsed * 1000);
+            }
 
-        if (!result.success) {
-            // Revert optimistic update on failure
-            setIsRunning(true);
-            setTotalTimeSpent(prev => prev - finalElapsed);
-            setElapsedTime(finalElapsed);
-            startTimeRef.current = Date.now() - (finalElapsed * 1000);
+            return result;
+        } catch (error) {
+            console.error("Error pausing timer:", error);
+            return { success: false, message: "Failed to pause timer" };
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
-        return result;
-    }, [isLoading, isRunning, elapsedTime, makeApiCall]);
+    }, [elapsedTime, makeApiCall]);
 
     return {
         elapsedTime,

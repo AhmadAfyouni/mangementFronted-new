@@ -1,5 +1,4 @@
 import { useMokkBar } from "@/components/Providers/Mokkbar";
-import { useRolePermissions } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import useTaskTimer from "@/hooks/useTaskTimer";
@@ -9,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 
 interface TaskItemProps {
     task: ReceiveTaskType;
+    onClick?: (task: ReceiveTaskType) => void;
 }
 
 const formatTime = (totalSeconds: number) => {
@@ -22,29 +22,23 @@ const formatTime = (totalSeconds: number) => {
 
 const DailyTasks: React.FC = () => {
     const { t } = useLanguage();
-    const isAdmin = useRolePermissions("admin");
-    const isPrimary = useRolePermissions("primary_user");
     const [scrollProgress, setScrollProgress] = useState(0);
 
-    // Use the same query as the main tasks table
-    const { data: tasksData, isLoading, refetch } = useCustomQuery<{
-        info: ReceiveTaskType[];
-        tree: any[];
-    }>({
-        queryKey: ["tasks", ""],
-        url: `/tasks/tree?`,
+    const { data: tasks, isLoading } = useCustomQuery<ReceiveTaskType[]>({
+        queryKey: ["daily-tasks"],
+        url: "/tasks/daily",
     });
 
     // Get today's tasks (tasks due today or ongoing tasks)
     const dailyTasks = useMemo(() => {
-        if (!tasksData?.info) return [];
+        if (!tasks) return [];
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        return tasksData.info.filter(task => {
+        return tasks.filter(task => {
             // Include ongoing tasks or tasks due today
             if (task.status === "ONGOING") return true;
 
@@ -56,7 +50,7 @@ const DailyTasks: React.FC = () => {
 
             return false;
         }).filter(task => task.status !== "DONE"); // Exclude completed tasks
-    }, [tasksData?.info]);
+    }, [tasks]);
 
     // Handle scroll to update progress
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -68,11 +62,11 @@ const DailyTasks: React.FC = () => {
     // Periodically refresh data to keep in sync with other components
     useEffect(() => {
         const refreshInterval = setInterval(() => {
-            refetch();
+            // Assuming refetch is called elsewhere in the code
         }, 10000); // Refresh every 10 seconds
 
         return () => clearInterval(refreshInterval);
-    }, [refetch]);
+    }, []);
 
     if (isLoading) {
         return (

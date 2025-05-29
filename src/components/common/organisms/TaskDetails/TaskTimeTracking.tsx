@@ -1,9 +1,7 @@
-import { Clock, Play, Pause, RotateCcw } from "lucide-react";
-import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
-import { TimeLogSection } from "@/components/common/atoms/tasks/TimeLogSection";
 import useLanguage from "@/hooks/useLanguage";
+import { Clock, Play, Pause, RotateCcw } from "lucide-react";
+import { TimeLogSection } from "@/components/common/atoms/tasks/TimeLogSection";
 import { TimeLog } from "@/types/Task.type";
-import { useState } from "react";
 
 interface TaskTimeTrackingProps {
   displayTime: number;
@@ -31,7 +29,6 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
   isSubtask = false,
 }) => {
   const { t, currentLanguage } = useLanguage();
-  const [showDetails, setShowDetails] = useState(false);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);

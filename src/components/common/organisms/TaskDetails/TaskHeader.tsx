@@ -1,27 +1,23 @@
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate, getPriorityColor } from "@/services/task.service";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { AlertCircle, Check, Clock, Edit2, X, ArrowLeft, Layers } from "lucide-react";
+import { AlertCircle, Check, Clock, Edit2, X, Layers } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface TaskHeaderProps {
   task: ReceiveTaskType;
-  onUpdate: () => void;
+  onUpdate: (updatedTask: ReceiveTaskType) => void;
   taskName: string;
-  onNameChange: (name: string) => void;
-  allTasks?: ReceiveTaskType[];
+  onNameChange: (newName: string) => void;
 }
 
 export const TaskHeader: React.FC<TaskHeaderProps> = ({
   task,
   onUpdate,
   taskName,
-  onNameChange,
-  allTasks
+  onNameChange
 }) => {
   const { t, currentLanguage } = useLanguage();
-  const router = useRouter();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(taskName);
 
@@ -45,15 +41,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
 
   // Check if this is a subtask and get parent task info
   const isSubtask = !!task.parent_task;
-  const parentTask = isSubtask && allTasks
-    ? allTasks.find(t => t.id === task.parent_task)
-    : null;
-
-  const handleParentTaskClick = () => {
-    if (parentTask) {
-      router.push(`/tasks/${parentTask.id}`);
-    }
-  };
 
   return (
     <div className="mb-6">
@@ -147,7 +134,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
 
         {(
           <button
-            onClick={onUpdate}
+            onClick={() => onUpdate(task)}
             className={`px-6 py-2 rounded-lg transition-colors ${isSubtask
               ? 'bg-slate-600 text-white hover:bg-slate-700'
               : 'bg-blue-600 text-white hover:bg-blue-700'

@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, Settings, Clock, Bell, FileText, Calendar, Users, Save, Edit3 } from "lucide-react";
+import { Building2, Settings, Clock, Bell, FileText, Calendar, Save, Edit3 } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { useCreateMutation } from "@/hooks/useCreateMutation";
@@ -109,7 +108,6 @@ const CompanySettings = () => {
     });
 
     const { t, currentLanguage } = useLanguage();
-    const { isLightMode } = useCustomTheme();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
 
@@ -117,7 +115,7 @@ const CompanySettings = () => {
     const allWorkDays = Object.values(WorkDay);
 
     // Fetch company settings
-    const { data: companySettings, isLoading, refetch } = useCustomQuery<CompanySettings>({
+    const { data: companySettings } = useCustomQuery<CompanySettings>({
         queryKey: ["company-settings"],
         url: "/company-settings",
     });
@@ -145,7 +143,7 @@ const CompanySettings = () => {
         }
     }, [companySettings]);
 
-    const handleWorkSettingsChange = (field: keyof WorkSettings, value: any) => {
+    const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | WorkDay[] | string[]) => {
         setFormData(prev => ({
             ...prev,
             workSettings: {
@@ -165,7 +163,7 @@ const CompanySettings = () => {
         }));
     };
 
-    const handleGeneralSettingChange = (field: keyof CompanySettings, value: any) => {
+    const handleGeneralSettingChange = (field: keyof CompanySettings, value: boolean | number | string | string[] | ProgressCalculationMethod) => {
         setFormData(prev => ({
             ...prev,
             [field]: value

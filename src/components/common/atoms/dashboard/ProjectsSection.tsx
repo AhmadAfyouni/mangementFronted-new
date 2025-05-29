@@ -92,7 +92,7 @@ const ProjectsSection: React.FC = () => {
                                         backgroundColor: '#1f2937',
                                         color: '#f9fafb'
                                     }}
-                                    formatter={(value: any) => [`${value}h`, 'Hours Spent']}
+                                    formatter={(value: number) => [`${value}h`, 'Hours Spent']}
                                 />
                                 <Bar
                                     dataKey="hours"

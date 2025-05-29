@@ -258,7 +258,6 @@ export default function TaskDetailsPage() {
             onUpdate={handleUpdate}
             taskName={taskName}
             onNameChange={setTaskName}
-            allTasks={allTasks}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, Info, Upload, Save, Edit3, MapPin, Mail, Phone, Globe, FileText, User, Calendar, Hash } from "lucide-react";
+import { Building2, Upload, Save, Edit3, Mail, Globe, FileText } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
+import Image from "next/image";
 
 // Business Types Enum
 enum BusinessType {
@@ -97,7 +97,6 @@ const CompanyProfile = () => {
     });
 
     const { t, currentLanguage } = useLanguage();
-    const { isLightMode } = useCustomTheme();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
 
@@ -105,7 +104,7 @@ const CompanyProfile = () => {
     const businessTypes = Object.values(BusinessType);
 
     // Fetch company profile
-    const { data: companyProfile, isLoading, refetch } = useCustomQuery<CompanyProfile>({
+    const { data: companyProfile } = useCustomQuery<CompanyProfile>({
         queryKey: ["company-profile"],
         url: "/company-profile",
     });
@@ -571,9 +570,11 @@ const CompanyProfile = () => {
                                 <div className="flex items-center gap-4">
                                     {formData.companyLogo ? (
                                         <div className="w-20 h-20 rounded-lg bg-main flex items-center justify-center overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={formData.companyLogo}
                                                 alt="Company Logo"
+                                                width={80}
+                                                height={80}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
