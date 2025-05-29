@@ -10,7 +10,7 @@ import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import { useRedux } from "@/hooks/useRedux";
-import useTimeTicker from "@/hooks/useTimeTicker";
+import useTaskTimer from "@/hooks/useTaskTimer";
 import { updateTaskData } from "@/services/task.service";
 import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
@@ -72,12 +72,12 @@ export default function TaskDetailsPage() {
   }, [task]);
 
   const {
-    startTaskTicker,
-    pauseTaskTicker,
+    startTimer,
+    pauseTimer,
     elapsedTime,
-    isTaskRunning,
-    isMakingAPICall,
-  } = useTimeTicker(taskId, task?.timeLogs || []);
+    isRunning,
+    isLoading,
+  } = useTaskTimer(taskId, task?.timeLogs || []);
 
   // Track display time
   const [displayTime, setDisplayTime] = useState(0);
@@ -104,11 +104,11 @@ export default function TaskDetailsPage() {
       });
       return;
     }
-    await startTaskTicker();
+    await startTimer();
   };
 
   const handlePause = async () => {
-    await pauseTaskTicker();
+    await pauseTimer();
   };
 
   const handleUpdate = async () => {
@@ -155,8 +155,8 @@ export default function TaskDetailsPage() {
         setStatusMenuOpen(false);
         setIsRatingOpen(true);
 
-        if (isTaskRunning) {
-          pauseTaskTicker();
+        if (isRunning) {
+          pauseTimer();
         }
       } else {
         setSnackbarConfig({
@@ -248,13 +248,17 @@ export default function TaskDetailsPage() {
 
   return (
     <GridContainer>
-      <div className={`col-span-full min-h-screen bg-main p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`col-span-full min-h-screen p-6 ${isRTL ? 'rtl' : 'ltr'} ${task.parent_task
+        ? 'bg-gradient-to-br from-main via-main to-slate-900/10'
+        : 'bg-main'
+        }`} dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="max-w-7xl mx-auto">
           <TaskHeader
             task={task}
             onUpdate={handleUpdate}
             taskName={taskName}
             onNameChange={setTaskName}
+            allTasks={allTasks}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -272,6 +276,7 @@ export default function TaskDetailsPage() {
                 isPriorityMenuOpen={isPriorityMenuOpen}
                 setStatusMenuOpen={setStatusMenuOpen}
                 setPriorityMenuOpen={setPriorityMenuOpen}
+                allTasks={allTasks}
               />
 
               <TaskDescription
@@ -313,14 +318,15 @@ export default function TaskDetailsPage() {
             <div className="space-y-6">
               <TaskTimeTracking
                 displayTime={displayTime}
-                isTaskRunning={isTaskRunning}
-                isMakingAPICall={isMakingAPICall}
+                isTaskRunning={isRunning}
+                isMakingAPICall={isLoading}
                 selectedStatus={selectedStatus}
                 onStart={handleStart}
                 onPause={handlePause}
                 timeLogs={task.timeLogs}
                 totalTimeSpent={task.totalTimeSpent}
                 isLightMode={isLightMode}
+                isSubtask={!!task.parent_task}
               />
 
               <TaskSidebar

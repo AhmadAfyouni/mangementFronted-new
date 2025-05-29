@@ -10,7 +10,7 @@ import {
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import useTimeTicker from "@/hooks/useTimeTicker";
+import useTaskTimer from "@/hooks/useTaskTimer";
 import {
   formatDate,
   getPriorityBorderColor,
@@ -35,22 +35,21 @@ const formatTime = (totalSeconds: number) => {
 const ListRow: React.FC<{
   task: ExtendedReceiveTaskType;
   level: number;
-}> = ({ task, level }) => {
+  sectionName?: string;
+}> = ({ task, level, sectionName }) => {
   const router = useRouter();
   const { t, currentLanguage } = useLanguage();
   const { setSnackbarConfig } = useMokkBar();
   const { isLightMode } = useCustomTheme();
   const {
     elapsedTime,
-    isTaskRunning,
-    pauseTaskTicker,
-    startTaskTicker,
-    isMakingAPICall,
-  } = useTimeTicker(task.id, task.timeLogs);
+    isRunning,
+    pauseTimer,
+    startTimer,
+    isLoading,
+  } = useTaskTimer(task.id, task.timeLogs);
 
-
-  console.log("is making api call : ", isMakingAPICall);
-
+  console.log("is loading : ", isLoading);
 
   const handleTaskClick = () => {
     router.push(`/tasks/${task.id}`);
@@ -74,8 +73,11 @@ const ListRow: React.FC<{
 
   return (
     <div
-      className={`grid grid-cols-4 bg-dark hover:bg-secondary/50 cursor-pointer transition-all duration-300 ${isRTL ? "border-r-4" : "border-l-4"
-        } ${getPriorityBorderColor(task.priority)} my-1 hover:shadow-md hover:shadow-black/20 group`}
+      className={`hidden md:grid grid-cols-5 hover:bg-secondary/50 cursor-pointer transition-all duration-300 ${isRTL ? "border-r-4" : "border-l-4"
+        } ${getPriorityBorderColor(task.priority)} my-1 hover:shadow-md hover:shadow-black/20 group ${task.parent_task
+          ? 'bg-slate-500/5 hover:bg-slate-500/10'
+          : 'bg-dark'
+        }`}
       onClick={handleTaskClick}
     >
       {/* Task Name */}
@@ -91,7 +93,15 @@ const ListRow: React.FC<{
           className={isLightMode ? `bg-darker w-[25px] h-[25px] p-1 rounded-md` : ""}
         />
         <div className="flex-1">
-          <span className="text-twhite font-medium group-hover:text-blue-300 transition-colors duration-300">{task.name}</span>
+          <div className="flex items-center gap-2">
+            {task.parent_task && (
+              <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full font-medium">
+                {t("Subtask")}
+              </span>
+            )}
+            <span className={`font-medium group-hover:text-blue-300 transition-colors duration-300 ${task.parent_task ? 'text-slate-200' : 'text-twhite'
+              }`}>{task.name}</span>
+          </div>
           {task.assignee && (
             <div className="flex items-center gap-1 mt-1">
               <User className="w-3 h-3 text-gray-400" />
@@ -120,6 +130,15 @@ const ListRow: React.FC<{
         </span>
       </div>
 
+      {/* Section */}
+      <div
+        className="flex items-center py-4 px-6"
+      >
+        <span className="text-sm text-orange-400 font-medium">
+          {sectionName || t("Unknown Section")}
+        </span>
+      </div>
+
       {/* Actions */}
       <div className="flex items-center justify-between py-4 px-6">
         <div className="flex items-center space-x-3">
@@ -131,7 +150,7 @@ const ListRow: React.FC<{
                   {formatTime(task?.totalTimeSpent || 0)}
                 </span>
               </div>
-              {isTaskRunning && (
+              {isRunning && (
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot"></div>
                   <span className="text-xs text-green-400">
@@ -147,12 +166,12 @@ const ListRow: React.FC<{
 
             (
               <div className="flex space-x-1">
-                {!isTaskRunning ? (
+                {!isRunning ? (
                   <button
-                    disabled={isMakingAPICall
+                    disabled={isLoading
                       // || task?.status !== "ONGOING"
                     }
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isMakingAPICall
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
                       ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
                       : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
                       }`}
@@ -160,7 +179,7 @@ const ListRow: React.FC<{
                       e.stopPropagation();
                       if (task?.status === "ONGOING") {
                         try {
-                          const result = await startTaskTicker();
+                          const result = await startTimer();
                           if (!result.success) {
                             setSnackbarConfig({
                               message: t("Failed to start the timer. Please try again."),
@@ -195,12 +214,12 @@ const ListRow: React.FC<{
                   </button>
                 ) : (
                   <button
-                    // disabled={isMakingAPICall}
+                    // disabled={isLoading}
                     className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10 flex items-center gap-1.5 transition-all duration-300"
                     onClick={async (e) => {
                       e.stopPropagation();
                       try {
-                        const result = await pauseTaskTicker();
+                        const result = await pauseTimer();
                         if (!result.success) {
                           setSnackbarConfig({
                             message: t("Failed to pause the timer. Please try again."),
@@ -218,7 +237,7 @@ const ListRow: React.FC<{
                       }
                     }}
                   >
-                    {isMakingAPICall ? (
+                    {isLoading ? (
                       <PageSpinner size="small" />
                     ) : (
                       <>

@@ -20,7 +20,7 @@ import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import { useRedux } from "@/hooks/useRedux";
-import useTimeTicker from "@/hooks/useTimeTicker";
+import useTaskTimer from "@/hooks/useTaskTimer";
 import {
   formatDate,
   getPriorityColor,
@@ -82,13 +82,12 @@ const ListTaskDetails: React.FC<{
     task?.status
   );
   const {
-    startTaskTicker,
-    pauseTaskTicker,
+    startTimer,
+    pauseTimer,
     elapsedTime,
-
-    isTaskRunning,
-    isMakingAPICall,
-  } = useTimeTicker(task!.id, task?.timeLogs);
+    isRunning,
+    isLoading,
+  } = useTaskTimer(task!.id, task?.timeLogs);
 
   // Add a new state to track display time
   const [displayTime, setDisplayTime] = useState(
@@ -146,11 +145,11 @@ const ListTaskDetails: React.FC<{
       return;
     }
 
-    await startTaskTicker();
+    await startTimer();
   };
 
   const handlePause = async () => {
-    await pauseTaskTicker();
+    await pauseTimer();
   };
 
   // In the status option selection handler, add state updates
@@ -162,9 +161,9 @@ const ListTaskDetails: React.FC<{
         setIsRatingOpen(true);
 
         // Immediately update UI to reflect completed state
-        if (isTaskRunning) {
+        if (isRunning) {
           // Stop the timer if it's running
-          pauseTaskTicker();
+          pauseTimer();
         }
       } else {
         setSnackbarConfig({
@@ -416,9 +415,9 @@ const ListTaskDetails: React.FC<{
               </span>
             ) : (
               <span className="bg-dark text-twhite px-2 py-1 rounded text-xs cursor-pointer flex items-center gap-2">
-                {isMakingAPICall ? (
+                {isLoading ? (
                   <PageSpinner />
-                ) : !isTaskRunning ? (
+                ) : !isRunning ? (
                   <div
                     className="bg-dark flex items-center gap-2"
                     onClick={handleStart}

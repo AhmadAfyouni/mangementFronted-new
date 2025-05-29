@@ -14,6 +14,27 @@ const TimeTracker: React.FC = () => {
     const dailyTimeline = dashboardData?.dailyTimeline as DailyTimelineResponse;
     const timeTracking = dashboardData?.timeTracking;
 
+    // Use real data if available, otherwise fallback to sample data
+    const timelineData = dailyTimeline?.entries?.length ? dailyTimeline : null;
+
+    // Generate colors for different tasks
+    const getTaskColor = (taskId: string, index: number) => {
+        const colors = [
+            { border: 'border-cyan-500', stripe: 'rgba(34, 211, 238, 0.6)' },
+            { border: 'border-purple-500', stripe: 'rgba(168, 85, 247, 0.6)' },
+            { border: 'border-green-500', stripe: 'rgba(34, 197, 94, 0.6)' },
+            { border: 'border-orange-500', stripe: 'rgba(249, 115, 22, 0.6)' },
+            { border: 'border-pink-500', stripe: 'rgba(236, 72, 153, 0.6)' },
+            { border: 'border-blue-500', stripe: 'rgba(59, 130, 246, 0.6)' },
+            { border: 'border-red-500', stripe: 'rgba(239, 68, 68, 0.6)' },
+            { border: 'border-yellow-500', stripe: 'rgba(234, 179, 8, 0.6)' }
+        ];
+        return colors[index % colors.length];
+    };
+
+    // Filter out entries with zero duration for cleaner display
+    const validEntries = timelineData?.entries?.filter(entry => entry.duration > 0) || [];
+
     // Sample monthly hours data for the chart
     const monthlyHoursData = [
         { month: 'Jan', hours: 280, breakHours: 40, overtimeHours: 15 },
@@ -41,49 +62,37 @@ const TimeTracker: React.FC = () => {
                             <p className="text-tmid">{t('loading')}...</p>
                         </div>
                     ) : (
-                        /* Hours Summary Cards */
-                        <div className="space-y-3">
-                            <div className="flex items-center p-3 sm:p-4 bg-primary-100 rounded-xl border border-primary-200">
-                                <div className="p-2 sm:p-3 bg-white rounded-full mx-2 sm:mx-3">
-                                    <Clock size={16} className="text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-xs sm:text-sm text-tblack">{t('worked_hours')}</div>
-                                    <div className="text-base sm:text-lg md:text-xl font-bold text-tfblack">
-                                        {timeTracking?.workedHours || 0} {t('hours')}
-                                    </div>
-                                </div>
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
+                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('worked_hours')}</p>
+                                <p className="text-sm sm:text-lg font-bold text-twhite">
+                                    {timeTracking?.workedHours || "0h"}
+                                </p>
                             </div>
-
-                            <div className="flex items-center p-3 sm:p-4 bg-warning-100 rounded-xl border border-warning-200">
-                                <div className="p-2 sm:p-3 bg-white rounded-full mx-2 sm:mx-3">
-                                    <Clock size={16} className="text-warning" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-xs sm:text-sm text-tblack">{t('break_time')}</div>
-                                    <div className="text-base sm:text-lg md:text-xl font-bold text-tfblack">
-                                        {timeTracking?.breakTime || 0} {t('hours')}
-                                    </div>
-                                </div>
+                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
+                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('break_time')}</p>
+                                <p className="text-sm sm:text-lg font-bold text-twhite">
+                                    {timeTracking?.breakTime || "0h"}
+                                </p>
                             </div>
-
-                            <div className="flex items-center p-3 sm:p-4 bg-danger-100 rounded-xl border border-danger-200">
-                                <div className="p-2 sm:p-3 bg-white rounded-full mx-2 sm:mx-3">
-                                    <Clock size={16} className="text-danger" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-xs sm:text-sm text-tblack">{t('overtime_hours')}</div>
-                                    <div className="text-base sm:text-lg md:text-xl font-bold text-tfblack">
-                                        {timeTracking?.overtimeHours || 0} {t('hours')}
-                                    </div>
-                                </div>
+                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
+                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('overtime_hours')}</p>
+                                <p className="text-sm sm:text-lg font-bold text-twhite">
+                                    {timeTracking?.overtimeHours || "0h"}
+                                </p>
+                            </div>
+                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
+                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('working_hours')}</p>
+                                <p className="text-sm sm:text-lg font-bold text-twhite">
+                                    8h
+                                </p>
                             </div>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Hours Chart */}
+            {/* Monthly Hours Chart */}
             <div className="col-span-12 md:col-span-8 xl:col-span-9">
                 <div className="bg-secondary rounded-xl shadow p-4 sm:p-6 h-full">
                     <div className="flex justify-between items-center mb-4 sm:mb-6">
@@ -147,74 +156,83 @@ const TimeTracker: React.FC = () => {
             {/* Daily Timeline (Full width) */}
             <div className="col-span-12">
                 <div className="bg-secondary rounded-xl shadow p-4 sm:p-6">
-                    <div className="flex items-center mb-4 sm:mb-6">
-                        <Clock size={16} className="text-icons mx-2" />
-                        <h2 className="text-base sm:text-lg font-bold text-twhite">{t('daily_timeline')}</h2>
+                    <div className="flex items-center mb-6">
+                        <Clock size={16} className="text-tmid mr-2" />
+                        <h2 className="text-lg font-bold text-twhite">{t('daily_timeline')}</h2>
                     </div>
 
-                    <div className="relative h-12 sm:h-14 mb-8 sm:mb-10">
-                        {/* Timeline task blocks from the dailyTimeline data */}
-                        {dailyTimeline?.entries && dailyTimeline.entries.map((entry: TimelineEntry, index: number) => {
-                            // Use the position and width from the API data
-                            const isFirstHalf = index % 2 === 0;
-                            const colorClass = isFirstHalf
-                                ? 'bg-primary-opacity-80 border border-primary'  // Using 80% opacity
-                                : 'bg-warning-opacity-80 border border-warning';  // Using 80% opacity
+                    {/* Timeline Container */}
+                    <div className="relative">
+                        {/* Timeline track */}
+                        <div className="relative h-24 bg-main rounded-lg mb-6 overflow-hidden border border-tbright/20">
+                            {/* Time grid lines */}
+                            <div className="absolute inset-0 flex">
+                                {[0, 16.67, 33.33, 50, 66.67, 83.33, 100].map((position, index) => (
+                                    <div
+                                        key={index}
+                                        className="absolute top-0 bottom-0 w-px bg-tbright/10"
+                                        style={{ left: `${position}%` }}
+                                    />
+                                ))}
+                            </div>
 
-                            return (
-                                <div
-                                    key={index}
-                                    className={`absolute top-0 h-full ${colorClass} rounded-lg`}
-                                    style={{
-                                        left: `${entry.position}%`,
-                                        width: `${entry.width}%`
-                                    }}
-                                    title={`${entry.taskName} - ${entry.projectName}`}
-                                >
-                                    {/* For larger screens, show task name inside the timeline block if width allows */}
-                                    {entry.width > 15 && (
-                                        <div className="hidden sm:block whitespace-nowrap overflow-hidden text-ellipsis px-2 text-xs text-twhite">
-                                            {entry.taskName}
-                                        </div>
-                                    )}
+                            {/* Timeline task blocks with striped pattern */}
+                            {validEntries.length > 0 ? (
+                                validEntries.map((entry, index) => {
+                                    const color = getTaskColor(entry.taskId, index);
+                                    return (
+                                        <div
+                                            key={`${entry.taskId}-${index}`}
+                                            className={`absolute top-3 bottom-3 rounded-lg border-2 ${color.border} shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer z-10`}
+                                            style={{
+                                                left: `${entry.position}%`,
+                                                width: `${entry.width}%`,
+                                                backgroundImage: `repeating-linear-gradient(
+                                                    45deg,
+                                                    transparent,
+                                                    transparent 10px,
+                                                    ${color.stripe} 10px,
+                                                    ${color.stripe} 16px
+                                                )`
+                                            }}
+                                            title={`${entry.taskName} - ${entry.projectName} (${entry.startTime} - ${entry.endTime})`}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                    <span className="text-tmid text-sm">{t('no_timeline_data')}</span>
                                 </div>
-                            );
-                        })}
+                            )}
+                        </div>
 
-                        {/* Fallback message if no entries */}
-                        {(!dailyTimeline?.entries || dailyTimeline.entries.length === 0) && !isLoading && (
-                            <div className="flex justify-center items-center h-full text-xs sm:text-sm text-tmid">
-                                {t('no_timeline_entries')}
+                        {/* Time markers below the timeline */}
+                        <div className="flex justify-between text-sm text-tmid font-medium">
+                            <span>{timelineData?.shiftStart || "07:00"}</span>
+                            <span>09:00</span>
+                            <span>11:00</span>
+                            <span>13:00</span>
+                            <span>15:00</span>
+                            <span>17:00</span>
+                            <span>{timelineData?.shiftEnd || "19:00"}</span>
+                        </div>
+
+                        {/* Summary statistics */}
+                        <div className="flex justify-center items-center gap-8 mt-6">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                <span className="text-sm text-tmid">
+                                    {t('total_working_time')}: <span className="font-medium text-twhite">{timelineData?.totalWorkingTime || 0} {t('hours')}</span>
+                                </span>
                             </div>
-                        )}
-
-                        {/* Time markers - using shift start and end times if available */}
-                        <div className="absolute -bottom-6 sm:-bottom-8 left-0 right-0 flex justify-between text-2xs sm:text-xs text-tmid">
-                            <div>{dailyTimeline?.shiftStart?.split(':').slice(0, 2).join(':') || '00:00'}</div>
-                            <div>04:00</div>
-                            <div>08:00</div>
-                            <div>12:00</div>
-                            <div>16:00</div>
-                            <div>20:00</div>
-                            <div>{dailyTimeline?.shiftEnd?.split(':').slice(0, 2).join(':') || '24:00'}</div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-warning rounded-full"></div>
+                                <span className="text-sm text-tmid">
+                                    {t('total_break_time')}: <span className="font-medium text-twhite">{timelineData?.totalBreakTime || 0} {t('hours')}</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Summary statistics */}
-                    {dailyTimeline && (
-                        <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mt-4">
-                            <div className="bg-secondary/30 px-2 sm:px-3 py-1 rounded-lg">
-                                <span className="text-xs sm:text-sm text-tmid">
-                                    {t('total_working_time')}: <span className="font-medium">{dailyTimeline.totalWorkingTime || 0}</span> {t('hours')}
-                                </span>
-                            </div>
-                            <div className="bg-secondary/30 px-2 sm:px-3 py-1 rounded-lg">
-                                <span className="text-xs sm:text-sm text-tmid">
-                                    {t('total_break_time')}: <span className="font-medium">{dailyTimeline.totalBreakTime || 0}</span> {t('hours')}
-                                </span>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

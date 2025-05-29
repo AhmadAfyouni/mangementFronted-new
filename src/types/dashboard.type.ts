@@ -43,8 +43,8 @@ export interface DailyTask {
     dueTime: string;
     priority: string;
     status: string;
+    timeSpent?: number;
     timeLogs?: TimeLog[];
-
 }
 
 export interface ProjectStats {
@@ -65,7 +65,7 @@ export interface MyTask {
     progress: number;
     commentsCount: number;
     filesCount: number;
-
+    timeLogs?: TimeLog[];
 }
 
 export interface RecentActivity {

@@ -172,8 +172,8 @@ const CalendarSection: React.FC = () => {
     };
 
     return (
-        <div className="bg-secondary rounded-xl shadow p-6">
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+        <div className="bg-secondary rounded-xl shadow p-6 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-6 h-full">
                 <div className="md:col-span-4">
                     <div className="calendar-wrapper">
                         <DatePicker

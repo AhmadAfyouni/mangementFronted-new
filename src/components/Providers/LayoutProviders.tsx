@@ -4,7 +4,6 @@ import Content from "./Content";
 import I18nProvider from "./I18nProvider";
 import { QueryProvider } from "./QueryProvider";
 import ReduxProvider from "./ReduxProvider";
-import { TaskTimerProvider } from "./TaskTimerContext";
 import LoadingProvider from "./LoadingProvider";
 import { MokkBarProvider } from "./Mokkbar";
 
@@ -13,13 +12,11 @@ const LayoutProviders = ({ children }: { children: ReactNode }) => {
     <ReduxProvider>
       <QueryProvider>
         <I18nProvider>
-          <TaskTimerProvider>
-            <LoadingProvider>
-              <MokkBarProvider>
-                <Content>{children}</Content>
-              </MokkBarProvider>
-            </LoadingProvider>
-          </TaskTimerProvider>
+          <LoadingProvider>
+            <MokkBarProvider>
+              <Content>{children}</Content>
+            </MokkBarProvider>
+          </LoadingProvider>
         </I18nProvider>
       </QueryProvider>
     </ReduxProvider>
