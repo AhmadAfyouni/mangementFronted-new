@@ -7,7 +7,6 @@ import { ReceiveTaskType, ExtendedReceiveTaskType } from "@/types/Task.type";
 import { useEffect, useState } from "react";
 import AddSectionModal from "../atoms/modals/AddSectionModal";
 import { Plus, ListChecks, Calendar, CircleCheckBig, Settings, FolderOpen } from "lucide-react";
-import dynamic from "next/dynamic";
 
 const ListTasks = ({
     tasksData,
