@@ -21,20 +21,20 @@ const Dashboard = () => {
     const { t } = useLanguage();
 
     const { useDashboardData } = useDashboard();
-    const { data } = useDashboardData();
+    const { data, isLoading } = useDashboardData();
 
     return (
         <div className="min-h-screen bg-main">
             {/* Main Content */}
-            <div className="container mx-auto px-4 pb-10 pt-6">
+            <div className="container mx-auto px-3 sm:px-4 pb-8 sm:pb-10 pt-4 sm:pt-6">
                 {/* Welcome Section */}
-                <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-twhite">{t('welcome')}</h1>
-                    <p className="text-sm sm:text-base text-twhite mt-1">{t('welcome_subtitle')}</p>
+                <div className="mb-4 sm:mb-6 md:mb-8">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-twhite">{t('welcome')}</h1>
+                    <p className="text-xs sm:text-sm md:text-base text-twhite mt-1">{t('welcome_subtitle')}</p>
                 </div>
 
                 {/* Task Summary Cards */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-4 sm:mb-6 md:mb-8">
                     <TaskSummaryCard
                         title={t('total')}
                         count={data?.taskSummary?.total ?? 0}
@@ -70,40 +70,47 @@ const Dashboard = () => {
                 </div>
 
                 {/* Calendar & Daily Tasks */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-                    <div className="col-span-1 lg:col-span-1">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+                    <div className="col-span-1">
                         <CalendarSection />
                     </div>
-                    <div className="col-span-1 lg:col-span-1">
-                        <DailyTasks />
+                    <div className="col-span-1">
+                        <DailyTasks
+                            dailyTasks={data?.dailyTasks || []}
+                            isLoading={isLoading}
+                        />
                     </div>
                 </div>
 
                 {/* Time Tracker Section */}
-                <TimeTracker />
+                <TimeTracker
+                    dailyTimeline={data?.dailyTimeline}
+                    timeTracking={data?.timeTracking}
+                    isLoading={isLoading}
+                />
 
                 {/* Projects and Messages */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
                     {/* Projects Section */}
                     <div className="col-span-1 lg:col-span-2">
                         <ProjectsSection />
                     </div>
 
                     {/* Messages */}
-                    <div className="col-span-1 lg:col-span-1">
+                    <div className="col-span-1">
                         <MessagesSection />
                     </div>
                 </div>
 
                 {/* My Tasks and Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                     {/* My Tasks */}
                     <div className="col-span-1 lg:col-span-2">
                         <MyTasks />
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="col-span-1 lg:col-span-1">
+                    <div className="col-span-1">
                         <RecentActivity />
                     </div>
                 </div>

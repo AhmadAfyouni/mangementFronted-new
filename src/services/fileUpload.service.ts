@@ -31,6 +31,25 @@ class FileUploadService {
   private static readonly baseUrl: string = process.env.NEXT_PUBLIC_FILE_STORAGE_URL || "";
   // Make sure we're not adding any path segments as they should be included in the URL
 
+  // Helper method to ensure complete URL
+  private static ensureCompleteUrl(url: string): string {
+    // If the URL is already complete (starts with http/https), return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // Use the base URL from environment variable
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
+    // If it's a relative URL,     prepend the base URL
+    if (url.startsWith('/')) {
+      return `${baseUrl}${url}`;
+    }
+
+    // If it doesn't start with /, add both base URL and /
+    return `${baseUrl}/${url}`;
+  }
+
   static async uploadMultipleFiles(files: FileObject[], path: string) {
     if (!files || !files.length) {
       throw new Error("No files provided for upload");
@@ -57,9 +76,10 @@ class FileUploadService {
       );
 
       console.log("Files uploaded successfully:", response.data);
-      // Return the file URLs without prepending the base URL again
-      // The API response already includes the complete URL paths
-      return response.data.files.map((selFile) => selFile.publicUrl);
+      // Ensur e complete URLs are returned
+      return response.data.files.map((selFile) =>
+        FileUploadService.ensureCompleteUrl(selFile.publicUrl)
+      );
     } catch (error) {
       console.error("Error uploading files:", error);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -84,9 +104,11 @@ class FileUploadService {
         }
       );
 
-      // Return the full URL without prepending the base URL again
-      // The API response already includes the complete URL path
-      return response.data.file.publicUrl;
+      console.log("Single file upload response:", response.data);
+      // Ensure complete URL is returned
+      const completeUrl = FileUploadService.ensureCompleteUrl(response.data.file.publicUrl);
+      console.log("Complete file URL:", completeUrl);
+      return completeUrl;
     } catch (error) {
       console.error("Error uploading file:", error);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

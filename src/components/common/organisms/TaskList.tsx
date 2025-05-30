@@ -7,7 +7,7 @@ import { ReceiveTaskType, ExtendedReceiveTaskType } from "@/types/Task.type";
 import { useEffect, useState } from "react";
 import AddSectionModal from "../atoms/modals/AddSectionModal";
 import { Plus, ListChecks, Calendar, CircleCheckBig, Settings, FolderOpen } from "lucide-react";
-import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
 const ListTasks = ({
     tasksData,
@@ -20,10 +20,14 @@ const ListTasks = ({
     const [tasks, setTasks] = useState<{
         [key: string]: ReceiveTaskType[];
     }>({});
+    const [isClient, setIsClient] = useState(false);
     const { isLightMode } = useCustomTheme();
     const { t, currentLanguage } = useLanguage();
     const { renderTaskWithSubtasks, organizeTasksByHierarchy } = useHierarchy();
-    const router = useRouter();
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
         if (tasksData) {
@@ -63,7 +67,10 @@ const ListTasks = ({
     });
 
     const handleTaskClick = (task: ReceiveTaskType | ExtendedReceiveTaskType) => {
-        router.push(`/tasks/${task.id}`);
+        if (isClient && typeof window !== 'undefined') {
+            // Use window.location for navigation to avoid router issues
+            window.location.href = `/tasks/${task.id}`;
+        }
     };
 
     return (

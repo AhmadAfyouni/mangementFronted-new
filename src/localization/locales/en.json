@@ -534,6 +534,8 @@
     "welcome": "Welcome to your dashboard",
     "welcome_subtitle": "Here's an overview of your tasks and activities",
 
+    "calendar": "Calendar",
+
     "total": "Total Tasks",
     "pending": "Pending",
     "in_progress": "In Progress",

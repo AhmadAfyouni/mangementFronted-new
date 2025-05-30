@@ -1,18 +1,22 @@
-import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
-import { DailyTimelineResponse } from "@/types/dashboard.type";
+import { DailyTimelineResponse, TimeTracking } from "@/types/dashboard.type";
 import { Clock } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-// Time Tracker Components
-const TimeTracker: React.FC = () => {
-    const { t } = useLanguage();
-    const { useDashboardData } = useDashboard();
-    const { data: dashboardData, isLoading } = useDashboardData();
+// Props interface for TimeTracker
+interface TimeTrackerProps {
+    dailyTimeline?: DailyTimelineResponse;
+    timeTracking?: TimeTracking;
+    isLoading?: boolean;
+}
 
-    // Get timeline data from the hook
-    const dailyTimeline = dashboardData?.dailyTimeline as DailyTimelineResponse;
-    const timeTracking = dashboardData?.timeTracking;
+// Time Tracker Components
+const TimeTracker: React.FC<TimeTrackerProps> = ({
+    dailyTimeline,
+    timeTracking,
+    isLoading = false
+}) => {
+    const { t } = useLanguage();
 
     // Use real data if available, otherwise fallback to sample data
     const timelineData = dailyTimeline?.entries?.length ? dailyTimeline : null;
@@ -35,57 +39,104 @@ const TimeTracker: React.FC = () => {
     // Filter out entries with zero duration for cleaner display
     const validEntries = timelineData?.entries?.filter(entry => entry.duration > 0) || [];
 
-    // Sample monthly hours data for the chart
-    const monthlyHoursData = [
-        { month: 'Jan', hours: 280, breakHours: 40, overtimeHours: 15 },
-        { month: 'Feb', hours: 320, breakHours: 35, overtimeHours: 25 },
-        { month: 'Mar', hours: 300, breakHours: 45, overtimeHours: 10 },
-        { month: 'Apr', hours: 350, breakHours: 50, overtimeHours: 30 },
-        { month: 'May', hours: 330, breakHours: 40, overtimeHours: 20 },
-        { month: 'Jun', hours: 400, breakHours: 60, overtimeHours: 35 },
-    ];
+    // Generate monthly hours data from timeTracking.hoursByDay or use sample data
+    const generateMonthlyHoursData = () => {
+        if (timeTracking?.hoursByDay && timeTracking.hoursByDay.length > 0) {
+            // Group by month and calculate totals
+            const monthlyData: { [key: string]: { hours: number, breakHours: number, overtimeHours: number } } = {};
+
+            timeTracking.hoursByDay.forEach((day: { date: string; plannedHours: number; actualHours: number }) => {
+                const date = new Date(day.date);
+                const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = { hours: 0, breakHours: 0, overtimeHours: 0 };
+                }
+
+                monthlyData[monthKey].hours += day.actualHours;
+                // Calculate break and overtime based on planned vs actual
+                const overtime = Math.max(0, day.actualHours - day.plannedHours);
+                monthlyData[monthKey].overtimeHours += overtime;
+                // Estimate break time as 10% of working hours
+                monthlyData[monthKey].breakHours += day.actualHours * 0.1;
+            });
+
+            return Object.entries(monthlyData).map(([month, data]) => ({
+                month,
+                hours: Math.round(data.hours),
+                breakHours: Math.round(data.breakHours),
+                overtimeHours: Math.round(data.overtimeHours)
+            }));
+        }
+
+        // Fallback to sample data
+        return [
+            { month: 'Jan', hours: 280, breakHours: 40, overtimeHours: 15 },
+            { month: 'Feb', hours: 320, breakHours: 35, overtimeHours: 25 },
+            { month: 'Mar', hours: 300, breakHours: 45, overtimeHours: 10 },
+            { month: 'Apr', hours: 350, breakHours: 50, overtimeHours: 30 },
+            { month: 'May', hours: 330, breakHours: 40, overtimeHours: 20 },
+            { month: 'Jun', hours: 400, breakHours: 60, overtimeHours: 35 },
+        ];
+    };
+
+    const monthlyHoursData = generateMonthlyHoursData();
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             {/* Time Display and Hours Summary */}
             <div className="col-span-12 md:col-span-4 xl:col-span-3">
-                <div className="bg-secondary rounded-xl shadow p-4 sm:p-6">
-                    <h2 className="text-lg sm:text-xl font-bold text-twhite mb-3 sm:mb-4">{t('time_tracker')}</h2>
-
-                    {/* Current Time Display */}
-                    <div className="text-xl sm:text-4xl md:text-2xl lg:text-5xl font-bold text-twhite border-2 border-tbright rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 text-center">
-                        {timeTracking?.totalTimeToday || "00:00:00"}
+                <div className="bg-secondary rounded-2xl shadow-lg p-6 border border-tbright/10">
+                    {/* Large Timer Display */}
+                    <div className="text-center mb-6">
+                        <div className="text-4xl sm:text-5xl font-bold text-twhite tracking-tight font-mono">
+                            {timeTracking?.totalTimeToday || "00:00:00"}
+                        </div>
                     </div>
 
                     {isLoading ? (
-                        <div className="flex items-center justify-center py-6 sm:py-8">
-                            <p className="text-tmid">{t('loading')}...</p>
+                        <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
-                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('worked_hours')}</p>
-                                <p className="text-sm sm:text-lg font-bold text-twhite">
-                                    {timeTracking?.workedHours || "0h"}
-                                </p>
+                        <div className="space-y-3">
+                            {/* Worked Hours */}
+                            <div className="bg-primary/50  rounded-2xl p-4 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-sm">
+                                    <Clock className="w-5 h-5 text-primary" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-tmid mb-1">{t('worked_hours')}</p>
+                                    <p className="text-xl font-bold text-twhite">
+                                        {timeTracking?.workedHours ? `${timeTracking.workedHours} hours` : "0 hours"}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
-                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('break_time')}</p>
-                                <p className="text-sm sm:text-lg font-bold text-twhite">
-                                    {timeTracking?.breakTime || "0h"}
-                                </p>
+
+                            {/* Break Time */}
+                            <div className="bg-warning/50  rounded-2xl p-4 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-sm">
+                                    <Clock className="w-5 h-5 text-warning" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-tmid mb-1">{t('break_time')}</p>
+                                    <p className="text-xl font-bold text-twhite">
+                                        {timeTracking?.breakTime ? `${timeTracking.breakTime} hours` : "0 hours"}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
-                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('overtime_hours')}</p>
-                                <p className="text-sm sm:text-lg font-bold text-twhite">
-                                    {timeTracking?.overtimeHours || "0h"}
-                                </p>
-                            </div>
-                            <div className="bg-main rounded-lg p-2 sm:p-3 text-center">
-                                <p className="text-xs sm:text-sm text-tmid mb-1">{t('working_hours')}</p>
-                                <p className="text-sm sm:text-lg font-bold text-twhite">
-                                    8h
-                                </p>
+
+                            {/* Overtime Hours */}
+                            <div className="bg-danger/50  rounded-2xl p-4 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-sm">
+                                    <Clock className="w-5 h-5 text-danger" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-tmid mb-1">{t('overtime_hours')}</p>
+                                    <p className="text-xl font-bold text-twhite">
+                                        {timeTracking?.overtimeHours ? `${timeTracking.overtimeHours} hours` : "0 hours"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -136,9 +187,9 @@ const TimeTracker: React.FC = () => {
                                     labelStyle={{ color: 'var(--color-twhite)' }}
                                     itemStyle={{ color: 'var(--color-twhite)' }}
                                 />
-                                <Bar dataKey="hours" stackId="a" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="breakHours" stackId="a" fill="var(--color-warning)" radius={[0, 0, 0, 0]} />
-                                <Bar dataKey="overtimeHours" stackId="a" fill="var(--color-danger)" radius={[0, 0, 0, 0]} />
+                                <Bar dataKey="hours" stackId="a" fill="var(--color-primary-hex)" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="breakHours" stackId="a" fill="var(--color-warning-hex)" radius={[0, 0, 0, 0]} />
+                                <Bar dataKey="overtimeHours" stackId="a" fill="var(--color-danger-hex)" radius={[0, 0, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -146,8 +197,12 @@ const TimeTracker: React.FC = () => {
                     {/* Highlight label for current month */}
                     <div className="flex justify-center items-center mt-3 sm:mt-4">
                         <div className="bg-secondary/30 px-2 sm:px-3 py-1 rounded-lg">
-                            <span className="text-sm text-tmid font-medium">300 {t('hours')}</span>
-                            <span className="text-xs sm:text-sm text-tmid ml-1 sm:ml-2">March, 2025</span>
+                            <span className="text-sm text-tmid font-medium">
+                                {timeTracking?.workedHours || 0} {t('hours')}
+                            </span>
+                            <span className="text-xs sm:text-sm text-tmid ml-1 sm:ml-2">
+                                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -208,13 +263,13 @@ const TimeTracker: React.FC = () => {
 
                         {/* Time markers below the timeline */}
                         <div className="flex justify-between text-sm text-tmid font-medium">
-                            <span>{timelineData?.shiftStart || "07:00"}</span>
-                            <span>09:00</span>
+                            <span>{timelineData?.shiftStart || "09:00"}</span>
                             <span>11:00</span>
                             <span>13:00</span>
                             <span>15:00</span>
                             <span>17:00</span>
-                            <span>{timelineData?.shiftEnd || "19:00"}</span>
+                            <span>19:00</span>
+                            <span>{timelineData?.shiftEnd || "17:00"}</span>
                         </div>
 
                         {/* Summary statistics */}

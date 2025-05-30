@@ -1,14 +1,18 @@
 import { useMokkBar } from "@/components/Providers/Mokkbar";
-import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import useTaskTimer from "@/hooks/useTaskTimer";
-import { ReceiveTaskType } from "@/types/Task.type";
+import { DailyTask } from "@/types/dashboard.type";
 import { Clock } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+
+interface DailyTasksProps {
+    dailyTasks: DailyTask[];
+    isLoading: boolean;
+}
 
 interface TaskItemProps {
-    task: ReceiveTaskType;
-    onClick?: (task: ReceiveTaskType) => void;
+    task: DailyTask;
+    onClick?: (task: DailyTask) => void;
 }
 
 const formatTime = (totalSeconds: number) => {
@@ -20,37 +24,14 @@ const formatTime = (totalSeconds: number) => {
         .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-const DailyTasks: React.FC = () => {
+const DailyTasks: React.FC<DailyTasksProps> = ({ dailyTasks, isLoading }) => {
     const { t } = useLanguage();
     const [scrollProgress, setScrollProgress] = useState(0);
 
-    const { data: tasks, isLoading } = useCustomQuery<ReceiveTaskType[]>({
-        queryKey: ["daily-tasks"],
-        url: "/tasks/daily",
-    });
-
-    // Get today's tasks (tasks due today or ongoing tasks)
-    const dailyTasks = useMemo(() => {
-        if (!tasks) return [];
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        return tasks.filter(task => {
-            // Include ongoing tasks or tasks due today
-            if (task.status === "ONGOING") return true;
-
-            if (task.due_date) {
-                const dueDate = new Date(task.due_date);
-                dueDate.setHours(0, 0, 0, 0);
-                return dueDate.getTime() === today.getTime();
-            }
-
-            return false;
-        }).filter(task => task.status !== "DONE"); // Exclude completed tasks
-    }, [tasks]);
+    // Filter tasks to show only non-completed tasks
+    const filteredDailyTasks = useMemo(() => {
+        return dailyTasks.filter(task => task.status !== "DONE");
+    }, [dailyTasks]);
 
     // Handle scroll to update progress
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -59,33 +40,24 @@ const DailyTasks: React.FC = () => {
         setScrollProgress(progress);
     };
 
-    // Periodically refresh data to keep in sync with other components
-    useEffect(() => {
-        const refreshInterval = setInterval(() => {
-            // Assuming refetch is called elsewhere in the code
-        }, 10000); // Refresh every 10 seconds
-
-        return () => clearInterval(refreshInterval);
-    }, []);
-
     if (isLoading) {
         return (
-            <div className="bg-secondary rounded-xl shadow p-6 h-full">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-twhite">{t('daily_tasks')}</h2>
+            <div className="bg-secondary rounded-xl shadow p-4 sm:p-6 h-full">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-twhite">{t('daily_tasks')}</h2>
                 </div>
                 <div className="flex justify-center items-center h-64">
-                    <p className="text-tmid">{t('loading')}...</p>
+                    <p className="text-tmid text-sm sm:text-base">{t('loading')}...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-secondary rounded-xl shadow p-6 h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-twhite">{t('daily_tasks')}</h2>
-                <button className="text-sm bg-main hover:bg-dark text-tmid px-4 py-2 rounded-lg border border-dark transition-colors">
+        <div className="bg-secondary rounded-xl shadow p-4 sm:p-6 h-full flex flex-col">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-bold text-twhite">{t('daily_tasks')}</h2>
+                <button className="text-xs sm:text-sm bg-main hover:bg-dark text-tmid px-2 sm:px-4 py-1 sm:py-2 rounded-lg border border-dark transition-colors">
                     {t('view_all')}
                 </button>
             </div>
@@ -93,7 +65,7 @@ const DailyTasks: React.FC = () => {
             {/* Scrollable tasks container with fixed height to match calendar */}
             <div className="relative flex-1">
                 {/* Scroll progress indicator */}
-                {dailyTasks.length > 5 && (
+                {filteredDailyTasks.length > 5 && (
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gray-700/30 rounded-t-xl z-10">
                         <div
                             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-xl transition-all duration-300 ease-out scroll-indicator"
@@ -103,10 +75,10 @@ const DailyTasks: React.FC = () => {
                 )}
 
                 <div className="absolute inset-0 overflow-y-auto daily-tasks-scroll" onScroll={handleScroll}>
-                    <div className="space-y-2 pr-2 pb-2">
-                        {dailyTasks.length > 5 && <div className="h-1"></div>} {/* Spacer for progress bar */}
-                        {dailyTasks.length > 0 ? (
-                            dailyTasks.map((task, index) => (
+                    <div className="space-y-2 pr-1 sm:pr-2 pb-2">
+                        {filteredDailyTasks.length > 5 && <div className="h-1"></div>} {/* Spacer for progress bar */}
+                        {filteredDailyTasks.length > 0 ? (
+                            filteredDailyTasks.map((task, index) => (
                                 <div key={task.id} className="task-item-enter" style={{ animationDelay: `${index * 0.1}s` }}>
                                     <TaskItem
                                         task={task}
@@ -115,14 +87,14 @@ const DailyTasks: React.FC = () => {
                             ))
                         ) : (
                             <div className="flex justify-center items-center h-64">
-                                <p className="text-tmid">{t('no_daily_tasks')}</p>
+                                <p className="text-tmid text-sm sm:text-base">{t('no_daily_tasks')}</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Fade effect at bottom to indicate more content */}
-                {dailyTasks.length > 5 && (
+                {filteredDailyTasks.length > 5 && (
                     <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-secondary to-transparent pointer-events-none rounded-b-xl"></div>
                 )}
             </div>
@@ -251,17 +223,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
     };
 
     return (
-        <div className={`flex items-center bg-main rounded-lg py-2 px-2 transition-colors ${isRunning ? "ring-1 ring-primary ring-opacity-50" : ""
+        <div className={`flex items-center bg-main rounded-lg py-2 sm:py-3 px-2 sm:px-3 transition-colors ${isRunning ? "ring-1 ring-primary ring-opacity-50" : ""
             } ${getColorClass()}`}>
             {/* Task details */}
-            <div className="flex-1 px-2 min-w-0">
-                <h3 className="text-sm font-medium text-twhite truncate">{task.name}</h3>
+            <div className="flex-1 px-1 sm:px-2 min-w-0">
+                <h3 className="text-xs sm:text-sm font-medium text-twhite truncate">{task.name}</h3>
                 {/* Compact time tracking section */}
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 sm:gap-2 mt-1">
                     <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-blue-400" />
                         <span className="text-xs text-gray-300">
-                            {formatTime(task?.totalTimeSpent || totalTimeSpent)}
+                            {formatTime(task?.timeSpent || totalTimeSpent)}
                         </span>
                     </div>
                     {isRunning && (
@@ -276,13 +248,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
             </div>
 
             {/* Compact action buttons */}
-            <div className="flex items-center">
+            <div className="flex items-center ml-1 sm:ml-2">
                 {task?.status !== "DONE" && (
                     <div className="flex">
                         {!isRunning ? (
                             <button
                                 disabled={isLoading}
-                                className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 ${!isLoading
+                                className={`px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all duration-300 ${!isLoading
                                     ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                                     : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
                                     }`}
@@ -292,7 +264,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
                             </button>
                         ) : (
                             <button
-                                className="px-2 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300"
+                                className="px-2 sm:px-3 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300"
                                 onClick={handlePauseTask}
                             >
                                 {isLoading ? "..." : t("Pause")}
@@ -302,7 +274,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
                 )}
 
                 {task?.status === "DONE" && (
-                    <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/20">
+                    <span className="px-2 sm:px-3 py-1 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/20">
                         {t("Completed")}
                     </span>
                 )}
