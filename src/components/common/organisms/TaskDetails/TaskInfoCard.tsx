@@ -87,18 +87,18 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   // Function to get task type display
   const getTaskTypeDisplay = () => {
     if (task.isRoutineTask) {
-      return { text: '🔄 Routine Task', bgColor: 'bg-cyan-500/20 text-cyan-400' };
+      return { text: 'Routine Task', bgColor: 'bg-cyan-500/20 text-cyan-400' };
     }
     if (task.isRecurring) {
-      return { text: '🔁 Recurring Task', bgColor: 'bg-indigo-500/20 text-indigo-400' };
+      return { text: 'Recurring Task', bgColor: 'bg-indigo-500/20 text-indigo-400' };
     }
     if (isSubtask) {
-      return { text: '🔗 Subtask', bgColor: 'bg-purple-500/20 text-purple-400' };
+      return { text: 'Subtask', bgColor: 'bg-purple-500/20 text-purple-400' };
     }
     if ((task.subtasks?.length || 0) > 0) {
-      return { text: '📁 Parent Task', bgColor: 'bg-orange-500/20 text-orange-400' };
+      return { text: 'Parent Task', bgColor: 'bg-orange-500/20 text-orange-400' };
     }
-    return { text: '📋 Regular Task', bgColor: 'bg-blue-500/20 text-blue-400' };
+    return { text: 'Regular Task', bgColor: 'bg-blue-500/20 text-blue-400' };
   };
 
   // Get task type display
@@ -120,7 +120,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
         {isSubtask && (
           <div className="flex items-center gap-2">
             <span className="text-sm bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full border border-slate-500/40">
-              🔗 {t("Subtask")}
+              {t("Subtask")}
             </span>
             {/* Visual hierarchy indicator */}
             <div className="flex items-center gap-1">
