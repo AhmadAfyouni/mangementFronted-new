@@ -16,6 +16,8 @@ export const useTaskForm = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
+  const today = new Date().toISOString().split('T')[0];
+
   const {
     register,
     handleSubmit,
@@ -26,7 +28,17 @@ export const useTaskForm = () => {
     setValue,
   } = useForm<TaskFormInputs>({
     resolver: yupResolver(addTaskSchema) as any,
-    defaultValues: {},
+    defaultValues: {
+      name: "",
+      description: "",
+      priority: "",
+      start_date: today,
+      due_date: "",
+      status: "PENDING",
+      isRecurring: false,
+      isRoutineTask: false,
+      progressCalculationMethod: "time_based",
+    },
   });
 
   const [selectedEmp, setSelectedEmp] = useState<any>(null);

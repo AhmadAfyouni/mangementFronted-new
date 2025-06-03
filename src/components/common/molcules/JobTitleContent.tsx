@@ -7,16 +7,18 @@ import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
-import { JobTitleType } from "@/types/JobTitle.type";
+import { JobTitleType, RoutineTaskType } from "@/types/JobTitle.type";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import CustomModal from "../atoms/modals/CustomModal";
+import RoutineTasksModal from "../atoms/modals/RoutineTasksModal";
 import PageSpinner from "../atoms/ui/PageSpinner";
-import { Eye } from "lucide-react";
+import { Eye, Info } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
 import { setActiveEntity } from "@/state/slices/searchSlice";
+import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 
 const TruncatedText = ({ text }: { text: string }) => (
   <p className="truncate max-w-[200px]">{text || "N/A"}</p>
@@ -71,6 +73,13 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
     content: string[];
   } | null>(null);
 
+  // Add state for routine tasks modal
+  const [isRoutineTasksModalOpen, setIsRoutineTasksModalOpen] = useState(false);
+  const [routineTasksModalContent, setRoutineTasksModalContent] = useState<{
+    title: string;
+    tasks: RoutineTaskType[];
+  } | null>(null);
+
   // Get search query from Redux
   const searchQuery = useSelector((state: RootState) =>
     state.globalSearch.queries.jobTitles);
@@ -81,13 +90,21 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
     dispatch(setActiveEntity('jobTitles'));
   }, [dispatch]);
 
-  const { data: jobs, isLoading } = useCustomQuery<{ data: JobTitleType[] }>({
+  // Use custom query to fetch job titles
+  const { data: jobs, isLoading } = useCustomQuery<JobTitleType[] | { data: JobTitleType[], meta: any }>({
     queryKey: ["jobTitles", selectedOption],
     url:
       selectedOption === "view"
         ? `/job-titles/view`
         : `/job-titles/get-job-titles`,
   });
+
+  // Ensure we always have a valid array to work with
+  const jobsData = Array.isArray(jobs)
+    ? jobs
+    : (jobs && 'data' in jobs && Array.isArray(jobs.data))
+      ? jobs.data
+      : [];
 
   // Search configuration
   const searchConfig: SearchConfig<JobTitleType> = {
@@ -133,7 +150,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
     itemsPerPage,
     handlePageChange,
     handleItemsPerPageChange
-  } = useGlobalSearch('jobTitles', jobs?.data || [], searchConfig);
+  } = useGlobalSearch('jobTitles', jobsData, searchConfig);
 
   const handleShowMore = (
     type: "responsibilities" | "permissions",
@@ -145,6 +162,18 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
       content: items,
     });
     setIsModalOpen(true);
+  };
+
+  // Add handler for showing routine tasks
+  const handleShowRoutineTasks = (
+    title: string,
+    tasks: RoutineTaskType[]
+  ) => {
+    setRoutineTasksModalContent({
+      title: `${title} - ${t("Routine Tasks")}`,
+      tasks: tasks,
+    });
+    setIsRoutineTasksModalOpen(true);
   };
 
   // Generate array of page numbers for pagination
@@ -170,16 +199,22 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
 
   const { NavigateButton } = useSetPageData<JobTitleType>("/jobs/add-title");
 
+  // Function to find the jobTitleId for a given task
+  const getJobTitleIdForTask = (task: RoutineTaskType, jobsData: JobTitleType[]): string => {
+    const job = jobsData.find(job => job.routineTasks?.some(t => t.id === task.id));
+    return job?.id || '';
+  };
+
   if (isLoading) {
     return <PageSpinner />;
   }
 
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
+    <div className="bg-secondary rounded-xl shadow-md p-5 flex flex-col gap-5 col-span-12">
       <div className="overflow-x-auto rounded-lg shadow-md">
-        {!jobs || jobs.data.length === 0 || paginatedData.length === 0 ? (
+        {jobsData.length === 0 || paginatedData.length === 0 ? (
           <>
-            <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5 text-twhite">
+            <div className="py-10 flex flex-col items-center justify-center gap-5 text-twhite">
               {searchQuery
                 ? t("No job titles found matching your search criteria.")
                 : t("No Job Titles Found")}
@@ -196,88 +231,118 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
                 }
               >
                 <tr>
-                  <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                     {t("Title")}
                   </th>
-                  <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                     {t("Description")}
                   </th>
-                  <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                     {t("Responsibilities")}
                   </th>
-                  <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                     {t("Permissions")}
                   </th>
-                  <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                     {t("Department")}
                   </th>
+                  <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
+                    {t("Routine Tasks")}
+                  </th>
                   {(isAdmin || hasEditPermission) && (
-                    <th className="text-center py-3 px-4 uppercase font-semibold text-sm">
+                    <th className="text-center py-4 px-4 uppercase font-semibold text-sm">
                       {t("Actions")}
                     </th>
                   )}
                 </tr>
               </thead>
               <tbody>
-                {paginatedData && paginatedData.length > 0 && paginatedData.map((jobTitle) => (
+                {paginatedData.map((job) => (
                   <tr
-                    key={jobTitle.id}
-                    className={`
-                      ${isLightMode
-                        ? "hover:bg-darker text-blackAF hover:text-tblackAF"
-                        : "hover:bg-slate-700 text-twhite"
-                      }
-                      group transition-colors
-                    `}
+                    key={job.id}
+                    className={`${isLightMode ? "hover:bg-dark" : "hover:bg-secondary"
+                      } border-b border-gray-700`}
                   >
-                    <td className="py-3 px-4 text-center">
-                      <TruncatedText text={jobTitle.title} />
+                    <td className="text-center py-4 px-4">
+                      <TruncatedText text={job.title} />
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <TruncatedText text={jobTitle.description} />
+                    <td className="text-center py-4 px-4">
+                      <TruncatedText text={job.description} />
                     </td>
-                    <td className="py-3 px-4">
-                      <ShowMoreList
-                        items={jobTitle.responsibilities}
-                        onShowMore={() =>
+                    <td className="text-center py-4 px-4">
+                      <button
+                        onClick={() =>
                           handleShowMore(
                             "responsibilities",
                             t("Responsibilities"),
-                            jobTitle.responsibilities
+                            job.responsibilities
                           )
                         }
-                        isLightMode={isLightMode}
-                      />
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-blue-700 transition-colors"
+                      >
+                        {t("View")} ({job.responsibilities.length})
+                      </button>
                     </td>
-                    <td className="py-3 px-4">
-                      <ShowMoreList
-                        items={jobTitle.permissions}
-                        onShowMore={() =>
+                    <td className="text-center py-4 px-4">
+                      <button
+                        onClick={() =>
                           handleShowMore(
                             "permissions",
                             t("Permissions"),
-                            jobTitle.permissions
+                            job.permissions
                           )
                         }
-                        isLightMode={isLightMode}
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-green-700 transition-colors"
+                      >
+                        {t("View")} ({job.permissions.length})
+                      </button>
+                    </td>
+                    <td className="text-center py-4 px-4">
+                      <TruncatedText
+                        text={job.department?.name || t("No Department")}
                       />
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <TruncatedText text={jobTitle.department?.name} />
+                    <td className="text-center py-4 px-4">
+                      {job.hasRoutineTasks && job.routineTasks && job.routineTasks.length > 0 ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() =>
+                              handleShowRoutineTasks(
+                                job.title,
+                                job.routineTasks
+                              )
+                            }
+                            className="bg-purple-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-purple-700 transition-colors"
+                          >
+                            {t("View")} ({job.routineTasks.length})
+                          </button>
+                          {job.autoGenerateRoutineTasks && (
+                            <div className="relative group">
+                              <Info
+                                size={16}
+                                className="text-blue-400 cursor-help"
+                              />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-dark text-white text-xs rounded p-2 whitespace-nowrap">
+                                {t("Auto-generates routine tasks")}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">{t("None")}</span>
+                      )}
                     </td>
                     {(isAdmin || hasEditPermission) && (
-                      <td className="py-3 px-4 flex justify-center">
-                        <NavigateButton
-                          data={jobTitle}
-                          className="cursor-pointer p-2 w-16 text-xs flex justify-center font-bold rounded-full bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30"
-                        >
-                          <Image
-                            src={PencilIcon}
-                            alt="edit icon"
-                            height={20}
-                            width={20}
-                          />
-                        </NavigateButton>
+                      <td className="text-center py-4 px-4">
+                        <RouteWrapper href={`/jobs/add-title?id=${job.id}`}>
+                          <div className="inline-block cursor-pointer">
+                            <Image
+                              src={PencilIcon}
+                              alt="edit icon"
+                              className="w-5 h-5"
+                            />
+                          </div>
+                        </RouteWrapper>
                       </td>
                     )}
                   </tr>
@@ -290,14 +355,14 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
 
       {/* Pagination Controls */}
       {paginatedData && paginatedData.length > 0 && (
-        <div className={`flex flex-col md:flex-row justify-between items-center mt-4 px-2 ${isLightMode ? "text-blackAF" : "text-twhite"
+        <div className={`flex flex-col md:flex-row justify-between items-center mt-3 mb-1 px-2 ${isLightMode ? "text-blackAF" : "text-twhite"
           }`}>
           <div className="mb-4 md:mb-0">
             <span>{t("Showing")} </span>
             <select
               value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`px-2 py-1 rounded mx-1 ${isLightMode
+              className={`px-3 py-2 rounded mx-1 ${isLightMode
                 ? "bg-white text-black border border-gray-300"
                 : "bg-tblack text-white border border-gray-700"
                 }`}
@@ -310,11 +375,11 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
             <span>{t("of")} {totalItems} {t("items")}</span>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-1">
             <button
               onClick={() => handlePageChange(1)}
               disabled={currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === 1
+              className={`mx-1 px-3 py-2 rounded ${currentPage === 1
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
                   ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
@@ -327,7 +392,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === 1
+              className={`mx-1 px-3 py-2 rounded ${currentPage === 1
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
                   ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
@@ -341,7 +406,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`mx-1 px-3 py-1 rounded ${currentPage === page
+                className={`mx-1 px-3 py-2 rounded ${currentPage === page
                   ? isLightMode
                     ? "bg-tmid text-main"
                     : "bg-tmid text-main"
@@ -357,7 +422,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === totalPages
+              className={`mx-1 px-3 py-2 rounded ${currentPage === totalPages
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
                   ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
@@ -370,7 +435,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
             <button
               onClick={() => handlePageChange(totalPages)}
               disabled={currentPage === totalPages}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === totalPages
+              className={`mx-1 px-3 py-2 rounded ${currentPage === totalPages
                 ? "opacity-50 cursor-not-allowed"
                 : isLightMode
                   ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
@@ -394,6 +459,47 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
           content={modalContent.content}
           language={currentLanguage as "en" | "ar"}
           actionText={t("Close")}
+        />
+      )}
+
+      {/* Routine Tasks Modal */}
+      {routineTasksModalContent && (
+        <RoutineTasksModal
+          isOpen={isRoutineTasksModalOpen}
+          onClose={() => {
+            setIsRoutineTasksModalOpen(false);
+            setRoutineTasksModalContent(null);
+          }}
+          title={routineTasksModalContent.title}
+          tasks={routineTasksModalContent.tasks}
+          language={currentLanguage as "en" | "ar"}
+          t={t}
+          jobTitleId={getJobTitleIdForTask(routineTasksModalContent.tasks[0], jobsData)}
+          onTaskUpdated={(updatedTask) => {
+            // Update the task in the local state
+            if (jobsData.length > 0) {
+              const updatedJobs = [...jobsData];
+              const jobIndex = updatedJobs.findIndex(job =>
+                job.routineTasks?.some((task: RoutineTaskType) => task.id === updatedTask.id)
+              );
+
+              if (jobIndex !== -1) {
+                const taskIndex = updatedJobs[jobIndex].routineTasks.findIndex(
+                  (task: RoutineTaskType) => task.id === updatedTask.id
+                );
+
+                if (taskIndex !== -1) {
+                  updatedJobs[jobIndex].routineTasks[taskIndex] = updatedTask;
+                  // We can't directly modify the jobs, but we can update UI state
+                  // This is a workaround since we don't have proper state management
+                  setRoutineTasksModalContent({
+                    ...routineTasksModalContent,
+                    tasks: updatedJobs[jobIndex].routineTasks
+                  });
+                }
+              }
+            }
+          }}
         />
       )}
     </div>

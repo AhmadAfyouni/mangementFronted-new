@@ -9,13 +9,49 @@ export const addTaskSchema = yup.object().shape({
   priority: yup.string().required("Priority is required"),
   emp: yup.string().nullable(),
   department_id: yup.string().nullable(),
+  project_id: yup.string().nullable(),
+  section_id: yup.string().nullable(),
+  status: yup.string().nullable(),
+  assignee: yup.string().nullable(),
   due_date: yup
     .date()
     .required("Due date is required")
     .typeError("Invalid date format")
     .min(today, "Due date cannot be in the past"),
+  start_date: yup
+    .date()
+    .required("Start date is required")
+    .typeError("Invalid date format"),
+  actual_end_date: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
+  expected_end_date: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
+  estimated_hours: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value
+    ),
+  actual_hours: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value
+    ),
   files: yup.array().of(yup.string()),
   isRecurring: yup.boolean(),
+  recurringType: yup
+    .string()
+    .nullable()
+    .when("isRecurring", {
+      is: true,
+      then: (schema) => schema.required("Recurring type is required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
   intervalInDays: yup
     .number()
     .nullable()
@@ -30,6 +66,24 @@ export const addTaskSchema = yup.object().shape({
           .min(1, "Interval must be at least 1 day"),
       otherwise: (schema) => schema.nullable(),
     }),
+  recurringEndDate: yup
+    .date()
+    .nullable()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value
+    )
+    .when("isRecurring", {
+      is: true,
+      then: (schema) =>
+        schema
+          .required("Recurring end date is required")
+          .typeError("Invalid date format"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  isRoutineTask: yup.boolean(),
+  routineTaskId: yup.string().nullable(),
+  progressCalculationMethod: yup.string().nullable(),
+  parent_task: yup.string().nullable(),
   end_date: yup
     .date()
     .nullable()
@@ -44,6 +98,12 @@ export const addTaskSchema = yup.object().shape({
           .typeError("Invalid date format"),
       otherwise: (schema) => schema.nullable(),
     }),
+  rate: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value
+    ),
 });
 
 export const addSubTaskSchema = yup.object().shape({
@@ -51,12 +111,40 @@ export const addSubTaskSchema = yup.object().shape({
   description: yup.string().required("Description is required"),
   priority: yup.string().required("Priority is required"),
   emp: yup.string().nullable(),
-  files: yup.array().of(yup.string()),
   due_date: yup
     .date()
     .required("Due date is required")
     .typeError("Invalid date format")
     .min(today, "Due date cannot be in the past"),
+  section_id: yup.string().nullable(),
+  start_date: yup
+    .date()
+    .required("Start date is required")
+    .typeError("Invalid date format"),
+  actual_end_date: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
+  expected_end_date: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
+  estimated_hours: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value
+    ),
+  files: yup.array().of(yup.string()),
+  recurringEndDate: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
+  progressCalculationMethod: yup.string().nullable(),
+  end_date: yup
+    .date()
+    .nullable()
+    .typeError("Invalid date format"),
 });
 
 export const addTaskPopupSchema = yup.object().shape({

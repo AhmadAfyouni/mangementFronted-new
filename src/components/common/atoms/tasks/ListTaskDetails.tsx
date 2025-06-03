@@ -54,6 +54,8 @@ const ListTaskDetails: React.FC<{
     "MEDIUM",
     "HIGH",
   ];
+
+
   const statusOptions: (string | undefined)[] = [
     "PENDING",
     "ONGOING",
@@ -81,6 +83,7 @@ const ListTaskDetails: React.FC<{
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(
     task?.status
   );
+
   const {
     startTimer,
     pauseTimer,
@@ -111,7 +114,8 @@ const ListTaskDetails: React.FC<{
 
   const handleBackdropClick = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    onClose(e);
+
+    // Always try to save changes before closing
     try {
       await updateTaskData(task!.id, {
         status: selectedStatus!,
@@ -131,6 +135,9 @@ const ListTaskDetails: React.FC<{
     } catch (error) {
       console.log("Error updating task card data :  ", error);
     }
+
+    // Close panel
+    onClose(e);
   };
 
   const { setSnackbarConfig } = useMokkBar();
@@ -212,8 +219,46 @@ const ListTaskDetails: React.FC<{
         >
           &times;
         </div>
-        {/* Task Title */}
-        <h1 className="text-lg font-semibold">{task?.name}</h1>
+        {/* Header with Save Button */}
+        <div className="flex justify-between items-center mb-4">
+          {/* Task Title */}
+          <h1 className="text-lg font-semibold">{task?.name}</h1>
+
+          {/* Save Button */}
+          {(isAdmin || isPrimary || userId === task?.assignee._id || userId === task?.emp?.id) && (
+            <button
+              onClick={() => {
+                // Save changes
+                updateTaskData(task!.id, {
+                  status: selectedStatus!,
+                  priority: selectedPriority!,
+                  description: descriptionRef.current!.value,
+                  due_date: calendar!,
+                }).then(() => {
+                  queryClient.invalidateQueries({ queryKey: ["tasks"] });
+                  setSnackbarConfig({
+                    message: t("Changes saved successfully"),
+                    open: true,
+                    severity: "success",
+                  });
+                }).catch(error => {
+                  console.error("Error saving changes:", error);
+                  setSnackbarConfig({
+                    message: t("Failed to save changes"),
+                    open: true,
+                    severity: "error",
+                  });
+                });
+              }}
+              className="px-4 py-2 rounded-md flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {t("Save Changes")}
+            </button>
+          )}
+        </div>
         {/* Assignee and Due Date */}
         <div className="flex gap-4 items-center">
           <div className="text-twhite text-sm">{t("Assignee")}</div>
@@ -227,10 +272,11 @@ const ListTaskDetails: React.FC<{
             <p>{task?.assignee.name}</p>
           </div>
         </div>
+        {/* Due Date */}
         <div className="flex gap-4 items-center">
           <div className="text-twhite text-sm">{t("Due Date")}</div>
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className={`flex items-center gap-2 cursor-pointer border border-blue-500 rounded px-2 py-1`}
             onClick={() => calRef.current?.showPicker()}
             dir="ltr"
           >
@@ -303,12 +349,12 @@ const ListTaskDetails: React.FC<{
           <span>{t("Priority")}</span>
           <span
             className={`${getPriorityColor(selectedPriority!)} ${isLightMode ? "text-twhite" : "text-tblackAF"
-              } px-2 py-1 rounded text-xs cursor-pointer`}
+              } px-2 py-1 rounded text-xs cursor-pointer border border-blue-500`}
             onClick={() => setPriorityMenuOpen(!isPriorityMenuOpen)}
           >
             {t(selectedPriority)}
           </span>
-          {userId == task?.assignee._id && isPriorityMenuOpen && (
+          {isPriorityMenuOpen && (
             <div
               className={`absolute top-1/2 mt-1 ${getDir() == "rtl" ? "left-10" : "right-10 "
                 } bg-dark text-twhite rounded-md shadow-lg p-2 z-10 backdrop-blur-sm min-w-[120px]`}
@@ -339,11 +385,12 @@ const ListTaskDetails: React.FC<{
         >
           <span>{t("Status")}</span>
           <span
-            className="bg-dark text-twhite px-2 py-1 rounded text-xs cursor-pointer"
-            onClick={() =>
-              (userId == task?.assignee._id || userId == task?.emp.id) &&
-              setStatusMenuOpen(!isStatusMenuOpen)
-            }
+            className={`bg-dark text-twhite px-2 py-1 rounded text-xs ${isStatusMenuOpen ? "cursor-pointer border border-blue-500" : "cursor-default"}`}
+            onClick={() => {
+              if (isStatusMenuOpen && (userId == task?.assignee._id || userId == task?.emp?.id)) {
+                setStatusMenuOpen(!isStatusMenuOpen);
+              }
+            }}
           >
             {t(selectedStatus)}
           </span>
@@ -463,8 +510,9 @@ const ListTaskDetails: React.FC<{
           <textarea
             ref={descriptionRef}
             defaultValue={task?.description}
-            className="text-twhite mt-2 p-4 rounded-md w-full outline-none border-none bg-main"
-            placeholder="What is this task about?"
+            className={`text-twhite mt-2 p-4 rounded-md w-full outline-none bg-main ${isPriorityMenuOpen ? 'cursor-text border border-blue-500 focus:border-blue-600' : 'cursor-default border-none'
+              }`}
+            placeholder={t("What is this task about?")}
           ></textarea>
         </div>
 
@@ -585,7 +633,7 @@ const ListTaskDetails: React.FC<{
           )}
         </div>
 
-        {(isAdmin || isPrimary) && (
+        {(isAdmin || isPrimary) && isPriorityMenuOpen && (
           <button
             className={`${isLightMode ? "bg-darkest text-white" : "bg-gray-700"
               }  text-twhite py-2 px-4 rounded-lg flex items-center gap-2`}

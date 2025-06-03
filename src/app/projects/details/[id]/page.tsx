@@ -8,7 +8,7 @@ import HomeTasksReport from "@/components/common/molcules/HomeTasksReport";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate } from "@/services/task.service";
-import { ProjectDetailsType } from "@/types/Project.type";
+import { ProjectDetailsType, ProjectStatus } from "@/types/Project.type";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -21,7 +21,8 @@ import {
   Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import ProjectStatusControls from "@/components/common/atoms/projects/ProjectStatusControls";
 
 const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   const { t, currentLanguage } = useLanguage();
@@ -44,6 +45,18 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
     queryKey: ["project-details"],
     url: `/projects/project-details/${id}`,
   });
+
+  const [projectStatus, setProjectStatus] = useState<ProjectStatus | undefined>(undefined);
+
+  useEffect(() => {
+    if (project?.status) {
+      setProjectStatus(project.status);
+    }
+  }, [project]);
+
+  const handleStatusUpdate = (newStatus: ProjectStatus) => {
+    setProjectStatus(newStatus);
+  };
 
   if (isLoading) {
     return (
@@ -162,6 +175,15 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                       <span className="text-sm text-tdark">{t("Task Count")}</span>
                       <p className="text-twhite">{totalTasks}</p>
                     </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-gray-700/50">
+                    <ProjectStatusControls
+                      projectId={project._id}
+                      currentStatus={projectStatus}
+                      onStatusUpdated={handleStatusUpdate}
+                      t={t}
+                    />
                   </div>
                 </div>
 

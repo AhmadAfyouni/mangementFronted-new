@@ -15,9 +15,8 @@ const Page = () => {
     <GridContainer>
       <div className="col-span-full flex flex-col xs:flex-row justify-between items-center mb-5 gap-5">
         <h1
-          className={`text-3xl font-bold  ${
-            isLightMode ? "text-twhite " : "text-twhite"
-          }  text-center `}
+          className={`text-3xl font-bold  ${isLightMode ? "text-twhite " : "text-twhite"
+            }  text-center `}
         >
           {t("Projects")}
         </h1>

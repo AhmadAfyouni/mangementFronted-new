@@ -54,17 +54,31 @@ export interface TaskFormInputs {
   id: string;
   name: string;
   description: string;
-  // task_type: string;
-  priority: number;
+  task_type?: string;
+  priority: string;
   emp?: string;
   department_id?: string;
   project_id?: string;
-  // status: string;
+  section_id?: string;
+  status?: string;
+  assignee?: string;
   due_date: string;
+  start_date: string;
+  actual_end_date?: string;
+  expected_end_date?: string;
+  estimated_hours?: number;
+  actual_hours?: number;
   files?: string[];
   isRecurring?: boolean;
+  recurringType?: string;
   intervalInDays?: number;
+  recurringEndDate?: string;
+  isRoutineTask?: boolean;
+  routineTaskId?: string;
+  progressCalculationMethod?: string;
+  parent_task?: string;
   end_date?: string;
+  rate?: number;
 }
 
 export interface ITaskStatus {
@@ -77,20 +91,6 @@ export interface ITaskType {
   id: string;
   name: string;
   description: string;
-}
-
-export interface TaskFormInputs {
-  id: string;
-  name: string;
-  description: string;
-  task_type: string;
-  priority: number;
-  emp?: string;
-  department_id?: string;
-  project_id?: string;
-  status: string;
-  due_date: string;
-  files?: string[];
 }
 
 // Props for the CreateTask component
@@ -269,21 +269,51 @@ export type ReceiveTaskType = {
   name: string;
   description: string;
   priority: "LOW" | "MEDIUM" | "HIGH";
-  emp: TaskEmployeeType;
-  assignee: TaskEmployeeType;
+  emp?: TaskEmployeeType | null;
+  assignee?: TaskEmployeeType | null;
   status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | string;
   createdAt: string;
   updatedAt: string;
   due_date: string;
-  files: string[];
-  is_over_due: boolean;
+  start_date: string;
+  actual_end_date?: string;
+  expected_end_date?: string;
+
+  // Time tracking fields
+  estimated_hours?: number;
+  actual_hours?: number;
   totalTimeSpent: number;
-  startTime: string;
+  startTime?: string;
   timeLogs: TimeLog[];
-  section: Section;
+
+  // File management
+  files: string[];
+
+  // Status and progress
+  is_over_due: boolean;
+  progress: number;
+  progressCalculationMethod?: string;
+  hasLoggedHours?: boolean;
+  isActive?: boolean;
+
+  // Recurring task fields
+  isRecurring?: boolean;
+  recurringType?: string;
+  intervalInDays?: number;
+  recurringEndDate?: string;
+
+  // Routine task fields
+  isRoutineTask?: boolean;
+  routineTaskId?: string;
+
+  // Relationships
   parent_task?: string;
-  subtasks: ReceiveTaskType[],
-  rate?: number;
+  sub_tasks?: string[];
+  dependencies?: string[];
+  subtasks?: ReceiveTaskType[];
+
+  // Organization
+  section?: Section;
   department?: {
     _id: string,
     name: string,
@@ -294,7 +324,17 @@ export type ReceiveTaskType = {
     numericOwners: NumericOwner[],
     requiredReports: RequiredReport[],
     developmentPrograms: DevelopmentProgram[],
-  },
+  };
+  project?: any;
+
+  // Board customization
+  boardPosition?: string;
+  boardOrder?: number;
+
+  // Legacy fields
+  over_all_time?: string;
+  rate?: number;
+  end_date?: string;
 };
 
 export type ExtendedReceiveTaskType = {

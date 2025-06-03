@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { TimeLog } from "@/types/Task.type";
+import { apiClient } from "@/utils/axios/usage";
 
 interface UseTaskTimerReturn {
     // Timer state
@@ -115,30 +115,17 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
     // API call helper
     const makeApiCall = useCallback(async (action: 'start' | 'pause') => {
         try {
-            const token = Cookies.get("access_token");
-            if (!token) {
-                throw new Error("Authentication token not found");
-            }
+            const endpoint = action === 'start' ? `/tasks/start/${taskId}` : `/tasks/pause/${taskId}`;
+            const response = await apiClient.get<{ data: any }>(endpoint);
 
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/tasks/${action}/${taskId}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
+            // Invalidate all relevant queries for perfect sync
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+                queryClient.invalidateQueries({ queryKey: ["task", taskId] }),
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+            ]);
 
-            if (response.status === 200) {
-                // Invalidate all relevant queries for perfect sync
-                await Promise.all([
-                    queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-                    queryClient.invalidateQueries({ queryKey: ["task", taskId] }),
-                    queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-                ]);
-
-                return { success: true };
-            }
-
-            throw new Error(`API call failed with status ${response.status}`);
+            return { success: true };
         } catch (error) {
             console.error(`Error ${action}ing timer:`, error);
             return { success: false, error };
@@ -149,19 +136,15 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
     const startTimer = useCallback(async (): Promise<{ success: boolean; message?: string }> => {
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/tasks/${taskId}/start-timer`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
+            const result = await makeApiCall('start');
 
-            const result = await response.json();
             if (result.success) {
                 setIsRunning(true);
                 setElapsedTime(0);
                 startTimeRef.current = Date.now();
                 return { success: true };
             } else {
-                return { success: false, message: result.message };
+                return { success: false, message: "Failed to start timer" };
             }
         } catch (error) {
             console.error("Error starting timer:", error);
@@ -169,7 +152,7 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
         } finally {
             setIsLoading(false);
         }
-    }, [taskId]);
+    }, [makeApiCall]);
 
     // Pause timer action
     const pauseTimer = useCallback(async (): Promise<{ success: boolean; message?: string }> => {

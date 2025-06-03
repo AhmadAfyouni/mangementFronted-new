@@ -6,16 +6,20 @@ import { useState } from "react";
 
 interface TaskHeaderProps {
   task: ReceiveTaskType;
-  onUpdate: (updatedTask: ReceiveTaskType) => void;
+  onUpdate: () => void;
   taskName: string;
   onNameChange: (newName: string) => void;
+  isEditing: boolean;
+  onEditToggle: () => void;
 }
 
 export const TaskHeader: React.FC<TaskHeaderProps> = ({
   task,
   onUpdate,
   taskName,
-  onNameChange
+  onNameChange,
+  isEditing,
+  onEditToggle
 }) => {
   const { t, currentLanguage } = useLanguage();
   const [isEditingName, setIsEditingName] = useState(false);
@@ -101,7 +105,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
                   {taskName || 'Untitled Task'}
                 </h1>
               </div>
-              {(
+              {isEditing && (
                 <button
                   onClick={() => setIsEditingName(true)}
                   className="p-2 text-gray-400 hover:text-twhite hover:bg-gray-700/50 rounded-lg transition-all"
@@ -132,15 +136,25 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
           </div>
         </div>
 
-        {(
+        {isEditing ? (
           <button
-            onClick={() => onUpdate(task)}
+            onClick={onUpdate}
+            className={`px-6 py-2 rounded-lg transition-colors ${isSubtask
+              ? 'bg-green-600 text-white hover:bg-green-700'
+              : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+          >
+            {t("Save Changes")}
+          </button>
+        ) : (
+          <button
+            onClick={onEditToggle}
             className={`px-6 py-2 rounded-lg transition-colors ${isSubtask
               ? 'bg-slate-600 text-white hover:bg-slate-700'
               : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
           >
-            {t("Save Changes")}
+            {t("Edit")}
           </button>
         )}
       </div>

@@ -16,6 +16,8 @@ import { TaskFormInputs } from "@/types/Task.type";
 import React from "react";
 import PendingLogic from "@/components/common/atoms/ui/PendingLogic";
 import FileUploadSection from "@/components/common/atoms/tasks/FileUploadSection";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/utils/axios/usage";
 
 const AddTask: React.FC = () => {
   const { t } = useLanguage();
@@ -50,6 +52,36 @@ const AddTask: React.FC = () => {
     isProjectDisabled
   );
 
+  // Fetch sections
+  const { data: sections = [] } = useQuery({
+    queryKey: ["sections"],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<any>("/sections");
+        // Return response.data as that's where the actual data is
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+        return [];
+      }
+    },
+  });
+
+  // Fetch tasks for parent task selection
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<any>("/tasks");
+        // Return the tasks array from the response data
+        return response.data?.tasks || [];
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        return [];
+      }
+    },
+  });
+
   const { addTask, isPending } = useTaskSubmit(
     selectedEmployee,
     selectedDepartment,
@@ -66,17 +98,50 @@ const AddTask: React.FC = () => {
       getValues
     );
 
+    // Helper function to convert date strings to ISO format
+    const toISODate = (dateStr: string | undefined) => {
+      if (!dateStr) return undefined;
+      try {
+        return new Date(dateStr).toISOString();
+      } catch (e) {
+        return undefined;
+      }
+    };
+
+    // Helper function to convert string to number
+    const toNumber = (value: any) => {
+      if (value === undefined || value === null || value === "") return undefined;
+      const num = Number(value);
+      return isNaN(num) ? undefined : num;
+    };
+
     const payload = {
       name: getValues("name"),
       description: getValues("description"),
       priority: getValues("priority"),
       files: getValues("files") ?? [],
-      due_date: new Date(data.due_date).toISOString(),
+      due_date: toISODate(data.due_date),
+      start_date: toISODate(data.start_date),
+      section_id: getValues("section_id") || undefined,
+      parent_task: getValues("parent_task") || undefined,
+      assignee: getValues("assignee") || undefined,
+      actual_end_date: toISODate(data.actual_end_date),
+      expected_end_date: toISODate(data.expected_end_date),
+      estimated_hours: toNumber(getValues("estimated_hours")),
+      actual_hours: toNumber(getValues("actual_hours")),
+      isRecurring: getValues("isRecurring") || false,
+      recurringType: getValues("recurringType") || undefined,
+      intervalInDays: toNumber(getValues("intervalInDays")),
+      recurringEndDate: toISODate(data.recurringEndDate),
+      isRoutineTask: getValues("isRoutineTask") || false,
+      routineTaskId: getValues("routineTaskId") || undefined,
+      progressCalculationMethod: getValues("progressCalculationMethod") || undefined,
+      end_date: toISODate(data.end_date),
       ...target,
     };
 
     const filteredPayload = Object.fromEntries(
-      Object.entries(payload).filter(([, value]) => value !== "")
+      Object.entries(payload).filter(([, value]) => value !== undefined && value !== "")
     );
 
     console.log(filteredPayload);
@@ -116,6 +181,8 @@ const AddTask: React.FC = () => {
             employees={employees}
             selectedEmp={selectedEmp}
             setSelectedEmp={setSelectedEmp}
+            sections={sections}
+            tasks={tasks}
           />
 
           {/* File Upload Section */}
@@ -156,8 +223,8 @@ const AddTask: React.FC = () => {
           {feedbackMessage && (
             <p
               className={`mt-2 text-center ${feedbackMessage.includes("successfully")
-                  ? "text-green-500"
-                  : "text-red-500"
+                ? "text-green-500"
+                : "text-red-500"
                 }`}
             >
               {feedbackMessage}
