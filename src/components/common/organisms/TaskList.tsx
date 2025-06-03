@@ -15,6 +15,9 @@ const ListTasks = ({
     tasksData: ReceiveTaskType[] | undefined;
     sections: SectionType[] | undefined;
 }) => {
+
+    console.log("[tasksData] : ", sections);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tasks, setTasks] = useState<{
         [key: string]: ReceiveTaskType[];

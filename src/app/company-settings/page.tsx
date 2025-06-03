@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, Settings, Clock, Bell, FileText, Calendar, Save, Edit3, Upload, X } from "lucide-react";
+import { Building2, Settings, Clock, Bell, FileText, Calendar, Save, Edit3 } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
-import FileUploadWithProgress from "@/components/common/atoms/ui/FileUploadWithProgress";
-import { useMokkBar } from "@/components/Providers/Mokkbar";
 
 // Enums matching backend
 enum WorkDay {
@@ -116,7 +114,6 @@ const CompanySettings = () => {
     });
 
     const { t, currentLanguage } = useLanguage();
-    const { setSnackbarConfig } = useMokkBar();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
 
@@ -187,57 +184,6 @@ const CompanySettings = () => {
             : [...currentWorkDays, day];
 
         handleWorkSettingsChange('workDays', newWorkDays);
-    };
-
-    const handleFileUpload = (field: keyof CompanySettings, fileUrl: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: fileUrl
-        }));
-    };
-
-    const handleFileArrayUpload = (field: 'companyPolicyFiles' | 'taskTemplateFiles', fileUrl: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: [...(prev[field] || []), fileUrl]
-        }));
-    };
-
-    const handleFileUploadError = (error: string) => {
-        setSnackbarConfig({
-            open: true,
-            message: error,
-            severity: 'error'
-        });
-    };
-
-    // Helper function to open files in new tab
-    const openFile = (fileUrl?: string) => {
-        if (!fileUrl) return;
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-        let fullUrl = '';
-
-        if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-            fullUrl = fileUrl;
-        } else if (fileUrl.startsWith('/')) {
-            fullUrl = `${baseUrl}${fileUrl}`;
-        } else {
-            fullUrl = `${baseUrl}/${fileUrl}`;
-        }
-
-        window.open(fullUrl, '_blank');
-    };
-
-    // Helper function to get file name from URL
-    const getFileName = (fileUrl: string) => {
-        return fileUrl.split('/').pop() || 'Unknown file';
-    };
-
-    const removeFileFromArray = (field: 'companyPolicyFiles' | 'taskTemplateFiles', index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: prev[field]?.filter((_, i) => i !== index) || []
-        }));
     };
 
     const handleSave = () => {
@@ -737,254 +683,6 @@ const CompanySettings = () => {
                                             ))}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Company Policy Files */}
-                            <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-                                <h3 className="text-lg font-bold text-twhite mb-6 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
-                                        <Upload className="w-4 h-4 text-white" />
-                                    </div>
-                                    {t("Company Policy Documents")}
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <p className="text-gray-400 text-sm">
-                                        {t("Upload company policies, procedures, and guidelines")}
-                                    </p>
-
-                                    {/* Existing Policy Files */}
-                                    {formData.companyPolicyFiles && formData.companyPolicyFiles.length > 0 ? (
-                                        <div className="space-y-3">
-                                            <h4 className="text-twhite font-medium">{t("Uploaded Policy Files")}</h4>
-                                            {formData.companyPolicyFiles.map((fileUrl, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="group p-4 bg-main rounded-lg border border-gray-600 hover:border-green-400 hover:shadow-lg hover:shadow-green-400/10 transition-all duration-300 cursor-pointer"
-                                                    onClick={() => openFile(fileUrl)}
-                                                    title="Click to open file"
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center space-x-3">
-                                                            <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
-                                                                <FileText className="w-5 h-5 text-white" />
-                                                            </div>
-                                                            <div>
-                                                                <span className="text-twhite text-sm font-medium block">
-                                                                    {getFileName(fileUrl)}
-                                                                </span>
-                                                                <span className="text-gray-400 text-xs">
-                                                                    {t("Click to view document")}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            <div className="bg-green-500 text-white px-3 py-1 rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                {t("Open")}
-                                                            </div>
-                                                            {isEditing && (
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        removeFileFromArray('companyPolicyFiles', index);
-                                                                    }}
-                                                                    className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
-                                                                    title="Remove file"
-                                                                >
-                                                                    <X className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-6 bg-gray-800/50 rounded-lg border border-dashed border-gray-600 text-center">
-                                            <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-gray-400 text-sm">{t("No policy documents uploaded")}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Upload New Policy File */}
-                                    {isEditing && (
-                                        <div className="mt-4">
-                                            <FileUploadWithProgress
-                                                onUploadComplete={(fileUrl) => handleFileArrayUpload('companyPolicyFiles', fileUrl)}
-                                                onUploadError={handleFileUploadError}
-                                                acceptedFileTypes=".pdf,.doc,.docx"
-                                                maxFileSize={formData.maxFileUploadSize}
-                                                uploadPath="company/policies"
-                                                placeholder={t("Click to upload policy document")}
-                                                disabled={!isEditing}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Task Template Files */}
-                            <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-                                <h3 className="text-lg font-bold text-twhite mb-6 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center">
-                                        <Upload className="w-4 h-4 text-white" />
-                                    </div>
-                                    {t("Task Template Files")}
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <p className="text-gray-400 text-sm">
-                                        {t("Upload task templates and forms for standardized workflows")}
-                                    </p>
-
-                                    {/* Existing Template Files */}
-                                    {formData.taskTemplateFiles && formData.taskTemplateFiles.length > 0 ? (
-                                        <div className="space-y-3">
-                                            <h4 className="text-twhite font-medium">{t("Uploaded Template Files")}</h4>
-                                            {formData.taskTemplateFiles.map((fileUrl, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="group p-4 bg-main rounded-lg border border-gray-600 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-400/10 transition-all duration-300 cursor-pointer"
-                                                    onClick={() => openFile(fileUrl)}
-                                                    title="Click to open file"
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center space-x-3">
-                                                            <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
-                                                                <FileText className="w-5 h-5 text-white" />
-                                                            </div>
-                                                            <div>
-                                                                <span className="text-twhite text-sm font-medium block">
-                                                                    {getFileName(fileUrl)}
-                                                                </span>
-                                                                <span className="text-gray-400 text-xs">
-                                                                    {t("Click to view template")}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            <div className="bg-purple-500 text-white px-3 py-1 rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                {t("Open")}
-                                                            </div>
-                                                            {isEditing && (
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        removeFileFromArray('taskTemplateFiles', index);
-                                                                    }}
-                                                                    className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
-                                                                    title="Remove file"
-                                                                >
-                                                                    <X className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-6 bg-gray-800/50 rounded-lg border border-dashed border-gray-600 text-center">
-                                            <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-gray-400 text-sm">{t("No task templates uploaded")}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Upload New Template File */}
-                                    {isEditing && (
-                                        <div className="mt-4">
-                                            <FileUploadWithProgress
-                                                onUploadComplete={(fileUrl) => handleFileArrayUpload('taskTemplateFiles', fileUrl)}
-                                                onUploadError={handleFileUploadError}
-                                                acceptedFileTypes=".pdf,.doc,.docx,.xls,.xlsx"
-                                                maxFileSize={formData.maxFileUploadSize}
-                                                uploadPath="company/templates"
-                                                placeholder={t("Click to upload task template")}
-                                                disabled={!isEditing}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Employee Handbook */}
-                            <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-                                <h3 className="text-lg font-bold text-twhite mb-6 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-                                        <Upload className="w-4 h-4 text-white" />
-                                    </div>
-                                    {t("Employee Handbook")}
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <p className="text-gray-400 text-sm">
-                                        {t("Upload the official employee handbook document")}
-                                    </p>
-
-                                    {/* Current Handbook File */}
-                                    {formData.employeeHandbookFile ? (
-                                        <div className="mb-4">
-                                            <h4 className="text-twhite font-medium mb-3">{t("Current Handbook")}</h4>
-                                            <div
-                                                className="group p-4 bg-main rounded-lg border border-gray-600 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-400/10 transition-all duration-300 cursor-pointer"
-                                                onClick={() => openFile(formData.employeeHandbookFile)}
-                                                title="Click to open handbook"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center">
-                                                            <FileText className="w-5 h-5 text-white" />
-                                                        </div>
-                                                        <div>
-                                                            <span className="text-twhite text-sm font-medium block">
-                                                                {getFileName(formData.employeeHandbookFile)}
-                                                            </span>
-                                                            <span className="text-gray-400 text-xs">
-                                                                {t("Click to view handbook")}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="bg-orange-500 text-white px-3 py-1 rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                            {t("Open")}
-                                                        </div>
-                                                        {isEditing && (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleFileUpload('employeeHandbookFile', '');
-                                                                }}
-                                                                className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
-                                                                title="Remove handbook"
-                                                            >
-                                                                <X className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="p-6 bg-gray-800/50 rounded-lg border border-dashed border-gray-600 text-center mb-4">
-                                            <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-gray-400 text-sm">{t("No employee handbook uploaded")}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Upload Handbook */}
-                                    {isEditing && (
-                                        <FileUploadWithProgress
-                                            onUploadComplete={(fileUrl) => handleFileUpload('employeeHandbookFile', fileUrl)}
-                                            onUploadError={handleFileUploadError}
-                                            acceptedFileTypes=".pdf,.doc,.docx"
-                                            maxFileSize={formData.maxFileUploadSize}
-                                            uploadPath="company/handbook"
-                                            currentFileUrl={formData.employeeHandbookFile}
-                                            placeholder={t("Click to upload employee handbook")}
-                                            disabled={!isEditing}
-                                        />
-                                    )}
                                 </div>
                             </div>
                         </div>

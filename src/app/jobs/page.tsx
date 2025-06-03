@@ -27,14 +27,14 @@ const JobTitlesView: React.FC = () => {
 
   return (
     <GridContainer>
-      <div className="col-span-full flex flex-col md:flex-row justify-between items-center gap-5 mb-5">
-        <h1 className="text-3xl font-bold text-twhite text-center pb-4">
+      <div className="col-span-full flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <h1 className="text-3xl font-bold text-twhite text-center pb-2">
           {t("Job Titles")}
         </h1>
-        <div className="flex justify-center flex-wrap items-center gap-5">
+        <div className="flex justify-center flex-wrap items-center gap-4">
           {showSelect && (
             <select
-              className="bg-secondary outline-none border-none text-twhite rounded-lg px-4 py-2 focus:outline-none transition duration-200"
+              className="bg-secondary outline-none border-none text-twhite rounded-lg px-4 py-2.5 focus:outline-none transition duration-200"
               value={selectedOption}
               onChange={(e) => setSelectedOption(e.target.value)}
             >
@@ -49,7 +49,7 @@ const JobTitlesView: React.FC = () => {
           {isAdmin && (
             <>
               <RouteWrapper href="/jobs/add-title">
-                <div className="bg-secondary text-twhite px-6 py-2 rounded-lg hover:bg-opacity-90 transition duration-200">
+                <div className="bg-secondary text-twhite px-6 py-2.5 rounded-lg hover:bg-opacity-90 transition duration-200">
                   {t("Add Job Title")}
                 </div>
               </RouteWrapper>

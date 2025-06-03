@@ -36,7 +36,7 @@ export interface SearchConfig<
 function useGlobalSearch<
     T extends SearchableEntity,
     F extends Partial<Record<keyof T, string | number | boolean | null>>
->(entity: EntityType, data: T[], config: SearchConfig<T, F>) {
+>(entity: EntityType, data: T[] | readonly T[] | undefined, config: SearchConfig<T, F>) {
     const dispatch = useDispatch();
     const globalSearchState = useSelector((state: RootState) => state.globalSearch);
 
@@ -47,7 +47,10 @@ function useGlobalSearch<
 
     // Filter data based on search query and filters
     const filteredData = useMemo(() => {
-        return data.filter((item) => {
+        // Ensure data is an array before applying filter
+        const dataArray = Array.isArray(data) ? data : [];
+
+        return dataArray.filter((item) => {
             // Search query filtering
             const matchesSearch =
                 !searchQuery ||

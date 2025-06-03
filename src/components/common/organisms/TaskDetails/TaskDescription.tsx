@@ -4,9 +4,10 @@ import useLanguage from "@/hooks/useLanguage";
 interface TaskDescriptionProps {
   description: string;
   onChange: (value: string) => void;
+  isEditing: boolean;
 }
 
-export const TaskDescription: React.FC<TaskDescriptionProps> = ({ description, onChange }) => {
+export const TaskDescription: React.FC<TaskDescriptionProps> = ({ description, onChange, isEditing }) => {
   const { t } = useLanguage();
 
   return (
@@ -18,9 +19,13 @@ export const TaskDescription: React.FC<TaskDescriptionProps> = ({ description, o
       <textarea
         value={description}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full p-4 bg-dark rounded-lg text-twhite border border-gray-700 focus:border-blue-500 focus:outline-none transition-colors"
+        className={`w-full p-4 bg-dark rounded-lg text-twhite border border-gray-700 transition-colors ${isEditing
+            ? 'focus:border-blue-500 focus:outline-none cursor-text'
+            : 'cursor-default border-transparent'
+          }`}
         rows={5}
         placeholder={t("What is this task about?")}
+        readOnly={!isEditing}
       />
     </div>
   );

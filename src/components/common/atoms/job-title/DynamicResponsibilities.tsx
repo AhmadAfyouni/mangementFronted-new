@@ -41,7 +41,7 @@ const DynamicResponsibilities: React.FC<DynamicResponsibilitiesProps> = ({
   };
 
   return (
-    <div className="gap-3">
+    <div className="gap-3 flex flex-col">
       <label className="block text-sm font-medium">
         {t("Responsibilities")}
       </label>

@@ -1,16 +1,9 @@
 import { useDashboard } from "@/hooks/useDashboard";
-import useLanguage from "@/hooks/useLanguage";
-import useTaskTimer from "@/hooks/useTaskTimer";
 import { MyTask } from "@/types/dashboard.type";
-import { FileIcon, Inbox, MessageSquare, Clock } from "lucide-react";
-import { useState, memo, useCallback } from "react";
-import Image from "next/image";
-import { PlayIcon, PauseIcon } from "@/assets";
-import { useMokkBar } from "@/components/Providers/Mokkbar";
-import PageSpinner from "../ui/PageSpinner";
+import { FileIcon, Inbox, MessageSquare } from "lucide-react";
+import { memo, useCallback, useState } from "react";
 
 const MyTasks: React.FC = () => {
-    const { t } = useLanguage();
     type TaskStatus = "all" | MyTask['status'];
 
     const [activeFilter, setActiveFilter] = useState<TaskStatus>('all');
@@ -41,15 +34,6 @@ const MyTasks: React.FC = () => {
         } catch {
             return '';
         }
-    }, []);
-
-    const formatTime = useCallback((totalSeconds: number) => {
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        return `${hours.toString().padStart(2, "0")}:${minutes
-            .toString()
-            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     }, []);
 
     try {
@@ -155,7 +139,7 @@ const MyTasks: React.FC = () => {
                                         Status
                                     </th>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider">
-                                        Time Tracking
+                                        Progress
                                     </th>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider ltr:rounded-tr-xl  rtl:rounded-tl-xl">
                                         Activity
@@ -171,8 +155,6 @@ const MyTasks: React.FC = () => {
                                             isLast={index === filteredTasks.length - 1}
                                             formatDate={formatDate}
                                             getStatusColor={getStatusColor}
-                                            formatTime={formatTime}
-                                            t={t}
                                         />
                                     ))
                                 ) : (
@@ -208,19 +190,14 @@ const TaskRow = memo<{
     isLast: boolean;
     formatDate: (dateString: string) => string;
     getStatusColor: (status: string) => string;
-    formatTime: (totalSeconds: number) => string;
-    t: (key: string) => string;
-}>(({ task, isLast, formatDate, getStatusColor, formatTime, t }) => {
-    const { setSnackbarConfig } = useMokkBar();
-
-    // Use useTaskTimer hook directly - hooks must be called unconditionally
-    const {
-        elapsedTime,
-        isRunning,
-        pauseTimer,
-        startTimer,
-        isLoading,
-    } = useTaskTimer(task.id, task.timeLogs || []);
+}>(({ task, isLast, formatDate, getStatusColor }) => {
+    // Get progress color based on percentage
+    const getProgressColor = (progress: number) => {
+        if (progress >= 75) return "bg-green-500";
+        if (progress >= 50) return "bg-blue-500";
+        if (progress >= 25) return "bg-yellow-500";
+        return "bg-red-500";
+    };
 
     return (
         <tr
@@ -240,113 +217,19 @@ const TaskRow = memo<{
                 </span>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center space-x-3">
-                    <div className="bg-secondary/30 px-3 py-1.5 rounded-lg shadow shadow-black/20 hover:bg-secondary/40 transition-all duration-300">
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-blue-400" />
-                                <span className="text-sm font-medium text-gray-300">
-                                    {formatTime(task?.timeSpent || 0)}
-                                </span>
-                            </div>
-                            {isRunning && (
-                                <div className="flex items-center gap-2 mt-1">
-                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot"></div>
-                                    <span className="text-xs text-green-400">
-                                        {formatTime(elapsedTime)} {t("running")}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                <div className="flex flex-col w-full gap-1.5">
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400">{task.progress}%</span>
+                        {task.status === "DONE" && (
+                            <span className="text-xs text-green-400">Completed</span>
+                        )}
                     </div>
-
-                    {task.status !== "DONE" && (
-                        <div className="flex space-x-1">
-                            {!isRunning ? (
-                                <button
-                                    disabled={isLoading}
-                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
-                                        ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
-                                        : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
-                                        }`}
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        if (task?.status === "ONGOING") {
-                                            try {
-                                                const result = await startTimer();
-                                                if (!result.success) {
-                                                    setSnackbarConfig({
-                                                        message: t("Failed to start the timer. Please try again."),
-                                                        open: true,
-                                                        severity: "error",
-                                                    });
-                                                }
-                                            } catch (error) {
-                                                console.error("Error starting timer:", error);
-                                                setSnackbarConfig({
-                                                    message: t("Failed to start the timer. Please try again."),
-                                                    open: true,
-                                                    severity: "error",
-                                                });
-                                            }
-                                        } else {
-                                            setSnackbarConfig({
-                                                message: t("Task Status must be ONGOING"),
-                                                open: true,
-                                                severity: "warning",
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <Image
-                                        src={PlayIcon}
-                                        alt="play icon"
-                                        width={15}
-                                        height={15}
-                                    />
-                                    <span className="text-sm font-medium">{t("Start")}</span>
-                                </button>
-                            ) : (
-                                <button
-                                    className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10 flex items-center gap-1.5 transition-all duration-300"
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        try {
-                                            const result = await pauseTimer();
-                                            if (!result.success) {
-                                                setSnackbarConfig({
-                                                    message: t("Failed to pause the timer. Please try again."),
-                                                    open: true,
-                                                    severity: "error",
-                                                });
-                                            }
-                                        } catch (error) {
-                                            console.error("Error pausing timer:", error);
-                                            setSnackbarConfig({
-                                                message: t("Failed to pause the timer. Please try again."),
-                                                open: true,
-                                                severity: "error",
-                                            });
-                                        }
-                                    }}
-                                >
-                                    {isLoading ? (
-                                        <PageSpinner size="small" />
-                                    ) : (
-                                        <>
-                                            <Image
-                                                src={PauseIcon}
-                                                alt="pause icon"
-                                                width={15}
-                                                height={15}
-                                            />
-                                            <span className="text-sm font-medium">{t("Pause")}</span>
-                                        </>
-                                    )}
-                                </button>
-                            )}
-                        </div>
-                    )}
+                    <div className="w-full bg-gray-700 rounded-full h-2.5">
+                        <div
+                            className={`h-2.5 rounded-full ${getProgressColor(task.progress)}`}
+                            style={{ width: `${task.progress}%` }}
+                        ></div>
+                    </div>
                 </div>
             </td>
             <td className={`px-6 py-4 whitespace-nowrap ${isLast ? 'ltr:rounded-br-xl rtl:rounded-bl-xl' : ''}`}>

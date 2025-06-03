@@ -73,7 +73,7 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
 
       {/* Controls with better styling */}
       <div className="space-y-3">
-        {selectedStatus !== "DONE" && (
+        {selectedStatus !== "DONE" ? (
           <div className="flex gap-2">
             {!isTaskRunning ? (
               <button
@@ -103,9 +103,7 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
               </button>
             )}
           </div>
-        )}
-
-        {selectedStatus === "DONE" && (
+        ) : (
           <div className="text-center py-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg">
               <RotateCcw className="w-4 h-4" />

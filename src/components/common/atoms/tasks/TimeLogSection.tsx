@@ -72,7 +72,7 @@ export const TimeLogSection: React.FC<{
   return (
     <>
       <div className="flex justify-between items-center mb-2">
-        <label className="font-bold block">{t("Time Logs")}</label>
+        <label className="font-bold block text-twhite">{t("Time Logs")}</label>
         <button
           className="text-xs bg-dark text-twhite px-2 py-1 rounded"
           onClick={() => setIsExpanded(!isExpanded)}

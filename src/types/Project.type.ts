@@ -4,6 +4,12 @@ import { SectionType } from "./Section.type";
 import { ReceiveTaskType } from "./Task.type";
 import { DeptTree } from "./trees/Department.tree.type";
 
+export enum ProjectStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}
+
 export type ProjectType = {
   _id: string;
   name: string;
@@ -15,6 +21,7 @@ export type ProjectType = {
   endDate: string;
   createdAt: string;
   updatedAt: string;
+  status?: ProjectStatus;
 };
 
 export type ProjectDetailsType = {
@@ -31,4 +38,5 @@ export type ProjectDetailsType = {
   taskOnGoing: number;
   taskOnTest: number;
   taskPending: number;
+  status?: ProjectStatus;
 };

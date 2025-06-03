@@ -63,7 +63,7 @@ export const categorizeTasks = (tasks: ReceiveTaskType[]) => {
 
 export const updateTaskData = async (
   taskId: string,
-  data: { [key: string]: string }
+  data: { [key: string]: string | number | boolean | string[] | undefined | null }
 ) => {
   try {
     return await apiClient.post(`/tasks/update/${taskId}`, data);

@@ -74,9 +74,9 @@ const Notification = ({
   console.log("notifications : ", notifications);
 
   // Count unread notifications
-  const unreadCount =
-    notifications &&
-    notifications.filter((n: NotificationType) => !n.isRead).length;
+  const unreadCount = Array.isArray(notifications)
+    ? notifications.filter((n: NotificationType) => !n.isRead).length
+    : 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -191,55 +191,54 @@ const Notification = ({
               <div className="p-4 text-center text-gray-400">
                 {t("Loading notifications...")}
               </div>
-            ) : notifications && notifications.length === 0 ? (
+            ) : !Array.isArray(notifications) || notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-400">
                 {t("No notifications")}
               </div>
             ) : (
               <ul className="text-twhite divide-y divide-slate-600/30">
-                {notifications &&
-                  notifications.map((notification: NotificationType) => (
-                    <li
-                      key={notification._id}
-                      className={`
-                      p-3 cursor-pointer transition-colors duration-200
-                      ${!notification.isRead ? "bg-slate-700/20" : ""}
-                      ${isLightMode
-                          ? "hover:bg-slate-700/20 hover:text-tblackAF"
-                          : "hover:bg-tblack"
-                        }
-                      ${clickedNotificationId === notification._id && isPending
-                          ? "opacity-50"
-                          : ""
-                        }
-                    `}
-                      onClick={() => {
-                        if (!notification.isRead && !isPending) {
-                          markAsRead(notification._id);
-                        }
-                      }}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div
-                          className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead
-                            ? "bg-red-500"
-                            : "bg-transparent"
-                            }`}
-                        ></div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-sm">
-                            {notification.title}
-                          </h4>
-                          <p className="text-sm text-tmid mt-0.5">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-tbright mt-1">
-                            {formatDate(notification.notificationPushDateTime)}
-                          </p>
-                        </div>
+                {notifications.map((notification: NotificationType) => (
+                  <li
+                    key={notification._id}
+                    className={`
+                    p-3 cursor-pointer transition-colors duration-200
+                    ${!notification.isRead ? "bg-slate-700/20" : ""}
+                    ${isLightMode
+                        ? "hover:bg-slate-700/20 hover:text-tblackAF"
+                        : "hover:bg-tblack"
+                      }
+                    ${clickedNotificationId === notification._id && isPending
+                        ? "opacity-50"
+                        : ""
+                      }
+                  `}
+                    onClick={() => {
+                      if (!notification.isRead && !isPending) {
+                        markAsRead(notification._id);
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <div
+                        className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead
+                          ? "bg-red-500"
+                          : "bg-transparent"
+                          }`}
+                      ></div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">
+                          {notification.title}
+                        </h4>
+                        <p className="text-sm text-tmid mt-0.5">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-tbright mt-1">
+                          {formatDate(notification.notificationPushDateTime)}
+                        </p>
                       </div>
-                    </li>
-                  ))}
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </div>

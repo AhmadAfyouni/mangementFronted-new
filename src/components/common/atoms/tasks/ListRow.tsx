@@ -162,9 +162,8 @@ const ListRow: React.FC<{
           </div>
 
           {
-            // userId === task?.emp.id && task?.status !== "DONE" &&
-
-            (
+            // Only show timer controls if task is not in DONE status
+            task?.status !== "DONE" && (
               <div className="flex space-x-1">
                 {!isRunning ? (
                   <button

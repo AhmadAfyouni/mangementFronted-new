@@ -1,7 +1,6 @@
 "use client";
 
 import AddSubTaskModal from "@/components/common/atoms/modals/AddSubTaskModal";
-import StarRating from "@/components/common/atoms/tasks/StarsRating";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
@@ -9,10 +8,8 @@ import useComments from "@/hooks/useComments";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import { useRedux } from "@/hooks/useRedux";
 import useTaskTimer from "@/hooks/useTaskTimer";
 import { updateTaskData } from "@/services/task.service";
-import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -27,6 +24,7 @@ import { TaskInfoCard } from "@/components/common/organisms/TaskDetails/TaskInfo
 import { TaskSidebar } from "@/components/common/organisms/TaskDetails/TaskSidebar";
 import { TaskTimeTracking } from "@/components/common/organisms/TaskDetails/TaskTimeTracking";
 import { AxiosError } from "axios";
+import TimeTrackingModal from "@/components/common/atoms/tasks/TimeTrackingModal";
 
 export default function TaskDetailsPage() {
   const params = useParams();
@@ -46,10 +44,7 @@ export default function TaskDetailsPage() {
     nestedData: true
   });
 
-  const [isRatingOpen, setIsRatingOpen] = useState(false);
-  const { selector: userId } = useRedux(
-    (state: RootState) => state.user.userInfo?.id
-  );
+  const [isTimeTrackingOpen, setIsTimeTrackingOpen] = useState(false);
 
   const [calendar, setCalendar] = useState<string | undefined>();
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
@@ -59,6 +54,7 @@ export default function TaskDetailsPage() {
   const [description, setDescription] = useState<string>();
   const [taskName, setTaskName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Set initial values when task data is loaded
   useEffect(() => {
@@ -123,6 +119,16 @@ export default function TaskDetailsPage() {
 
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+
+      // Exit edit mode after saving
+      setIsEditing(false);
+
+      // Show success message
+      setSnackbarConfig({
+        message: t("Changes saved successfully"),
+        open: true,
+        severity: "success",
+      });
     } catch (error) {
       const err = error as AxiosError;
       console.log("Error updating task:", err);
@@ -150,20 +156,12 @@ export default function TaskDetailsPage() {
 
   const handleStatusChange = (option: string) => {
     if (option === "DONE") {
-      if (userId === task?.assignee?._id || userId === task?.assignee?._id) {
-        setSelectedStatus(option);
-        setStatusMenuOpen(false);
-        setIsRatingOpen(true);
+      setSelectedStatus(option);
+      setStatusMenuOpen(false);
+      setIsTimeTrackingOpen(true);
 
-        if (isRunning) {
-          pauseTimer();
-        }
-      } else {
-        setSnackbarConfig({
-          open: true,
-          message: t("You can't change the status to DONE"),
-          severity: "warning",
-        });
+      if (isRunning) {
+        pauseTimer();
       }
     } else {
       setSelectedStatus(option);
@@ -213,6 +211,40 @@ export default function TaskDetailsPage() {
     }
   };
 
+  // Add a function to handle the time tracking submission
+  const handleTimeSubmit = async (actualTime: number) => {
+    try {
+      await updateTaskData(taskId, {
+        status: "DONE",
+        actual_hours: actualTime,
+      });
+
+      // Update the local state to reflect the DONE status
+      setSelectedStatus("DONE");
+
+      queryClient.invalidateQueries({ queryKey: ["task", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+
+      setSnackbarConfig({
+        open: true,
+        message: t("Task completed and time recorded"),
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Error updating task time:", error);
+      setSnackbarConfig({
+        open: true,
+        message: t("Failed to update task time"),
+        severity: "error",
+      });
+
+      // Revert to previous status on error
+      if (task) {
+        setSelectedStatus(task.status);
+      }
+    }
+  };
+
   if (isTaskLoading || !task) {
     return (
       <GridContainer>
@@ -258,6 +290,8 @@ export default function TaskDetailsPage() {
             onUpdate={handleUpdate}
             taskName={taskName}
             onNameChange={setTaskName}
+            isEditing={isEditing}
+            onEditToggle={() => setIsEditing(!isEditing)}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -276,11 +310,13 @@ export default function TaskDetailsPage() {
                 setStatusMenuOpen={setStatusMenuOpen}
                 setPriorityMenuOpen={setPriorityMenuOpen}
                 allTasks={allTasks}
+                isEditing={isEditing}
               />
 
               <TaskDescription
                 description={description || ''}
                 onChange={setDescription}
+                isEditing={isEditing}
               />
 
               <TaskFiles
@@ -351,36 +387,18 @@ export default function TaskDetailsPage() {
           </>
         )}
 
-        {/* Rating Modal */}
-        <StarRating
-          max={5}
-          defaultValue={3}
-          size={32}
-          isRatingOpen={isRatingOpen}
-          setIsRatingOpen={setIsRatingOpen}
-          onSubmit={async (rating) => {
-            try {
-              await updateTaskData(taskId, {
-                rating: rating + "",
-              });
-
-              queryClient.invalidateQueries({ queryKey: ["task", taskId] });
-
-              setSnackbarConfig({
-                open: true,
-                message: t("Rating updated"),
-                severity: "success",
-              });
-            } catch (error) {
-              console.error("Error updating rating:", error);
-              setSnackbarConfig({
-                open: true,
-                message: t("Failed to update rating"),
-                severity: "error",
-              });
+        {/* Replace StarRating with TimeTrackingModal */}
+        <TimeTrackingModal
+          isOpen={isTimeTrackingOpen}
+          onClose={() => {
+            setIsTimeTrackingOpen(false);
+            // Restore previous status if modal is closed without submission
+            if (task && selectedStatus === "DONE") {
+              setSelectedStatus(task.status);
             }
           }}
-          title={t("Rate this Task")}
+          onSubmit={handleTimeSubmit}
+          recordedTime={task.totalTimeSpent || 0}
         />
       </div>
     </GridContainer>

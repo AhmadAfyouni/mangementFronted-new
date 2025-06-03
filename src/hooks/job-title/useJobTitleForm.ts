@@ -34,6 +34,9 @@ export function useJobTitleForm() {
       accessibleDepartments: [],
       accessibleEmps: [],
       accessibleJobTitles: [],
+      routineTasks: [],
+      hasRoutineTasks: false,
+      autoGenerateRoutineTasks: true,
     },
   });
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -49,7 +52,9 @@ export function useJobTitleForm() {
     endpoint: jobTitleData
       ? `/job-titles/update/${jobTitleData.id}`
       : `/job-titles/create`,
-    onSuccessMessage: t("Job Title added successfully!"),
+    onSuccessMessage: jobTitleData
+      ? t("Job Title updated successfully!")
+      : t("Job Title added successfully!"),
     invalidateQueryKeys: ["jobTitles"],
     onSuccessFn() {
       reset();

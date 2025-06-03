@@ -22,6 +22,8 @@ interface ConditionalSectionProps {
   employees?: { tree: EmpTree[] };
   selectedEmp: any;
   setSelectedEmp: (value: any) => void;
+  sections?: any[];
+  tasks?: any[];
 }
 
 export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
@@ -37,6 +39,8 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
   employees,
   selectedEmp,
   setSelectedEmp,
+  sections = [],
+  tasks = [],
 }) => {
   return (
     <>
@@ -47,11 +51,9 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
           </label>
           <select
             {...register("project_id")}
-            className={`${
-              isLightMode ? "bg-dark" : "bg-secondary"
-            } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${
-              errors.project_id ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`${isLightMode ? "bg-dark" : "bg-secondary"
+              } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${errors.project_id ? "border-red-500" : "border-gray-300"
+              }`}
             disabled={isProjectDisabled}
           >
             <option className="" value="">
@@ -78,11 +80,9 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
           </label>
           <select
             {...register("department_id")}
-            className={`${
-              isLightMode ? "bg-dark" : "bg-secondary"
-            } border-none outline-none w-full px-4 py-2 disabled:hidden mt-1 rounded-lg border ${
-              errors.department_id ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`${isLightMode ? "bg-dark" : "bg-secondary"
+              } border-none outline-none w-full px-4 py-2 disabled:hidden mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+              }`}
             disabled={isDepartmentDisabled}
           >
             <option value="" className="">
@@ -101,6 +101,58 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
           )}
         </div>
       )}
+
+      <div>
+        <label className="block text-tmid text-sm font-medium">
+          {t("Section")}
+        </label>
+        <select
+          {...register("section_id")}
+          className={`${isLightMode ? "bg-dark" : "bg-secondary"
+            } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${errors.section_id ? "border-red-500" : "border-gray-300"
+            }`}
+        >
+          <option className="" value="">
+            {t("Select a section (optional)")}
+          </option>
+          {sections?.map((section) => (
+            <option className="" key={section._id} value={section._id}>
+              {section.name}
+            </option>
+          ))}
+        </select>
+        {errors.section_id && (
+          <p className="text-red-500 mt-1 text-sm">
+            {errors.section_id.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-tmid text-sm font-medium">
+          {t("Parent Task")}
+        </label>
+        <select
+          {...register("parent_task")}
+          className={`${isLightMode ? "bg-dark" : "bg-secondary"
+            } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${errors.parent_task ? "border-red-500" : "border-gray-300"
+            }`}
+        >
+          <option className="" value="">
+            {t("Select a parent task (optional)")}
+          </option>
+          {tasks?.map((task) => (
+            <option className="" key={task.id} value={task.id}>
+              {task.name}
+            </option>
+          ))}
+        </select>
+        {errors.parent_task && (
+          <p className="text-red-500 mt-1 text-sm">
+            {errors.parent_task.message}
+          </p>
+        )}
+      </div>
 
       {!isEmployeeDisabled && (
         <div>
@@ -140,6 +192,34 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
           )}
         </div>
       )}
+
+      <div>
+        <label className="block text-tmid text-sm font-medium">
+          {t("Assignee")}
+        </label>
+        {employees && (
+          <select
+            {...register("assignee")}
+            className={`${isLightMode ? "bg-dark" : "bg-secondary"
+              } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${errors.assignee ? "border-red-500" : "border-gray-300"
+              }`}
+          >
+            <option className="" value="">
+              {t("Select an assignee (optional)")}
+            </option>
+            {employees?.tree.map((employee) => (
+              <option className="" key={employee.id} value={employee.id}>
+                {`${employee.name} - ${employee.title}`}
+              </option>
+            ))}
+          </select>
+        )}
+        {errors.assignee && (
+          <p className="text-red-500 mt-1 text-sm">
+            {errors.assignee.message}
+          </p>
+        )}
+      </div>
     </>
   );
 };
