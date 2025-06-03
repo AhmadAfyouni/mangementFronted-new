@@ -2,7 +2,6 @@ import { useMokkBar } from "@/components/Providers/Mokkbar";
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import { addTitleSchema } from "@/schemas/job.schema";
 import { JobTitleFormInputs } from "@/types/JobTitle.type";
-import { createJobTitle, updateJobTitle } from "@/services/job.service";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";

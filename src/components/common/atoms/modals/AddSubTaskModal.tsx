@@ -10,7 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import PendingLogic from "@/components/common/atoms/ui/PendingLogic";
-import { Clock, FileText, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 // Interface for file upload state
 interface UploadingFile {
@@ -29,11 +29,13 @@ const AddSubTaskModal: React.FC<{
 }> = ({ isOpen, onClose, parentTask }) => {
   const { t } = useLanguage();
   const { isLightMode } = useCustomTheme();
+  // Used in onSuccessFn and error handling callbacks
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   // File upload states
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [urls, setUrls] = useState<string[]>([]);
+  // Used in handleFileChange - needed for tracking upload state
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +63,7 @@ const AddSubTaskModal: React.FC<{
   });
 
   // Fetch sections
-  const { data: sections } = useCustomQuery<any[]>({
+  const { data: sections } = useCustomQuery<{ id: string, name: string }[]>({
     queryKey: ["sections"],
     url: `/sections`,
     nestedData: true,
@@ -82,8 +84,9 @@ const AddSubTaskModal: React.FC<{
       }, 1500);
     },
     options: {
-      onError: (error: any) => {
-        setFeedbackMessage(error?.response?.data?.message || "Failed to add subtask. Please try again.");
+      onError: (error: unknown) => {
+        const err = error as { response?: { data?: { message?: string } } };
+        setFeedbackMessage(err?.response?.data?.message || "Failed to add subtask. Please try again.");
       }
     }
   });
@@ -199,6 +202,13 @@ const AddSubTaskModal: React.FC<{
           </button>
         </div>
 
+        {/* Feedback message display */}
+        {feedbackMessage && (
+          <div className={`mb-4 p-3 rounded-lg ${feedbackMessage.includes("successfully") ? "bg-green-600/20 text-green-400" : "bg-red-600/20 text-red-400"}`}>
+            {feedbackMessage}
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit((data) => {
             setFeedbackMessage(null);
@@ -208,13 +218,13 @@ const AddSubTaskModal: React.FC<{
               if (!dateStr) return undefined;
               try {
                 return new Date(dateStr).toISOString();
-              } catch (e) {
+              } catch {
                 return undefined;
               }
             };
 
             // Helper function to convert string to number
-            const toNumber = (value: any) => {
+            const toNumber = (value: unknown) => {
               if (value === undefined || value === null || value === "") return undefined;
               const num = Number(value);
               return isNaN(num) ? undefined : num;
@@ -239,7 +249,7 @@ const AddSubTaskModal: React.FC<{
             };
 
             const filteredPayload = Object.fromEntries(
-              Object.entries(payload).filter(([_, value]) => value !== undefined && value !== "")
+              Object.entries(payload).filter(([, value]) => value !== undefined && value !== "")
             );
 
             addSubTask(filteredPayload);
@@ -346,10 +356,23 @@ const AddSubTaskModal: React.FC<{
                     <p className="text-red-500 mt-1 text-sm">{errors.due_date.message}</p>
                   )}
                 </div>
-              </div>
 
-              {/* More dates in a grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Actual End Date Field */}
+                <div>
+                  <label className="block text-tmid text-sm font-medium">
+                    {t("Actual End Date")}
+                  </label>
+                  <input
+                    type="date"
+                    {...register("actual_end_date")}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.actual_end_date ? "border border-red-500" : ""
+                      }`}
+                  />
+                  {errors.actual_end_date && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.actual_end_date.message}</p>
+                  )}
+                </div>
+
                 {/* Expected End Date Field */}
                 <div>
                   <label className="block text-tmid text-sm font-medium">
@@ -358,8 +381,12 @@ const AddSubTaskModal: React.FC<{
                   <input
                     type="date"
                     {...register("expected_end_date")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.expected_end_date ? "border border-red-500" : ""
+                      }`}
                   />
+                  {errors.expected_end_date && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.expected_end_date.message}</p>
+                  )}
                 </div>
 
                 {/* Estimated Hours Field */}
@@ -370,255 +397,188 @@ const AddSubTaskModal: React.FC<{
                   <input
                     type="number"
                     {...register("estimated_hours")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                    placeholder={t("Enter estimated hours")}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.estimated_hours ? "border border-red-500" : ""
+                      }`}
                   />
+                  {errors.estimated_hours && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.estimated_hours.message}</p>
+                  )}
+                </div>
+
+                {/* Recurring End Date Field */}
+                <div>
+                  <label className="block text-tmid text-sm font-medium">
+                    {t("Recurring End Date")}
+                  </label>
+                  <input
+                    type="date"
+                    {...register("recurringEndDate")}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.recurringEndDate ? "border border-red-500" : ""
+                      }`}
+                  />
+                  {errors.recurringEndDate && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.recurringEndDate.message}</p>
+                  )}
+                </div>
+
+                {/* Progress Calculation Method Field */}
+                <div>
+                  <label className="block text-tmid text-sm font-medium">
+                    {t("Progress Calculation Method")}
+                  </label>
+                  <select
+                    {...register("progressCalculationMethod")}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.progressCalculationMethod ? "border border-red-500" : ""
+                      }`}
+                  >
+                    <option value="">{t("Select a method")}</option>
+                    {["Manual", "Automatic"].map((method) => (
+                      <option key={method} value={method}>
+                        {t(method)}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.progressCalculationMethod && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.progressCalculationMethod.message}</p>
+                  )}
+                </div>
+
+                {/* End Date Field */}
+                <div>
+                  <label className="block text-tmid text-sm font-medium">
+                    {t("End Date")}
+                  </label>
+                  <input
+                    type="date"
+                    {...register("end_date")}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.end_date ? "border border-red-500" : ""
+                      }`}
+                  />
+                  {errors.end_date && (
+                    <p className="text-red-500 mt-1 text-sm">{errors.end_date.message}</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Assignment Section */}
+          {/* File Upload */}
           <div className="bg-secondary/20 p-4 rounded-lg">
-            <h3 className="font-semibold text-twhite mb-3">{t("Assignment")}</h3>
-
+            <h3 className="font-semibold text-twhite mb-3">{t("File Upload")}</h3>
             <div className="space-y-4">
-              {/* Section Field */}
+              {/* File Input */}
               <div>
                 <label className="block text-tmid text-sm font-medium">
-                  {t("Section")}
+                  {t("Add Files")}
                 </label>
-                <select
-                  {...register("section_id")}
-                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                >
-                  <option value="">
-                    {t("Select a section (optional)")}
-                  </option>
-                  {sections?.map((section) => (
-                    <option key={section._id} value={section._id}>
-                      {section.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    type="file"
+                    multiple
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.files ? "border border-red-500" : ""
+                      }`}
+                    disabled={isUploading}
+                  />
+                  {isUploading && (
+                    <div className="absolute right-3 top-3">
+                      <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                    </div>
+                  )}
+                </div>
+                {errors.files && (
+                  <p className="text-red-500 mt-1 text-sm">{errors.files.message}</p>
+                )}
               </div>
 
-              {/* Employee Field */}
+              {/* File List */}
               <div>
                 <label className="block text-tmid text-sm font-medium">
-                  {t("Employee")}
+                  {t("Files")}
                 </label>
-                <select
-                  {...register("emp")}
-                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                >
-                  <option value="">
-                    {t("Select an employee (optional)")}
-                  </option>
-                  {employees?.tree.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {`${employee.name} - ${employee.title}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Settings */}
-          <div className="bg-secondary/20 p-4 rounded-lg">
-            <h3 className="font-semibold text-twhite mb-3">{t("Additional Settings")}</h3>
-
-            <div className="space-y-4">
-              {/* Recurring End Date */}
-              <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("Recurring End Date")}
-                </label>
-                <input
-                  type="date"
-                  {...register("recurringEndDate")}
-                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                />
-              </div>
-
-              {/* Progress Calculation Method */}
-              <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("Progress Calculation Method")}
-                </label>
-                <select
-                  {...register("progressCalculationMethod")}
-                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                >
-                  <option value="">{t("Select a calculation method")}</option>
-                  <option value="time_based">{t("Time Based")}</option>
-                  <option value="date_based">{t("Date Based")}</option>
-                </select>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("End Date")}
-                </label>
-                <input
-                  type="date"
-                  {...register("end_date")}
-                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg`}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* File Upload Section */}
-          <div className="bg-secondary/20 p-4 rounded-lg">
-            <h3 className="font-semibold text-twhite mb-3 flex items-center gap-2">
-              <FileText size={18} className="text-blue-400" />
-              {t("Attachments")}
-            </h3>
-
-            <div className="mb-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="task-files"
-                  multiple
-                  disabled={isUploading}
-                />
-                <label
-                  htmlFor="task-files"
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer ${isLightMode ? "bg-dark text-twhite" : "bg-secondary text-twhite"
-                    } hover:bg-opacity-80 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                >
-                  <FileText size={16} />
-                  <span>{isUploading ? t("Uploading...") : t("Add Files")}</span>
-                </label>
-                <span className="text-sm text-gray-400">
-                  {urls.length > 0
-                    ? t("{{count}} files uploaded").replace("{{count}}", urls.length.toString())
-                    : t("No files uploaded")}
-                </span>
-              </div>
-            </div>
-
-            {/* File List */}
-            {uploadingFiles.length > 0 && (
-              <div className="mt-3">
-                <h4 className="text-sm text-gray-400 mb-2">{t("Files")}:</h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                <div className="flex flex-wrap">
                   {uploadingFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      className={`rounded-md ${isLightMode ? "bg-dark" : "bg-secondary/50"
-                        }`}
-                    >
-                      <div className="flex items-center justify-between p-2">
-                        <div className="flex items-center gap-2 truncate flex-1">
-                          <FileText size={16} className="text-gray-400" />
-                          <span className="text-twhite text-sm truncate max-w-xs">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-gray-400 whitespace-nowrap">
-                            {(file.file.size / 1024).toFixed(1)} KB
-                          </span>
-                        </div>
-
-                        {file.uploaded ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-green-400 text-xs flex items-center">
-                              <svg
-                                className="w-4 h-4 mx-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                              {t("Uploaded")}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeFile(file.id)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
-                              disabled={isUploading}
-                              title={t("Remove file")}
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            {file.progress > 0 && file.progress < 100 ? (
-                              <span className="text-blue-400 text-xs">
-                                {Math.round(file.progress)}%
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => removeFile(file.id)}
-                                className="text-red-400 hover:text-red-300 transition-colors"
-                                disabled={isUploading}
-                                title={t("Remove file")}
-                              >
-                                <X size={16} />
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Progress bar */}
-                      {file.progress > 0 && file.progress < 100 && (
-                        <div className="w-full h-1 rounded-full overflow-hidden bg-gray-700">
-                          <div
-                            className="h-full bg-blue-500 transition-all duration-150"
-                            style={{ width: `${file.progress}%` }}
-                          ></div>
-                        </div>
-                      )}
+                    <div key={file.id} className="flex items-center space-x-2 mb-2">
+                      <span>{file.name}</span>
+                      <button
+                        onClick={() => removeFile(file.id)}
+                        className="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700"
+                      >
+                        <X size={16} />
+                      </button>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Feedback Message */}
-          {feedbackMessage && (
-            <div className={`px-4 py-3 rounded-lg ${feedbackMessage.includes("success") ? "bg-green-900/20 text-green-400" : "bg-red-900/20 text-red-400"}`}>
-              {feedbackMessage}
+          {/* Section Selection */}
+          <div className="bg-secondary/20 p-4 rounded-lg">
+            <h3 className="font-semibold text-twhite mb-3">{t("Section")}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-tmid text-sm font-medium">
+                  {t("Select Section")}
+                </label>
+                <select
+                  {...register("section_id")}
+                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.section_id ? "border border-red-500" : ""
+                    }`}
+                >
+                  <option value="">{t("Select a section")}</option>
+                  {sections?.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.section_id && (
+                  <p className="text-red-500 mt-1 text-sm">{errors.section_id.message}</p>
+                )}
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Employee Selection */}
+          <div className="bg-secondary/20 p-4 rounded-lg">
+            <h3 className="font-semibold text-twhite mb-3">{t("Employee")}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-tmid text-sm font-medium">
+                  {t("Select Employee")}
+                </label>
+                <select
+                  {...register("emp")}
+                  className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.emp ? "border border-red-500" : ""
+                    }`}
+                >
+                  <option value="">{t("Select an employee")}</option>
+                  {employees?.tree.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.emp && (
+                  <p className="text-red-500 mt-1 text-sm">{errors.emp.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors"
-              disabled={isPending}
-            >
-              {t("Cancel")}
-            </button>
+          <div className="mt-6">
             <button
               type="submit"
-              className={`px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors ${isPending ? "opacity-70 cursor-not-allowed" : ""}`}
-              disabled={isPending || isUploading}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+              disabled={isPending}
             >
               <PendingLogic
                 isPending={isPending}
-                normalText={t("Create Subtask")}
-                pendingText={t("Creating...")}
+                normalText="Add Subtask"
+                pendingText="Creating..."
               />
             </button>
           </div>

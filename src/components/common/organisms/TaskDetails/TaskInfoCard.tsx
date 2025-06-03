@@ -1,4 +1,4 @@
-import { User, Building2, Target, AlertCircle, Calendar, FileText, ChevronDown, Edit2, Layers, ArrowUpRight, Clock, BarChart, Repeat, CheckCircle, Calendar as CalendarIcon, AlarmClock, Timer, TimerReset, Briefcase, Tag, HashIcon, Hourglass } from "lucide-react";
+import { User, Building2, Target, AlertCircle, Calendar, FileText, ChevronDown, Edit2, Layers, ArrowUpRight, Clock, BarChart, Repeat, Briefcase, Tag, HashIcon } from "lucide-react";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { formatDate, getPriorityColor } from "@/services/task.service";
 import useLanguage from "@/hooks/useLanguage";
@@ -372,7 +372,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
           {/* Dates Section */}
           <div className="p-4 bg-dark rounded-lg border border-gray-700">
             <h3 className="text-lg font-medium text-purple-400 mb-3 flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4" />
+              <Calendar className="w-4 h-4" />
               {t("Dates")}
             </h3>
             <div className="space-y-3">

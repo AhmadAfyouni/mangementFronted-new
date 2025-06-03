@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import CustomModal from './CustomModal';
-import { ProjectStatus, RoutineTaskType } from '@/types/JobTitle.type';
+import { RoutineTaskType } from '@/types/JobTitle.type';
 import useCustomTheme from '@/hooks/useCustomTheme';
-import { Clock, Calendar, CheckSquare, ListChecks, Info, CheckCircle, Play, RefreshCw, Loader2 } from 'lucide-react';
-import { updateRoutineTaskStatus } from '@/services/job.service';
+import { Clock, Calendar, CheckSquare, ListChecks, Info } from 'lucide-react';
 
 interface RoutineTasksSectionProps {
     isOpen: boolean;
@@ -13,7 +12,6 @@ interface RoutineTasksSectionProps {
     t: (key: string) => string;
     language: "en" | "ar";
     jobTitleId: string;
-    onTaskUpdated?: (updatedTask: RoutineTaskType) => void;
 }
 
 const RoutineTasksModal: React.FC<RoutineTasksSectionProps> = ({
@@ -23,7 +21,6 @@ const RoutineTasksModal: React.FC<RoutineTasksSectionProps> = ({
     title,
     t,
     language,
-    onTaskUpdated
 }) => {
     const { isLightMode } = useCustomTheme();
 

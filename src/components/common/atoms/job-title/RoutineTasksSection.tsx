@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
-import { CreateRoutineTaskDto, JobTitleFormInputs, PriorityLevel, RecurringType } from "@/types/JobTitle.type";
+import { UseFormSetValue, FieldErrors } from "react-hook-form";
+import { CreateRoutineTaskDto, JobTitleFormInputs } from "@/types/JobTitle.type";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import { Trash, Plus, MinusCircle, ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { PRIORITY_LEVELS, RECURRING_TYPES } from "@/schemas/job.schema";
@@ -12,7 +12,6 @@ interface RoutineTasksSectionProps {
     setAutoGenerateRoutineTasks: (value: boolean) => void;
     routineTasks: CreateRoutineTaskDto[];
     setRoutineTasks: (tasks: CreateRoutineTaskDto[]) => void;
-    register: UseFormRegister<JobTitleFormInputs>;
     setValue: UseFormSetValue<JobTitleFormInputs>;
     errors: FieldErrors<JobTitleFormInputs>;
     t: (key: string) => string;
@@ -25,9 +24,7 @@ const RoutineTasksSection: React.FC<RoutineTasksSectionProps> = ({
     setAutoGenerateRoutineTasks,
     routineTasks,
     setRoutineTasks,
-    register,
     setValue,
-    errors,
     t,
 }) => {
     const { isLightMode } = useCustomTheme();

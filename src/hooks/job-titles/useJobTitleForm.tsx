@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { addTitleSchema } from '@/schemas/job.schema';
-import { CreateRoutineTaskDto, JobTitleFormInputs, PermissionsEnum, JobTitleType } from '@/types/JobTitle.type';
+import { JobTitleFormInputs, JobTitleType } from '@/types/JobTitle.type';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/utils/axios/usage';
+import { Resolver } from 'react-hook-form';
 
 export const useJobTitleForm = () => {
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -39,7 +40,8 @@ export const useJobTitleForm = () => {
         setValue,
         watch,
     } = useForm<JobTitleFormInputs>({
-        resolver: yupResolver(addTitleSchema) as any,
+        // Use type assertion to handle complex schema-form mapping
+        resolver: yupResolver(addTitleSchema) as Resolver<JobTitleFormInputs>,
         defaultValues,
     });
 
@@ -90,7 +92,22 @@ export const useJobTitleForm = () => {
                         accessibleJobTitles: parsedData.accessibleJobTitles || [],
                         hasRoutineTasks: parsedData.hasRoutineTasks || false,
                         autoGenerateRoutineTasks: parsedData.autoGenerateRoutineTasks || false,
-                        routineTasks: (parsedData.routineTasks || []).map((task: any) => ({
+                        routineTasks: (parsedData.routineTasks || []).map((task: {
+                            name?: string;
+                            description?: string;
+                            priority?: string;
+                            recurringType?: string;
+                            intervalDays?: number;
+                            estimatedHours?: number;
+                            isActive?: boolean;
+                            instructions?: string[];
+                            hasSubTasks?: boolean;
+                            subTasks?: {
+                                name?: string;
+                                description?: string;
+                                estimatedHours?: number;
+                            }[];
+                        }) => ({
                             name: task.name || "",
                             description: task.description || "",
                             priority: task.priority || "MEDIUM",
@@ -100,7 +117,11 @@ export const useJobTitleForm = () => {
                             isActive: task.isActive !== undefined ? task.isActive : true,
                             instructions: task.instructions || [],
                             hasSubTasks: task.hasSubTasks || false,
-                            subTasks: (task.subTasks || []).map((subtask: any) => ({
+                            subTasks: (task.subTasks || []).map((subtask: {
+                                name?: string;
+                                description?: string;
+                                estimatedHours?: number;
+                            }) => ({
                                 name: subtask.name || "",
                                 description: subtask.description || "",
                                 estimatedHours: subtask.estimatedHours || 0

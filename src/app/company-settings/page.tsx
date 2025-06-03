@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, Settings, Clock, Bell, FileText, Calendar, Save, Edit3, Upload, X } from "lucide-react";
+import { Building2, Settings, Clock, Bell, FileText, Calendar, Save, Edit3 } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
-import FileUploadWithProgress from "@/components/common/atoms/ui/FileUploadWithProgress";
-import { useMokkBar } from "@/components/Providers/Mokkbar";
 
 // Enums matching backend
 enum WorkDay {
@@ -116,7 +114,6 @@ const CompanySettings = () => {
     });
 
     const { t, currentLanguage } = useLanguage();
-    const { setSnackbarConfig } = useMokkBar();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
 
@@ -187,57 +184,6 @@ const CompanySettings = () => {
             : [...currentWorkDays, day];
 
         handleWorkSettingsChange('workDays', newWorkDays);
-    };
-
-    const handleFileUpload = (field: keyof CompanySettings, fileUrl: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: fileUrl
-        }));
-    };
-
-    const handleFileArrayUpload = (field: 'companyPolicyFiles' | 'taskTemplateFiles', fileUrl: string) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: [...(prev[field] || []), fileUrl]
-        }));
-    };
-
-    const handleFileUploadError = (error: string) => {
-        setSnackbarConfig({
-            open: true,
-            message: error,
-            severity: 'error'
-        });
-    };
-
-    // Helper function to open files in new tab
-    const openFile = (fileUrl?: string) => {
-        if (!fileUrl) return;
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-        let fullUrl = '';
-
-        if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-            fullUrl = fileUrl;
-        } else if (fileUrl.startsWith('/')) {
-            fullUrl = `${baseUrl}${fileUrl}`;
-        } else {
-            fullUrl = `${baseUrl}/${fileUrl}`;
-        }
-
-        window.open(fullUrl, '_blank');
-    };
-
-    // Helper function to get file name from URL
-    const getFileName = (fileUrl: string) => {
-        return fileUrl.split('/').pop() || 'Unknown file';
-    };
-
-    const removeFileFromArray = (field: 'companyPolicyFiles' | 'taskTemplateFiles', index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: prev[field]?.filter((_, i) => i !== index) || []
-        }));
     };
 
     const handleSave = () => {

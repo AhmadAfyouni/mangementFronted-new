@@ -103,7 +103,7 @@ const AddTask: React.FC = () => {
       if (!dateStr) return undefined;
       try {
         return new Date(dateStr).toISOString();
-      } catch (e) {
+      } catch {
         return undefined;
       }
     };

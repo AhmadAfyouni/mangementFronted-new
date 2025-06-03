@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import CustomModal from "../atoms/modals/CustomModal";
 import RoutineTasksModal from "../atoms/modals/RoutineTasksModal";
 import PageSpinner from "../atoms/ui/PageSpinner";
-import { Eye, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
@@ -23,44 +23,6 @@ import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 const TruncatedText = ({ text }: { text: string }) => (
   <p className="truncate max-w-[200px]">{text || "N/A"}</p>
 );
-
-interface ShowMoreListProps {
-  items: string[];
-  onShowMore: () => void;
-  isLightMode: boolean;
-}
-
-const ShowMoreList = ({
-  items,
-  onShowMore,
-  isLightMode,
-}: ShowMoreListProps) => {
-  const firstItem = items[0] || "N/A";
-  const remainingCount = items.length - 1;
-
-  return (
-    <div className="flex items-center justify-between gap-2 px-2">
-      <p className="truncate max-w-[150px]">{firstItem}</p>
-      {items.length > 1 && (
-        <button
-          onClick={onShowMore}
-          className={`
-            flex items-center gap-1 p-1.5 rounded-lg
-            transition-all duration-200
-            ${isLightMode
-              ? "bg-primary/10 text-primary hover:bg-primary/20"
-              : "bg-primary/20 text-primary hover:bg-primary/30"
-            }
-          `}
-          title="Show More"
-        >
-          <Eye size={16} />
-          <span className="text-xs">+{remainingCount}</span>
-        </button>
-      )}
-    </div>
-  );
-};
 
 const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   const { t, currentLanguage } = useLanguage();
@@ -91,7 +53,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   }, [dispatch]);
 
   // Use custom query to fetch job titles
-  const { data: jobs, isLoading } = useCustomQuery<JobTitleType[] | { data: JobTitleType[], meta: any }>({
+  const { data: jobs, isLoading } = useCustomQuery<JobTitleType[] | { data: JobTitleType[], meta: Record<string, unknown> }>({
     queryKey: ["jobTitles", selectedOption],
     url:
       selectedOption === "view"
@@ -197,7 +159,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
     return pages;
   };
 
-  const { NavigateButton } = useSetPageData<JobTitleType>("/jobs/add-title");
+  const { } = useSetPageData<JobTitleType>("/jobs/add-title");
 
   // Function to find the jobTitleId for a given task
   const getJobTitleIdForTask = (task: RoutineTaskType, jobsData: JobTitleType[]): string => {
@@ -475,31 +437,6 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
           language={currentLanguage as "en" | "ar"}
           t={t}
           jobTitleId={getJobTitleIdForTask(routineTasksModalContent.tasks[0], jobsData)}
-          onTaskUpdated={(updatedTask) => {
-            // Update the task in the local state
-            if (jobsData.length > 0) {
-              const updatedJobs = [...jobsData];
-              const jobIndex = updatedJobs.findIndex(job =>
-                job.routineTasks?.some((task: RoutineTaskType) => task.id === updatedTask.id)
-              );
-
-              if (jobIndex !== -1) {
-                const taskIndex = updatedJobs[jobIndex].routineTasks.findIndex(
-                  (task: RoutineTaskType) => task.id === updatedTask.id
-                );
-
-                if (taskIndex !== -1) {
-                  updatedJobs[jobIndex].routineTasks[taskIndex] = updatedTask;
-                  // We can't directly modify the jobs, but we can update UI state
-                  // This is a workaround since we don't have proper state management
-                  setRoutineTasksModalContent({
-                    ...routineTasksModalContent,
-                    tasks: updatedJobs[jobIndex].routineTasks
-                  });
-                }
-              }
-            }
-          }}
         />
       )}
     </div>

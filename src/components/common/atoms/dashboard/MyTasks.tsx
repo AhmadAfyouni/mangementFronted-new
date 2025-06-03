@@ -1,12 +1,9 @@
-import { useMokkBar } from "@/components/Providers/Mokkbar";
 import { useDashboard } from "@/hooks/useDashboard";
-import useLanguage from "@/hooks/useLanguage";
 import { MyTask } from "@/types/dashboard.type";
 import { FileIcon, Inbox, MessageSquare } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 
 const MyTasks: React.FC = () => {
-    const { t } = useLanguage();
     type TaskStatus = "all" | MyTask['status'];
 
     const [activeFilter, setActiveFilter] = useState<TaskStatus>('all');
@@ -158,7 +155,6 @@ const MyTasks: React.FC = () => {
                                             isLast={index === filteredTasks.length - 1}
                                             formatDate={formatDate}
                                             getStatusColor={getStatusColor}
-                                            t={t}
                                         />
                                     ))
                                 ) : (
@@ -194,10 +190,7 @@ const TaskRow = memo<{
     isLast: boolean;
     formatDate: (dateString: string) => string;
     getStatusColor: (status: string) => string;
-    t: (key: string) => string;
-}>(({ task, isLast, formatDate, getStatusColor, t }) => {
-    const { setSnackbarConfig } = useMokkBar();
-
+}>(({ task, isLast, formatDate, getStatusColor }) => {
     // Get progress color based on percentage
     const getProgressColor = (progress: number) => {
         if (progress >= 75) return "bg-green-500";

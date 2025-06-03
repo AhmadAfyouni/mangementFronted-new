@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { TimeLog } from "@/types/Task.type";
 import { apiClient } from "@/utils/axios/usage";
@@ -116,7 +115,7 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
     const makeApiCall = useCallback(async (action: 'start' | 'pause') => {
         try {
             const endpoint = action === 'start' ? `/tasks/start/${taskId}` : `/tasks/pause/${taskId}`;
-            const response = await apiClient.get<{ data: any }>(endpoint);
+            await apiClient.get(endpoint);
 
             // Invalidate all relevant queries for perfect sync
             await Promise.all([

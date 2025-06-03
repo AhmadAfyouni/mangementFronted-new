@@ -325,7 +325,15 @@ export type ReceiveTaskType = {
     requiredReports: RequiredReport[],
     developmentPrograms: DevelopmentProgram[],
   };
-  project?: any;
+  project?: {
+    _id: string;
+    name: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    departments?: Array<{ _id: string; name: string }>;
+    adminDepartment?: { _id: string; name: string };
+  } | null;
 
   // Board customization
   boardPosition?: string;
@@ -342,8 +350,8 @@ export type ExtendedReceiveTaskType = {
   name: string;
   description: string;
   priority: "LOW" | "MEDIUM" | "HIGH";
-  emp: TaskEmployeeType;
-  assignee: TaskEmployeeType;
+  emp?: TaskEmployeeType;
+  assignee?: TaskEmployeeType;
   status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | string;
   createdAt: string;
   updatedAt: string;

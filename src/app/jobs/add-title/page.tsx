@@ -17,12 +17,9 @@ import { DeptTree } from "@/types/trees/Department.tree.type";
 import getErrorMessages from "@/utils/handleErrorMessages";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import PendingLogic from "@/components/common/atoms/ui/PendingLogic";
 import DynamicResponsibilities from "@/components/common/atoms/job-title/DynamicResponsibilities";
-import RoutineTasksSection from "@/components/common/atoms/job-title/RoutineTasksSection";
-import { ChevronDown, ChevronUp, CheckCircle, Save, AlertTriangle, Plus, Clock, Trash2, Edit, X, AlignLeft, Bookmark, Calendar } from "lucide-react";
-import CustomModal from "@/components/common/atoms/modals/CustomModal";
-import { useSearchParams, useParams } from "next/navigation";
+import { ChevronDown, ChevronUp, Save, AlertTriangle, Plus, Clock, Trash2, Bookmark, Calendar, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/utils/axios/usage";
 
@@ -64,7 +61,6 @@ const AddJobTitle: React.FC = () => {
     [FORM_SECTIONS.ROUTINE_TASKS]: false,
     [FORM_SECTIONS.DEPARTMENT_INFO]: false
   });
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formTouched, setFormTouched] = useState(false);
 
   const hookResult = useJobTitleForm();
@@ -76,7 +72,6 @@ const AddJobTitle: React.FC = () => {
   const reset = hookResult.reset || (hookResult.formMethods && hookResult.formMethods.reset);
   const getValues = hookResult.getValues || (hookResult.formMethods && hookResult.formMethods.getValues);
   const setValue = hookResult.setValue || (hookResult.formMethods && hookResult.formMethods.setValue);
-  const addJobTitle = hookResult.addJobTitle;
   const errorJobTitle = hookResult.errorJobTitle;
   const isErrorJobTitle = hookResult.isErrorJobTitle;
   const isPendingJobTitle = hookResult.isPendingJobTitle;
@@ -101,8 +96,8 @@ const AddJobTitle: React.FC = () => {
   });
 
   // Mutation for create/update operations
-  const { mutate: mutateJobTitle, isPending: isMutating } = useMutation({
-    mutationFn: async (data: any) => {
+  const { mutate: mutateJobTitle } = useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
       // Handle both create and update operations
       const url = isEditMode ? `/job-titles/update/${jobTitleId}` : '/job-titles';
       const response = await apiClient.post(url, data);
@@ -226,7 +221,8 @@ const AddJobTitle: React.FC = () => {
     routineTasks,
     hasRoutineTasks,
     selectedCategory,
-    selectedDept
+    selectedDept,
+    formTouched
   ]);
 
   // Toggle section expansion
@@ -237,18 +233,6 @@ const AddJobTitle: React.FC = () => {
     }));
     setActiveSection(section);
     setFormTouched(true);
-  };
-
-  // Navigate to next section
-  const goToNextSection = () => {
-    const sections = Object.values(FORM_SECTIONS);
-    const currentIndex = sections.indexOf(activeSection);
-    if (currentIndex < sections.length - 1) {
-      const nextSection = sections[currentIndex + 1];
-      toggleSection(nextSection, true);
-      // Scroll to the section
-      document.getElementById(nextSection)?.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   // Handle form submission
@@ -280,13 +264,13 @@ const AddJobTitle: React.FC = () => {
   }
 
   // Section indicator component
-  const SectionIndicator = ({ isExpanded, hasError, isComplete }) => (
+  const SectionIndicator = ({ hasError, isComplete }) => (
     <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-2 
       ${hasError ? 'bg-red-500' : isComplete ? 'bg-green-500' : 'bg-gray-500'}`}>
       {hasError ? (
         <AlertTriangle size={14} className="text-white" />
       ) : isComplete ? (
-        <CheckCircle size={14} className="text-white" />
+        <Save size={14} className="text-white" />
       ) : (
         <span className="text-white text-xs font-bold">{Object.values(FORM_SECTIONS).indexOf(activeSection) + 1}</span>
       )}
@@ -321,7 +305,6 @@ const AddJobTitle: React.FC = () => {
               >
                 <div className="flex items-center">
                   <SectionIndicator
-                    isExpanded={expandedSections[FORM_SECTIONS.BASIC_INFO]}
                     hasError={errors.title || errors.description}
                     isComplete={getValues("title") && getValues("description")}
                   />
@@ -361,7 +344,6 @@ const AddJobTitle: React.FC = () => {
               >
                 <div className="flex items-center">
                   <SectionIndicator
-                    isExpanded={expandedSections[FORM_SECTIONS.RESPONSIBILITIES]}
                     hasError={errors.responsibilities}
                     isComplete={responsibilities.length > 0}
                   />
@@ -394,7 +376,6 @@ const AddJobTitle: React.FC = () => {
               >
                 <div className="flex items-center">
                   <SectionIndicator
-                    isExpanded={expandedSections[FORM_SECTIONS.PERMISSIONS]}
                     hasError={false}
                     isComplete={permissionsMode === "custom" ? permissionsSelected.length > 0 : true}
                   />
@@ -439,7 +420,6 @@ const AddJobTitle: React.FC = () => {
               >
                 <div className="flex items-center">
                   <SectionIndicator
-                    isExpanded={expandedSections[FORM_SECTIONS.ROUTINE_TASKS]}
                     hasError={errors.routineTasks}
                     isComplete={hasRoutineTasks ? routineTasks.length > 0 : true}
                   />
@@ -889,7 +869,6 @@ const AddJobTitle: React.FC = () => {
               >
                 <div className="flex items-center">
                   <SectionIndicator
-                    isExpanded={expandedSections[FORM_SECTIONS.DEPARTMENT_INFO]}
                     hasError={errors.department_id || errors.category}
                     isComplete={selectedDept && selectedCategory}
                   />

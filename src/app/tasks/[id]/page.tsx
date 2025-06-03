@@ -1,7 +1,6 @@
 "use client";
 
 import AddSubTaskModal from "@/components/common/atoms/modals/AddSubTaskModal";
-import StarRating from "@/components/common/atoms/tasks/StarsRating";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
@@ -9,10 +8,8 @@ import useComments from "@/hooks/useComments";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import { useRedux } from "@/hooks/useRedux";
 import useTaskTimer from "@/hooks/useTaskTimer";
 import { updateTaskData } from "@/services/task.service";
-import { RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -47,11 +44,7 @@ export default function TaskDetailsPage() {
     nestedData: true
   });
 
-  const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isTimeTrackingOpen, setIsTimeTrackingOpen] = useState(false);
-  const { selector: userId } = useRedux(
-    (state: RootState) => state.user.userInfo?.id
-  );
 
   const [calendar, setCalendar] = useState<string | undefined>();
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
