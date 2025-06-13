@@ -144,9 +144,8 @@ export const PullToRefreshProvider: React.FC<PullToRefreshProviderProps> = ({
     >
       <div className="relative min-h-screen">
         <div
-          className={`min-h-screen ${
-            isDragging.current ? "cursor-grabbing" : ""
-          }`}
+          className={`min-h-screen ${isDragging.current ? "cursor-grabbing" : ""
+            }`}
           style={{
             userSelect: isDragging.current ? "none" : "auto",
             touchAction: window.scrollY === 0 ? "none" : "auto",
