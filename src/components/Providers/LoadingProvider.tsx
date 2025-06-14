@@ -15,11 +15,7 @@ const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
 
   return (
     <>
-      {selector.isLoading && pathname !== "/auth" && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/5 z-50">
-          <PageSpinner />
-        </div>
-      )}
+      {selector.isLoading && pathname !== "/auth" && <PageSpinner />}
       {children}
     </>
   );

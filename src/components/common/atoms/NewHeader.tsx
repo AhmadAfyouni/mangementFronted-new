@@ -147,7 +147,7 @@ const NewHeader = ({
     <>
       <div
         className={`${isLightMode ? "bg-darkest" : "bg-main"
-          } fixed top-0 right-0 left-0 py-2 px-[2%] flex justify-between items-center border-b border-slate-600 z-20`}
+          } fixed top-0 right-0 left-0 py-2 px-[2%] flex justify-between items-center border-b border-slate-600 z-[var(--z-index-header)]`}
       >
         {/* Menu Button */}
         <div className="group relative">

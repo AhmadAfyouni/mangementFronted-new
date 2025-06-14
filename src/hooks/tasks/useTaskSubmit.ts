@@ -17,8 +17,8 @@ export const useTaskSubmit = (
     endpoint: selectedEmployee
       ? "/tasks/create"
       : selectedDepartment && isProjectDisabled
-      ? "/tasks/create-task-department"
-      : "/tasks/create-task-project",
+        ? "/tasks/create-task-department"
+        : "/tasks/create-task-project",
     onSuccessMessage: t("Task added successfully!"),
     invalidateQueryKeys: ["tasks"],
     onSuccessFn() {

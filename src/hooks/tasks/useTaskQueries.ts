@@ -19,11 +19,10 @@ export const useTaskQueries = (
     tree: DeptTree[];
   }>({
     queryKey: ["departments", selectedProject ?? "two"],
-    url: `/${
-      !isProjectDisabled && selectedProject
+    url: `/${!isProjectDisabled && selectedProject
         ? `projects/project-departments-tree/${selectedProject}`
         : "department/tree"
-    }`,
+      }`,
   });
 
   const { data: employees } = useCustomQuery<{

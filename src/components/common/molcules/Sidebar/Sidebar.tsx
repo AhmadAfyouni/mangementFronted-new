@@ -86,7 +86,7 @@ const Sidebar = ({
       <div
         className={`
           ${isExpanded
-            ? "fixed inset-0 bg-slate-600/10 backdrop-blur-sm z-10"
+            ? "fixed inset-0 bg-slate-600/10 backdrop-blur-sm z-[var(--z-index-sidebar-backdrop)]"
             : ""
           }
           ${isMobile ? "touch-none" : ""}
@@ -105,6 +105,7 @@ const Sidebar = ({
             ${!isMobile &&
             (isExpanded ? "w-[240px] mx-5" : "w-[92px] transform origin-left")
             }
+            z-[var(--z-index-sidebar)]
           `}
           onClick={(e) => e.stopPropagation()}
         >

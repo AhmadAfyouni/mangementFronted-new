@@ -99,7 +99,7 @@ const AddJobTitle: React.FC = () => {
   const { mutate: mutateJobTitle } = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
       // Handle both create and update operations
-      const url = isEditMode ? `/job-titles/update/${jobTitleId}` : '/job-titles';
+      const url = isEditMode ? `/job-titles/update/${jobTitleId}` : '/job-titles/create';
       const response = await apiClient.post(url, data);
       return response.data;
     },

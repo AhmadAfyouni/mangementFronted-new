@@ -47,6 +47,19 @@
   --color-tblack: #475569;
   --color-tblackAF: #000;
 
+  /* Z-index hierarchy */
+  --z-index-base: 1;
+  --z-index-dropdown: 10;
+  --z-index-sticky: 20;
+  --z-index-fixed: 30;
+  --z-index-sidebar-backdrop: 40;
+  --z-index-sidebar: 50;
+  --z-index-header: 60;
+  --z-index-modal-backdrop: 70;
+  --z-index-modal: 80;
+  --z-index-popover: 90;
+  --z-index-tooltip: 100;
+
   /* Primary Color - Blue */
   --color-primary-100: #e6f2ff;
   --color-primary-200: #bddaff;
