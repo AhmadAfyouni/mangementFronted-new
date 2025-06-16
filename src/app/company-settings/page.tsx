@@ -24,51 +24,52 @@ enum ProgressCalculationMethod {
     DATE_BASED = 'date_based'
 }
 
+interface DayWorkingHours {
+    day: WorkDay;
+    isWorkingDay: boolean;
+    startTime?: string;
+    endTime?: string;
+    breakTimeMinutes?: number;
+}
+
 interface TaskFieldSettings {
-    enableEstimatedTime: boolean;
-    enableActualTime: boolean;
-    enablePriority: boolean;
-    enableDueDate: boolean;
-    enableFiles: boolean;
-    enableComments: boolean;
-    enableSubTasks: boolean;
-    enableTimeTracking: boolean;
-    enableRecurring: boolean;
-    enableDependencies: boolean;
+    enableEstimatedTime?: boolean;
+    enableActualTime?: boolean;
+    enablePriority?: boolean;
+    enableDueDate?: boolean;
+    enableFiles?: boolean;
+    enableComments?: boolean;
+    enableSubTasks?: boolean;
+    enableTimeTracking?: boolean;
+    enableRecurring?: boolean;
+    enableDependencies?: boolean;
 }
 
 interface WorkSettings {
-    workDays: WorkDay[];
-    officialWorkingHoursPerDay: number;
-    workStartTime: string;
-    workEndTime: string;
-    holidays: string[];
-    timezone: string;
-    overtimeRate: number;
-    breakTimeMinutes: number;
+    dayWorkingHours?: DayWorkingHours[];
+    holidays?: string[];
+    timezone?: string;
+    overtimeRate?: number;
+    defaultBreakTimeMinutes?: number;
 }
 
 interface CompanySettings {
     _id?: string;
     workSettings: WorkSettings;
     taskFieldSettings: TaskFieldSettings;
-    progressCalculationMethod: ProgressCalculationMethod;
-    allowTaskDuplication: boolean;
-    requireTaskApproval: boolean;
-    autoGenerateTaskIds: boolean;
-    defaultTaskReminderDays: number;
-    enableEmailNotifications: boolean;
-    enablePushNotifications: boolean;
-    enableTaskDeadlineReminders: boolean;
-    enableProjectDeadlineReminders: boolean;
-    maxFileUploadSize: number;
-    allowedFileTypes: string[];
-    isActive: boolean;
+    progressCalculationMethod?: ProgressCalculationMethod;
+    allowTaskDuplication?: boolean;
+    requireTaskApproval?: boolean;
+    autoGenerateTaskIds?: boolean;
+    defaultTaskReminderDays?: number;
+    enableEmailNotifications?: boolean;
+    enablePushNotifications?: boolean;
+    enableTaskDeadlineReminders?: boolean;
+    enableProjectDeadlineReminders?: boolean;
+    maxFileUploadSize?: number;
+    allowedFileTypes?: string[];
+    isActive?: boolean;
     lastUpdated?: Date;
-    // File fields for company policies and templates
-    companyPolicyFiles?: string[];
-    taskTemplateFiles?: string[];
-    employeeHandbookFile?: string;
 }
 
 const CompanySettings = () => {
@@ -76,14 +77,19 @@ const CompanySettings = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<CompanySettings>({
         workSettings: {
-            workDays: [WorkDay.SUNDAY, WorkDay.MONDAY, WorkDay.TUESDAY, WorkDay.WEDNESDAY, WorkDay.THURSDAY],
-            officialWorkingHoursPerDay: 8,
-            workStartTime: "09:00",
-            workEndTime: "17:00",
+            dayWorkingHours: [
+                { day: WorkDay.SUNDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
+                { day: WorkDay.MONDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
+                { day: WorkDay.TUESDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
+                { day: WorkDay.WEDNESDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
+                { day: WorkDay.THURSDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
+                { day: WorkDay.FRIDAY, isWorkingDay: false },
+                { day: WorkDay.SATURDAY, isWorkingDay: false }
+            ],
             holidays: [],
             timezone: "Asia/Riyadh",
             overtimeRate: 1.5,
-            breakTimeMinutes: 60
+            defaultBreakTimeMinutes: 60
         },
         taskFieldSettings: {
             enableEstimatedTime: true,
@@ -108,9 +114,7 @@ const CompanySettings = () => {
         enableProjectDeadlineReminders: true,
         maxFileUploadSize: 10,
         allowedFileTypes: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.png', '.jpg', '.jpeg'],
-        isActive: true,
-        companyPolicyFiles: [],
-        taskTemplateFiles: []
+        isActive: true
     });
 
     const { t, currentLanguage } = useLanguage();
@@ -146,11 +150,41 @@ const CompanySettings = () => {
     // Initialize form data when company settings are loaded
     useEffect(() => {
         if (companySettings) {
-            setFormData(companySettings);
-        }
-    }, [companySettings]);
+            // Ensure all days are represented in dayWorkingHours
+            const existingDays = companySettings.workSettings.dayWorkingHours || [];
+            const dayWorkingHours = allWorkDays.map(day => {
+                const existingDay = existingDays.find(d => d.day === day);
+                return existingDay || {
+                    day,
+                    isWorkingDay: false
+                };
+            });
 
-    const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | WorkDay[] | string[]) => {
+            setFormData({
+                ...companySettings,
+                workSettings: {
+                    ...companySettings.workSettings,
+                    dayWorkingHours
+                }
+            });
+        }
+    }, [companySettings, allWorkDays]);
+
+    const handleDayWorkingHoursChange = (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            workSettings: {
+                ...prev.workSettings,
+                dayWorkingHours: prev.workSettings.dayWorkingHours?.map(dwh =>
+                    dwh.day === day
+                        ? { ...dwh, [field]: value }
+                        : dwh
+                ) || []
+            }
+        }));
+    };
+
+    const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | string[]) => {
         setFormData(prev => ({
             ...prev,
             workSettings: {
@@ -178,28 +212,72 @@ const CompanySettings = () => {
     };
 
     const handleWorkDayToggle = (day: WorkDay) => {
-        const currentWorkDays = formData.workSettings.workDays;
-        const newWorkDays = currentWorkDays.includes(day)
-            ? currentWorkDays.filter(d => d !== day)
-            : [...currentWorkDays, day];
+        const dayWorkingHours = formData.workSettings.dayWorkingHours || [];
+        const dayIndex = dayWorkingHours.findIndex(dwh => dwh.day === day);
 
-        handleWorkSettingsChange('workDays', newWorkDays);
+        if (dayIndex !== -1) {
+            const currentDay = dayWorkingHours[dayIndex];
+            const isCurrentlyWorking = currentDay.isWorkingDay;
+
+            handleDayWorkingHoursChange(day, 'isWorkingDay', !isCurrentlyWorking);
+
+            // If enabling work day, set default times if not already set
+            if (!isCurrentlyWorking) {
+                if (!currentDay.startTime) {
+                    handleDayWorkingHoursChange(day, 'startTime', "09:00");
+                }
+                if (!currentDay.endTime) {
+                    handleDayWorkingHoursChange(day, 'endTime', "17:00");
+                }
+                if (!currentDay.breakTimeMinutes) {
+                    handleDayWorkingHoursChange(day, 'breakTimeMinutes', formData.workSettings.defaultBreakTimeMinutes || 60);
+                }
+            }
+        }
     };
 
     const handleSave = () => {
+        // Filter out non-working days from dayWorkingHours before sending
+        const dataToSend = {
+            ...formData,
+            workSettings: {
+                ...formData.workSettings,
+                dayWorkingHours: formData.workSettings.dayWorkingHours?.filter(dwh => dwh.isWorkingDay) || []
+            }
+        };
+
         if (companySettings?._id) {
-            updateSettings(formData);
+            updateSettings(dataToSend);
         } else {
-            createSettings(formData);
+            createSettings(dataToSend);
         }
         setIsEditing(false);
     };
 
     const handleCancel = () => {
         if (companySettings) {
-            setFormData(companySettings);
+            const existingDays = companySettings.workSettings.dayWorkingHours || [];
+            const dayWorkingHours = allWorkDays.map(day => {
+                const existingDay = existingDays.find(d => d.day === day);
+                return existingDay || {
+                    day,
+                    isWorkingDay: false
+                };
+            });
+
+            setFormData({
+                ...companySettings,
+                workSettings: {
+                    ...companySettings.workSettings,
+                    dayWorkingHours
+                }
+            });
         }
         setIsEditing(false);
+    };
+
+    const getWorkingDays = () => {
+        return formData.workSettings.dayWorkingHours?.filter(dwh => dwh.isWorkingDay) || [];
     };
 
     if (!isAdmin) {
@@ -300,17 +378,17 @@ const CompanySettings = () => {
                                 </h3>
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                                    {allWorkDays.map((day) => (
+                                    {formData.workSettings.dayWorkingHours?.map((dayHours) => (
                                         <button
-                                            key={day}
-                                            onClick={() => isEditing && handleWorkDayToggle(day)}
+                                            key={dayHours.day}
+                                            onClick={() => isEditing && handleWorkDayToggle(dayHours.day)}
                                             disabled={!isEditing}
-                                            className={`p-3 rounded-lg text-center transition-all ${formData.workSettings.workDays.includes(day)
+                                            className={`p-3 rounded-lg text-center transition-all ${dayHours.isWorkingDay
                                                 ? "bg-blue-600 text-white"
                                                 : "bg-main text-gray-400 hover:bg-gray-700"
                                                 } ${!isEditing ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                         >
-                                            <div className="text-sm font-medium">{t(day)}</div>
+                                            <div className="text-sm font-medium">{t(dayHours.day)}</div>
                                         </button>
                                     ))}
                                 </div>
@@ -323,61 +401,61 @@ const CompanySettings = () => {
                                     {t("Working Hours")}
                                 </h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-400 mb-2">
-                                            {t("Daily Working Hours")}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            max="24"
-                                            value={formData.workSettings.officialWorkingHoursPerDay}
-                                            onChange={(e) => handleWorkSettingsChange("officialWorkingHoursPerDay", parseInt(e.target.value))}
-                                            disabled={!isEditing}
-                                            className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
-                                        />
-                                    </div>
+                                <div className="space-y-4">
+                                    {getWorkingDays().length > 0 && (
+                                        <div className="space-y-3">
+                                            <h4 className="text-md font-semibold text-twhite">{t("Working Hours for Each Day")}</h4>
+                                            {getWorkingDays().map((dayHours) => (
+                                                <div key={dayHours.day} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-main rounded-lg">
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium text-blue-400">
+                                                            {t(dayHours.day)}
+                                                        </span>
+                                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-400 mb-2">
-                                            {t("Start Time")}
-                                        </label>
-                                        <input
-                                            type="time"
-                                            value={formData.workSettings.workStartTime}
-                                            onChange={(e) => handleWorkSettingsChange("workStartTime", e.target.value)}
-                                            disabled={!isEditing}
-                                            className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
-                                        />
-                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs text-gray-400 mb-1">
+                                                            {t("Start Time")}
+                                                        </label>
+                                                        <input
+                                                            type="time"
+                                                            value={dayHours.startTime || "09:00"}
+                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "startTime", e.target.value)}
+                                                            disabled={!isEditing}
+                                                            className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                        />
+                                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-400 mb-2">
-                                            {t("End Time")}
-                                        </label>
-                                        <input
-                                            type="time"
-                                            value={formData.workSettings.workEndTime}
-                                            onChange={(e) => handleWorkSettingsChange("workEndTime", e.target.value)}
-                                            disabled={!isEditing}
-                                            className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
-                                        />
-                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs text-gray-400 mb-1">
+                                                            {t("End Time")}
+                                                        </label>
+                                                        <input
+                                                            type="time"
+                                                            value={dayHours.endTime || "17:00"}
+                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "endTime", e.target.value)}
+                                                            disabled={!isEditing}
+                                                            className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                        />
+                                                    </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-400 mb-2">
-                                            {t("Break Time (minutes)")}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={formData.workSettings.breakTimeMinutes}
-                                            onChange={(e) => handleWorkSettingsChange("breakTimeMinutes", parseInt(e.target.value))}
-                                            disabled={!isEditing}
-                                            className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
-                                        />
-                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs text-gray-400 mb-1">
+                                                            {t("Break Time (minutes)")}
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={dayHours.breakTimeMinutes || 60}
+                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "breakTimeMinutes", parseInt(e.target.value))}
+                                                            disabled={!isEditing}
+                                                            className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -391,13 +469,28 @@ const CompanySettings = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-400 mb-2">
+                                            {t("Default Break Time (minutes)")}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={formData.workSettings.defaultBreakTimeMinutes || 60}
+                                            onChange={(e) => handleWorkSettingsChange("defaultBreakTimeMinutes", parseInt(e.target.value))}
+                                            disabled={!isEditing}
+                                            className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">{t("Used as default for new working days")}</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-2">
                                             {t("Overtime Rate")}
                                         </label>
                                         <input
                                             type="number"
                                             step="0.1"
                                             min="1"
-                                            value={formData.workSettings.overtimeRate}
+                                            value={formData.workSettings.overtimeRate || 1.5}
                                             onChange={(e) => handleWorkSettingsChange("overtimeRate", parseFloat(e.target.value))}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
@@ -409,7 +502,7 @@ const CompanySettings = () => {
                                             {t("Timezone")}
                                         </label>
                                         <select
-                                            value={formData.workSettings.timezone}
+                                            value={formData.workSettings.timezone || "Asia/Riyadh"}
                                             onChange={(e) => handleWorkSettingsChange("timezone", e.target.value)}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
@@ -445,7 +538,7 @@ const CompanySettings = () => {
                                             <label className="relative inline-flex items-center cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={enabled}
+                                                    checked={enabled || false}
                                                     onChange={(e) => handleTaskFieldChange(field as keyof TaskFieldSettings, e.target.checked)}
                                                     disabled={!isEditing}
                                                     className="sr-only peer"
@@ -473,7 +566,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.allowTaskDuplication}
+                                                checked={formData.allowTaskDuplication || false}
                                                 onChange={(e) => handleGeneralSettingChange("allowTaskDuplication", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -490,7 +583,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.requireTaskApproval}
+                                                checked={formData.requireTaskApproval || false}
                                                 onChange={(e) => handleGeneralSettingChange("requireTaskApproval", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -507,7 +600,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.autoGenerateTaskIds}
+                                                checked={formData.autoGenerateTaskIds || false}
                                                 onChange={(e) => handleGeneralSettingChange("autoGenerateTaskIds", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -524,7 +617,7 @@ const CompanySettings = () => {
                                             <input
                                                 type="number"
                                                 min="1"
-                                                value={formData.defaultTaskReminderDays}
+                                                value={formData.defaultTaskReminderDays || 5}
                                                 onChange={(e) => handleGeneralSettingChange("defaultTaskReminderDays", parseInt(e.target.value))}
                                                 disabled={!isEditing}
                                                 className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
@@ -536,7 +629,7 @@ const CompanySettings = () => {
                                                 {t("Progress Calculation Method")}
                                             </label>
                                             <select
-                                                value={formData.progressCalculationMethod}
+                                                value={formData.progressCalculationMethod || ProgressCalculationMethod.TIME_BASED}
                                                 onChange={(e) => handleGeneralSettingChange("progressCalculationMethod", e.target.value)}
                                                 disabled={!isEditing}
                                                 className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
@@ -569,7 +662,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.enableEmailNotifications}
+                                                checked={formData.enableEmailNotifications || false}
                                                 onChange={(e) => handleGeneralSettingChange("enableEmailNotifications", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -586,7 +679,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.enablePushNotifications}
+                                                checked={formData.enablePushNotifications || false}
                                                 onChange={(e) => handleGeneralSettingChange("enablePushNotifications", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -603,7 +696,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.enableTaskDeadlineReminders}
+                                                checked={formData.enableTaskDeadlineReminders || false}
                                                 onChange={(e) => handleGeneralSettingChange("enableTaskDeadlineReminders", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -620,7 +713,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.enableProjectDeadlineReminders}
+                                                checked={formData.enableProjectDeadlineReminders || false}
                                                 onChange={(e) => handleGeneralSettingChange("enableProjectDeadlineReminders", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -652,7 +745,7 @@ const CompanySettings = () => {
                                             type="number"
                                             min="1"
                                             max="100"
-                                            value={formData.maxFileUploadSize}
+                                            value={formData.maxFileUploadSize || 10}
                                             onChange={(e) => handleGeneralSettingChange("maxFileUploadSize", parseInt(e.target.value))}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
@@ -668,11 +761,12 @@ const CompanySettings = () => {
                                                 <label key={type} className="flex items-center space-x-2 p-2 bg-main rounded-lg">
                                                     <input
                                                         type="checkbox"
-                                                        checked={formData.allowedFileTypes.includes(type)}
+                                                        checked={formData.allowedFileTypes?.includes(type) || false}
                                                         onChange={(e) => {
+                                                            const currentTypes = formData.allowedFileTypes || [];
                                                             const newTypes = e.target.checked
-                                                                ? [...formData.allowedFileTypes, type]
-                                                                : formData.allowedFileTypes.filter(t => t !== type);
+                                                                ? [...currentTypes, type]
+                                                                : currentTypes.filter(t => t !== type);
                                                             handleGeneralSettingChange("allowedFileTypes", newTypes);
                                                         }}
                                                         disabled={!isEditing}
@@ -706,7 +800,7 @@ const CompanySettings = () => {
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={formData.isActive}
+                                                checked={formData.isActive || false}
                                                 onChange={(e) => handleGeneralSettingChange("isActive", e.target.checked)}
                                                 disabled={!isEditing}
                                                 className="sr-only peer"
@@ -734,4 +828,4 @@ const CompanySettings = () => {
     );
 };
 
-export default CompanySettings; 
+export default CompanySettings;

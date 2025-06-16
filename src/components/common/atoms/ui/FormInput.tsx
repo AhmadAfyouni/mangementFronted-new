@@ -81,10 +81,9 @@ export const FormInput = <TFieldValues extends FieldValues>({
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [newOption, setNewOption] = useState("");
 
-  // Base styling classes
-  const baseClasses = `w-full px-4 py-2 mt-1 ${
-    isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"
-  } outline-none border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border`;
+  // Base styling classes with consistent spacing
+  const baseClasses = `w-full px-4 py-2 ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"
+    } outline-none border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-accent border`;
 
   const errorClasses = errors[name] ? "border-high" : "border-border";
 
@@ -113,9 +112,9 @@ export const FormInput = <TFieldValues extends FieldValues>({
     }
   };
 
-  // Default render label function
+  // Default render label function with consistent spacing
   const defaultRenderLabel = () => (
-    <label className="block text-sm font-medium">{t(label)}</label>
+    <label className="block text-sm font-medium mb-1">{t(label)}</label>
   );
 
   // Default input rendering based on type
@@ -155,7 +154,7 @@ export const FormInput = <TFieldValues extends FieldValues>({
               {onAddOption && (
                 <div
                   onClick={() => props.setIsAddingOption(true)}
-                  className={`mt-1 border-gray-500 border-dashed border-2 text-center rounded-md w-[45px] h-[40px] content-center text-lg font-bold cursor-pointer ${addButtonClassName}`}
+                  className={`border-gray-500 border-dashed border-2 text-center rounded-md w-[45px] h-[40px] content-center text-lg font-bold cursor-pointer ${addButtonClassName}`}
                 >
                   +
                 </div>
@@ -211,54 +210,54 @@ export const FormInput = <TFieldValues extends FieldValues>({
     }
   };
 
-  // Render
+  // Render with consistent spacing structure
   return (
-    <div>
+    <div className="mb-4">
       {renderLabel ? renderLabel(label) : defaultRenderLabel()}
 
       {renderInput
         ? renderInput({
-            label,
-            name,
-            type,
-            register,
-            errors,
-            setValue,
-            isLightMode,
-            t,
-            placeholder,
-            defaultValue,
-            rows,
-            options,
-            onAddOption,
-            baseClasses,
-            errorClasses,
-            handleChange,
-            isAddingOption,
-            setIsAddingOption,
-            additionalClassName,
-          })
+          label,
+          name,
+          type,
+          register,
+          errors,
+          setValue,
+          isLightMode,
+          t,
+          placeholder,
+          defaultValue,
+          rows,
+          options,
+          onAddOption,
+          baseClasses,
+          errorClasses,
+          handleChange,
+          isAddingOption,
+          setIsAddingOption,
+          additionalClassName,
+        })
         : defaultRenderInput({
-            label,
-            name,
-            type,
-            register,
-            errors,
-            setValue,
-            isLightMode,
-            t,
-            placeholder,
-            defaultValue,
-            rows,
-            options,
-            onAddOption,
-            baseClasses,
-            errorClasses,
-            handleChange,
-            isAddingOption,
-            setIsAddingOption,
-            additionalClassName,
-          })}
+          label,
+          name,
+          type,
+          register,
+          errors,
+          setValue,
+          isLightMode,
+          t,
+          placeholder,
+          defaultValue,
+          rows,
+          options,
+          onAddOption,
+          baseClasses,
+          errorClasses,
+          handleChange,
+          isAddingOption,
+          setIsAddingOption,
+          additionalClassName,
+        })}
 
       {errors[name] && (
         <p className={`text-red-500 mt-1 text-sm ${errorClassName}`}>
