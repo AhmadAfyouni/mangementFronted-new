@@ -42,43 +42,48 @@ const DynamicSkills: React.FC<DynamicSkillsProps> = ({
   };
 
   return (
-    <div className="gap-3">
-      <label className="block text-sm font-medium">
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-1">
         {t("Required Skills")}
       </label>
-      {skills.map((skill, index) => (
-        <div key={index} className="flex gap-2 items-center">
-          <input
-            type="text"
-            defaultValue={skill}
-            onChange={(e) => handleSkillChange(index, e.target.value)}
-            className={`flex-1 px-4 py-2 rounded-lg outline-none border-none focus:ring-2 focus:ring-accent
-              ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"}
-              ${errors.required_skills ? "border-red-500" : "border-border"}`}
-            placeholder={t("Enter skill here")}
-          />
-          <button
-            type="button"
-            onClick={() => handleRemoveSkill(index)}
-            className={`p-2 rounded-lg hover:bg-red-500/20
-              ${isLightMode ? "text-red-400" : "text-red-500"}`}
-          >
-            <X size={20} />
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={handleAddSkill}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg
-          ${isLightMode
-            ? "bg-dark hover:bg-darker text-tblackAF"
-            : "bg-secondary hover:bg-slate-700 text-twhite"
-          }`}
-      >
-        <Plus size={20} />
-        {t("Add Skill")}
-      </button>
+
+      <div className="space-y-2 mb-2">
+        {skills.map((skill, index) => (
+          <div key={index} className="flex gap-2 items-center">
+            <input
+              type="text"
+              defaultValue={skill}
+              onChange={(e) => handleSkillChange(index, e.target.value)}
+              className={`flex-1 px-4 py-2 rounded-lg outline-none border-none focus:ring-2 focus:ring-accent
+                ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"}
+                ${errors.required_skills ? "border-red-500" : "border-border"}`}
+              placeholder={t("Enter skill here")}
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveSkill(index)}
+              className={`p-2 rounded-lg hover:bg-red-500/20
+                ${isLightMode ? "text-red-400" : "text-red-500"}`}
+            >
+              <X size={20} />
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={handleAddSkill}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg
+            ${isLightMode
+              ? "bg-dark hover:bg-darker text-tblackAF"
+              : "bg-secondary hover:bg-slate-700 text-twhite"
+            }`}
+        >
+          <Plus size={20} />
+          {t("Add Skill")}
+        </button>
+      </div>
+
       {errors.required_skills && (
         <p className="text-red-500 mt-1 text-sm">
           {errors.required_skills.message as string}

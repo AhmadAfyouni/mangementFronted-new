@@ -99,6 +99,9 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
     }
 
     if (type === "select") {
+      console.log("the value of it is : ", value);
+      console.log("the menu of it is : ", selectOptions);
+
       return (
         <div className="flex gap-2 items-center">
           <select
@@ -108,15 +111,18 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
             onChange={onChange}
           >
             <option value="">{placeholder}</option>
-            {selectOptions.map((option, idx) => (
-              <option
-                key={idx}
-                value={typeof option === "string" ? option : option.value}
-                selected={value == option.value}
-              >
-                {typeof option === "string" ? option : option.label}
-              </option>
-            ))}
+            {
+
+
+              selectOptions.map((option, idx) => (
+                <option
+                  key={idx}
+                  value={typeof option === "string" ? option : option.value}
+                  selected={typeof option == "string" ? value == option : value == option.value}
+                >
+                  {typeof option === "string" ? option : option.label}
+                </option>
+              ))}
           </select>
           {showAddButton && (
             <div

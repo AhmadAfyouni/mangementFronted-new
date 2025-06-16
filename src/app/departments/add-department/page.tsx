@@ -200,7 +200,7 @@ const AddDept = () => {
                   selectOptions={requiredCategoryOptions}
                   value={departmentData?.category || ''}
                   onChange={(e) => setValue("category", e.target.value)}
-                  showAddButton={true}
+                  showAddButton={false}
                   onAddClick={() => setIsAddingCategory(true)}
                   className="bg-dark border border-dark/40 rounded-lg"
                 />

@@ -107,13 +107,13 @@ const AddJobCategory: React.FC = () => {
   return (
     <GridContainer>
       <div className="bg-droppable-fade text-twhite p-8 rounded-xl shadow-lg col-span-12 w-full">
-        <h1 className="text-center text-2xl  font-bold mb-6">
+        <h1 className="text-center text-2xl font-bold mb-6">
           {jobCategoryData
             ? t("Update Job Category")
             : t("Create Job Category")}
         </h1>
         <form
-          className="gap-4 "
+          className="space-y-0"
           onSubmit={handleSubmit(async (data: JobCategoryFormInputs) => {
             addJobCategory(data);
           })}
@@ -143,46 +143,47 @@ const AddJobCategory: React.FC = () => {
             valueTransformer={(value) => value.trim()}
           />
 
-          {/* Required Education Field */}
-          <FormInput
-            label={t("Required Education")}
-            placeholder={t("Select Required Education")}
-            name="required_education"
-            type="select"
-            register={register}
-            errors={errors}
-            setValue={setValue}
-            isLightMode={isLightMode}
-            t={t}
-            options={requiredEducationOptions}
-            onAddOption={(newEducation) =>
-              addEducationService({
-                newEducation,
-                setValue,
-                setRequiredEducationOptions,
-              })
-            }
-          />
-
-          {/* Required Experience Field */}
-          <FormInput
-            label={t("Required Experience")}
-            name="required_experience"
-            type="select"
-            register={register}
-            errors={errors}
-            isLightMode={isLightMode}
-            t={t}
-            placeholder={t("Select Required Experience")}
-            options={requiredExperienceOptions}
-            onAddOption={async (newExperience) => {
-              await addExperienceService({
-                newExperience,
-                setRequiredExperienceOptions: setRequiredExperienceOptions,
-                setValue,
-              });
-            }}
-          />
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Required Education Field */}
+            <FormInput
+              label={t("Required Education")}
+              placeholder={t("Select Required Education")}
+              name="required_education"
+              type="select"
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              isLightMode={isLightMode}
+              t={t}
+              options={requiredEducationOptions}
+              onAddOption={(newEducation) =>
+                addEducationService({
+                  newEducation,
+                  setValue,
+                  setRequiredEducationOptions,
+                })
+              }
+            />
+            {/* Required Experience Field */}
+            <FormInput
+              label={t("Required Experience")}
+              name="required_experience"
+              type="select"
+              register={register}
+              errors={errors}
+              isLightMode={isLightMode}
+              t={t}
+              placeholder={t("Select Required Experience")}
+              options={requiredExperienceOptions}
+              onAddOption={async (newExperience) => {
+                await addExperienceService({
+                  newExperience,
+                  setRequiredExperienceOptions: setRequiredExperienceOptions,
+                  setValue,
+                });
+              }}
+            />
+          </div>
 
           {/* Required Skills Field */}
           <DynamicSkills

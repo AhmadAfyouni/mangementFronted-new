@@ -440,7 +440,10 @@ const DeptAdditionalSection = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+
       {/* Numeric Owners Section */}
       <div className="md:col-span-1 space-y-4">
         <div className="flex items-center gap-3 mb-4">
@@ -571,7 +574,7 @@ const DeptAdditionalSection = ({
       </div>
 
       {/* Required Reports Section */}
-      <div className="md:col-span-1 space-y-4">
+      <div className="md:col-span-2 space-y-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-lg bg-purple-900/30 flex items-center justify-center">
             <FileText className="w-5 h-5 text-purple-400" />
@@ -655,7 +658,7 @@ const DeptAdditionalSection = ({
       </div>
 
       {/* Development Programs Section */}
-      <div className="md:col-span-3 space-y-4">
+      <div className="md:col-span-2 space-y-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-lg bg-amber-900/30 flex items-center justify-center">
             <Briefcase className="w-5 h-5 text-amber-400" />
@@ -770,6 +773,9 @@ const DeptAdditionalSection = ({
           </button>
         </div>
       </div>
+
+
+
     </div>
   );
 };
