@@ -168,7 +168,7 @@ const CompanySettings = () => {
                 }
             });
         }
-    }, [companySettings, allWorkDays]);
+    }, [companySettings]);
 
     const handleDayWorkingHoursChange = (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean) => {
         setFormData(prev => ({
