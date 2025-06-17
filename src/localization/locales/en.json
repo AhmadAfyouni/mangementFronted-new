@@ -278,6 +278,8 @@
     "ONGOING": "Ongoing",
     "ON_TEST": "On Test",
     "DONE": "Done",
+    "CLOSED": "Closed",
+    "CANCELED": "Canceled",
     "Projects": "Projects",
     "Add Project": "Add Project",
     "No Projects": "No Projects",

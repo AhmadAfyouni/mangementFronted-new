@@ -10,9 +10,11 @@ interface TaskInfoCardProps {
   selectedStatus?: string;
   selectedPriority?: "LOW" | "MEDIUM" | "HIGH";
   due_date?: string;
+  expected_end_date?: string; // Add this prop
   onStatusChange: (status: string) => void;
   onPriorityChange: (priority: "LOW" | "MEDIUM" | "HIGH") => void;
   onDueDateChange: (date: string) => void;
+  onExpectedEndDateChange: (date: string) => void;
   isStatusMenuOpen: boolean;
   isPriorityMenuOpen: boolean;
   setStatusMenuOpen: (open: boolean) => void;
@@ -39,9 +41,11 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   selectedStatus,
   selectedPriority,
   due_date,
+  expected_end_date, // Add this
   onStatusChange,
   onPriorityChange,
   onDueDateChange,
+  onExpectedEndDateChange,
   isStatusMenuOpen,
   isPriorityMenuOpen,
   setStatusMenuOpen,
@@ -52,14 +56,17 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   const { t, currentLanguage } = useLanguage();
   const router = useRouter();
   const isRTL = currentLanguage === "ar";
-  const calRef = useRef<HTMLInputElement>(null);
+  const dueDateRef = useRef<HTMLInputElement>(null); // Separate ref for due date
+  const expectedEndDateRef = useRef<HTMLInputElement>(null); // Separate ref for expected end date
 
-  const statusOptions = ["PENDING", "ONGOING", "ON_TEST", "DONE"];
+  const statusOptions = ["PENDING", "ONGOING", "ON_TEST", "DONE", "CLOSED", "CANCELED"];
   const priorityOptions: ("LOW" | "MEDIUM" | "HIGH")[] = ["LOW", "MEDIUM", "HIGH"];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "DONE": return "bg-green-500/20 text-green-400";
+      case "CLOSED": return "bg-red-500/20 text-red-400";
+      case "CANCELED": return "bg-purple-500/20 text-purple-400";
       case "ONGOING": return "bg-blue-500/20 text-blue-400";
       case "ON_TEST": return "bg-yellow-500/20 text-yellow-400";
       default: return "bg-gray-500/20 text-gray-400";
@@ -99,6 +106,11 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
       return { text: 'Parent Task', bgColor: 'bg-orange-500/20 text-orange-400' };
     }
     return { text: 'Regular Task', bgColor: 'bg-blue-500/20 text-blue-400' };
+  };
+
+  // Helper function to safely format dates
+  const formatDateSafely = (date: string | undefined | null): string => {
+    return date ? formatDate(date, currentLanguage as "ar" | "en") : t("Not set");
   };
 
   // Get task type display
@@ -395,19 +407,22 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => isEditing && calRef.current?.showPicker()}
+                    onClick={() => isEditing && dueDateRef.current?.showPicker()}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${task.is_over_due ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
                       } ${isEditing ? 'hover:bg-opacity-50 hover:scale-105 cursor-pointer border border-transparent hover:border-current' : 'cursor-default'}`}
                   >
                     <Calendar className="w-4 h-4" />
-                    {formatDate(due_date || task.due_date, currentLanguage as "ar" | "en")}
+                    {formatDateSafely(due_date)}
                     {isEditing && <Edit2 className="w-3 h-3 ml-1 opacity-60" />}
                   </button>
                   <input
-                    ref={calRef}
+                    ref={dueDateRef}
                     type="date"
-                    value={due_date || task.due_date}
-                    onChange={(e) => onDueDateChange(e.target.value)}
+                    value={due_date}
+                    onChange={(e) => {
+                      console.log('Due date input changed:', e.target.value);
+                      onDueDateChange(e.target.value);
+                    }}
                     className="absolute opacity-0 pointer-events-none"
                     disabled={!isEditing}
                   />
@@ -415,12 +430,33 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
               </div>
 
               {/* Expected End Date */}
-              {task.expected_end_date && (
-                <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <span className="text-gray-400">{t("Expected End")}:</span>
-                  <span className="text-twhite">{formatDate(task.expected_end_date, currentLanguage as "ar" | "en")}</span>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => isEditing && expectedEndDateRef.current?.showPicker()}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${task.is_over_due ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
+                      } ${isEditing ? 'hover:bg-opacity-50 hover:scale-105 cursor-pointer border border-transparent hover:border-current' : 'cursor-default'}`}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    {formatDateSafely(expected_end_date)}
+                    {isEditing && <Edit2 className="w-3 h-3 ml-1 opacity-60" />}
+                  </button>
+                  <input
+                    ref={expectedEndDateRef}
+                    type="date"
+                    value={expected_end_date}
+                    onChange={(e) => {
+                      console.log('Expected end date input changed:', e.target.value);
+                      onExpectedEndDateChange(e.target.value);
+                    }}
+                    className="absolute opacity-0 pointer-events-none"
+                    disabled={!isEditing}
+                  />
+                </div>
+              </div>
 
               {/* Actual End Date */}
               {task.actual_end_date && (

@@ -436,7 +436,8 @@ const ListTasks = ({
                 'ONGOING': { bg: 'bg-blue-500/20', text: 'text-blue-400', label: t('In Progress') },
                 'ON_TEST': { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: t('Testing') },
                 'TODO': { bg: 'bg-gray-500/20', text: 'text-gray-400', label: t('Pending') },
-                'CANCELLED': { bg: 'bg-red-500/20', text: 'text-red-400', label: t('Cancelled') }
+                'CLOSED': { bg: 'bg-red-500/20', text: 'text-red-400', label: t('Closed') },
+                'CANCELED': { bg: 'bg-purple-500/20', text: 'text-purple-400', label: t('Canceled') },
             };
 
             const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['TODO'];
@@ -563,7 +564,9 @@ const ListTasks = ({
                                             } ${taskItem.status === "DONE" ? "border-green-400" :
                                                 taskItem.status === "ONGOING" ? "border-blue-400" :
                                                     taskItem.status === "ON_TEST" ? "border-yellow-400" :
-                                                        taskItem.parent_task ? "border-slate-400" : "border-gray-400"
+                                                        taskItem.status === "CLOSED" ? "border-red-400" :
+                                                            taskItem.status === "CANCELED" ? "border-purple-400" :
+                                                                taskItem.parent_task ? "border-slate-400" : "border-gray-400"
                                             } ${level > 0 ? `mt-2` : ""}`}
                                         style={{ marginLeft: level > 0 ? `${level * 16}px` : '0' }}
                                     >
@@ -590,7 +593,9 @@ const ListTasks = ({
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${taskItem.status === "DONE" ? "bg-green-500/20 text-green-400" :
                                                     taskItem.status === "ONGOING" ? "bg-blue-500/20 text-blue-400" :
                                                         taskItem.status === "ON_TEST" ? "bg-yellow-500/20 text-yellow-400" :
-                                                            "bg-gray-500/20 text-gray-400"
+                                                            taskItem.status === "CLOSED" ? "bg-red-500/20 text-red-400" :
+                                                                taskItem.status === "CANCELED" ? "bg-purple-500/20 text-purple-400" :
+                                                                    "bg-gray-500/20 text-gray-400"
                                                     }`}>
                                                     {t(taskItem.status)}
                                                 </span>

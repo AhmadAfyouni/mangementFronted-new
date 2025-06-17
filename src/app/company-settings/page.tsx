@@ -29,7 +29,7 @@ interface DayWorkingHours {
     isWorkingDay: boolean;
     startTime?: string;
     endTime?: string;
-    breakTimeMinutes?: number;
+    breakTimeMinutes?: number | undefined;
 }
 
 interface TaskFieldSettings {
@@ -50,7 +50,7 @@ interface WorkSettings {
     holidays?: string[];
     timezone?: string;
     overtimeRate?: number;
-    defaultBreakTimeMinutes?: number;
+    defaultBreakTimeMinutes?: number | undefined;
 }
 
 interface CompanySettings {
@@ -88,7 +88,7 @@ const CompanySettings = () => {
             ],
             holidays: [],
             timezone: "Asia/Riyadh",
-            overtimeRate: 1.5,
+            overtimeRate: 1,
             defaultBreakTimeMinutes: 60
         },
         taskFieldSettings: {
@@ -170,7 +170,18 @@ const CompanySettings = () => {
         }
     }, [companySettings]);
 
-    const handleDayWorkingHoursChange = (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean) => {
+    // Using currentTarget instead (which is already properly typed)
+    const handleNumberInputWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+        e.currentTarget.blur(); // currentTarget is already typed as HTMLInputElement
+        e.preventDefault();
+    };
+
+    const handleNumberInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+        }
+    };
+    const handleDayWorkingHoursChange = (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean | undefined) => {
         setFormData(prev => ({
             ...prev,
             workSettings: {
@@ -184,7 +195,7 @@ const CompanySettings = () => {
         }));
     };
 
-    const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | string[]) => {
+    const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | string[] | undefined) => {
         setFormData(prev => ({
             ...prev,
             workSettings: {
@@ -209,6 +220,19 @@ const CompanySettings = () => {
             ...prev,
             [field]: value
         }));
+    };
+
+
+    const validateTimeOrder = (startTime: string, endTime: string) => {
+        if (!startTime || !endTime) return true;
+
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+
+        return startMinutes < endMinutes;
     };
 
     const handleWorkDayToggle = (day: WorkDay) => {
@@ -419,11 +443,30 @@ const CompanySettings = () => {
                                                         </label>
                                                         <input
                                                             type="time"
-                                                            value={dayHours.startTime || "09:00"}
-                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "startTime", e.target.value)}
+                                                            value={dayHours.startTime || ""}
+                                                            onChange={(e) => {
+                                                                const newStartTime = e.target.value;
+                                                                handleDayWorkingHoursChange(dayHours.day, "startTime", newStartTime);
+
+                                                                // Validate against end time
+                                                                if (dayHours.endTime && !validateTimeOrder(newStartTime, dayHours.endTime)) {
+                                                                    // Show warning or adjust end time
+                                                                    console.warn("Start time cannot be after end time");
+                                                                }
+                                                            }}
                                                             disabled={!isEditing}
-                                                            className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                            className={`w-full bg-secondary border rounded-lg px-3 py-2 text-twhite text-sm focus:outline-none disabled:opacity-50 ${dayHours.startTime && dayHours.endTime && !validateTimeOrder(dayHours.startTime, dayHours.endTime)
+                                                                ? 'border-red-500 focus:border-red-500'
+                                                                : 'border-gray-600 focus:border-blue-500'
+                                                                }`}
+
+                                                            onWheel={handleNumberInputWheel}
+                                                            onKeyDown={handleNumberInputKeyDown}
+
                                                         />
+                                                        {dayHours.startTime && dayHours.endTime && !validateTimeOrder(dayHours.startTime, dayHours.endTime) && (
+                                                            <p className="text-red-400 text-xs mt-1">{t("Start time must be before end time")}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -432,12 +475,32 @@ const CompanySettings = () => {
                                                         </label>
                                                         <input
                                                             type="time"
-                                                            value={dayHours.endTime || "17:00"}
-                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "endTime", e.target.value)}
+                                                            value={dayHours.endTime || ""}
+                                                            onChange={(e) => {
+                                                                const newEndTime = e.target.value;
+                                                                handleDayWorkingHoursChange(dayHours.day, "endTime", newEndTime);
+
+                                                                // Validate against start time
+                                                                if (dayHours.startTime && !validateTimeOrder(dayHours.startTime, newEndTime)) {
+                                                                    console.warn("End time cannot be before start time");
+                                                                }
+                                                            }}
                                                             disabled={!isEditing}
-                                                            className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                            className={`w-full bg-secondary border rounded-lg px-3 py-2 text-twhite text-sm focus:outline-none disabled:opacity-50 ${dayHours.startTime && dayHours.endTime && !validateTimeOrder(dayHours.startTime, dayHours.endTime)
+                                                                ? 'border-red-500 focus:border-red-500'
+                                                                : 'border-gray-600 focus:border-blue-500'
+                                                                }`}
+
+                                                            onWheel={handleNumberInputWheel}
+                                                            onKeyDown={handleNumberInputKeyDown}
+
                                                         />
+                                                        {dayHours.startTime && dayHours.endTime && !validateTimeOrder(dayHours.startTime, dayHours.endTime) && (
+                                                            <p className="text-red-400 text-xs mt-1">{t("End time must be after start time")}</p>
+                                                        )}
                                                     </div>
+
+
 
                                                     <div>
                                                         <label className="block text-xs text-gray-400 mb-1">
@@ -446,10 +509,24 @@ const CompanySettings = () => {
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            value={dayHours.breakTimeMinutes || 60}
-                                                            onChange={(e) => handleDayWorkingHoursChange(dayHours.day, "breakTimeMinutes", parseInt(e.target.value))}
+                                                            value={dayHours.breakTimeMinutes ?? ""}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                if (value === "") {
+                                                                    handleDayWorkingHoursChange(dayHours.day, "breakTimeMinutes", undefined);
+                                                                } else {
+                                                                    const numValue = parseInt(value);
+                                                                    if (!isNaN(numValue) && numValue >= 0) {
+                                                                        handleDayWorkingHoursChange(dayHours.day, "breakTimeMinutes", numValue);
+                                                                    }
+                                                                }
+                                                            }}
                                                             disabled={!isEditing}
                                                             className="w-full bg-secondary border border-gray-600 rounded-lg px-3 py-2 text-twhite text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                                            placeholder="0"
+                                                            onWheel={handleNumberInputWheel}
+                                                            onKeyDown={handleNumberInputKeyDown}
+
                                                         />
                                                     </div>
                                                 </div>
@@ -474,10 +551,24 @@ const CompanySettings = () => {
                                         <input
                                             type="number"
                                             min="0"
-                                            value={formData.workSettings.defaultBreakTimeMinutes || 60}
-                                            onChange={(e) => handleWorkSettingsChange("defaultBreakTimeMinutes", parseInt(e.target.value))}
+                                            value={formData.workSettings.defaultBreakTimeMinutes ?? ""}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === "") {
+                                                    handleWorkSettingsChange("defaultBreakTimeMinutes", undefined);
+                                                } else {
+                                                    const numValue = parseInt(value);
+                                                    if (!isNaN(numValue) && numValue >= 0) {
+                                                        handleWorkSettingsChange("defaultBreakTimeMinutes", numValue);
+                                                    }
+                                                }
+                                            }}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                            placeholder="Enter break time in minutes"
+                                            onWheel={handleNumberInputWheel}
+                                            onKeyDown={handleNumberInputKeyDown}
+
                                         />
                                         <p className="text-xs text-gray-500 mt-1">{t("Used as default for new working days")}</p>
                                     </div>
@@ -489,24 +580,41 @@ const CompanySettings = () => {
                                         <input
                                             type="number"
                                             step="0.1"
-                                            min="1"
-                                            value={formData.workSettings.overtimeRate || 1.5}
-                                            onChange={(e) => handleWorkSettingsChange("overtimeRate", parseFloat(e.target.value))}
+                                            min="0"
+                                            value={formData.workSettings.overtimeRate ?? ""}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === "") {
+                                                    handleWorkSettingsChange("overtimeRate", undefined);
+                                                } else {
+                                                    const numValue = parseFloat(value);
+                                                    if (!isNaN(numValue) && numValue >= 0) {
+                                                        handleWorkSettingsChange("overtimeRate", numValue);
+                                                    }
+                                                }
+                                            }}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                            placeholder="1"
+                                            onWheel={handleNumberInputWheel}
+                                            onKeyDown={handleNumberInputKeyDown}
+
                                         />
                                     </div>
+
+
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-400 mb-2">
                                             {t("Timezone")}
                                         </label>
                                         <select
-                                            value={formData.workSettings.timezone || "Asia/Riyadh"}
+                                            value={formData.workSettings.timezone || ""}
                                             onChange={(e) => handleWorkSettingsChange("timezone", e.target.value)}
                                             disabled={!isEditing}
                                             className="w-full bg-main border border-gray-600 rounded-lg px-3 py-2 text-twhite focus:border-blue-500 focus:outline-none disabled:opacity-50"
                                         >
+                                            <option value="">{t("Select Timezone")}</option>
                                             <option value="Asia/Riyadh">Asia/Riyadh</option>
                                             <option value="UTC">UTC</option>
                                             <option value="America/New_York">America/New_York</option>
@@ -616,6 +724,9 @@ const CompanySettings = () => {
                                             </label>
                                             <input
                                                 type="number"
+                                                onWheel={handleNumberInputWheel}
+                                                onKeyDown={handleNumberInputKeyDown}
+
                                                 min="1"
                                                 value={formData.defaultTaskReminderDays || 5}
                                                 onChange={(e) => handleGeneralSettingChange("defaultTaskReminderDays", parseInt(e.target.value))}
@@ -745,6 +856,9 @@ const CompanySettings = () => {
                                             type="number"
                                             min="1"
                                             max="100"
+                                            onWheel={handleNumberInputWheel}
+                                            onKeyDown={handleNumberInputKeyDown}
+
                                             value={formData.maxFileUploadSize || 10}
                                             onChange={(e) => handleGeneralSettingChange("maxFileUploadSize", parseInt(e.target.value))}
                                             disabled={!isEditing}
@@ -824,6 +938,8 @@ const CompanySettings = () => {
                     )}
                 </div>
             </div>
+
+
         </GridContainer>
     );
 };
