@@ -46,26 +46,35 @@ export default function TaskDetailsPage() {
 
   const [isTimeTrackingOpen, setIsTimeTrackingOpen] = useState(false);
 
-  const [calendar, setCalendar] = useState<string | undefined>();
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
   const [isStatusMenuOpen, setStatusMenuOpen] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState<"LOW" | "MEDIUM" | "HIGH" | undefined>();
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
-  const [description, setDescription] = useState<string>();
-  const [taskName, setTaskName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [calendar, setCalendar] = useState<string>("");
+  const [expectedEndDate, setExpectedEndDate] = useState<string>("");
+  const [selectedPriority, setSelectedPriority] = useState<"LOW" | "MEDIUM" | "HIGH">("LOW");
+  const [selectedStatus, setSelectedStatus] = useState<string>("TODO");
+  const [description, setDescription] = useState<string>("");
+  const [taskName, setTaskName] = useState<string>("");
 
-  // Set initial values when task data is loaded
   useEffect(() => {
     if (task) {
-      setCalendar(task.due_date);
-      setSelectedPriority(task.priority);
-      setSelectedStatus(task.status);
-      setDescription(task.description);
-      setTaskName(task.name);
+      setCalendar(task.due_date || "");
+      setSelectedPriority(task.priority || "LOW");
+      setSelectedStatus(task.status || "TODO");
+      setDescription(task.description || "");
+      setTaskName(task.name || "");
+      setExpectedEndDate(task.expected_end_date || "");
+
+      console.log('Task data loaded:', {
+        due_date: task.due_date,
+        expected_end_date: task.expected_end_date,
+        calendar,
+        expectedEndDate
+      }); // Debug log
     }
   }, [task]);
+
 
   const {
     startTimer,
@@ -106,16 +115,21 @@ export default function TaskDetailsPage() {
   const handlePause = async () => {
     await pauseTimer();
   };
-
   const handleUpdate = async () => {
     try {
-      await updateTaskData(taskId, {
+      // Ensure dates are in proper format
+      const updateData = {
         name: taskName!,
         status: selectedStatus!,
         priority: selectedPriority!,
         description: description!,
         due_date: calendar!,
-      });
+        expected_end_date: expectedEndDate || null, // Use null instead of undefined
+      };
+
+      console.log('Updating task with data:', updateData); // Debug log
+
+      await updateTaskData(taskId, updateData);
 
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
@@ -132,6 +146,7 @@ export default function TaskDetailsPage() {
     } catch (error) {
       const err = error as AxiosError;
       console.log("Error updating task:", err);
+      console.log("Error response:", err.response?.data); // Additional debug info
 
       // Revert local state to original task data on save failure
       if (task) {
@@ -140,7 +155,9 @@ export default function TaskDetailsPage() {
         setSelectedPriority(task.priority);
         setDescription(task.description);
         setCalendar(task.due_date);
+        setExpectedEndDate(task.expected_end_date || "");
       }
+
       // Extract message safely
       let errorMessage = "An error occurred";
       if (err.response?.data && typeof err.response.data === "object" && "message" in err.response.data) {
@@ -297,14 +314,23 @@ export default function TaskDetailsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+
               <TaskInfoCard
                 task={task}
                 selectedStatus={selectedStatus}
                 selectedPriority={selectedPriority}
                 due_date={calendar}
+                expected_end_date={expectedEndDate} // Add this line
                 onStatusChange={handleStatusChange}
                 onPriorityChange={setSelectedPriority}
-                onDueDateChange={setCalendar}
+                onDueDateChange={(date) => {
+                  console.log('Due date changing to:', date);
+                  setCalendar(date);
+                }}
+                onExpectedEndDateChange={(date) => {
+                  console.log('Expected end date changing to:', date);
+                  setExpectedEndDate(date);
+                }}
                 isStatusMenuOpen={isStatusMenuOpen}
                 isPriorityMenuOpen={isPriorityMenuOpen}
                 setStatusMenuOpen={setStatusMenuOpen}

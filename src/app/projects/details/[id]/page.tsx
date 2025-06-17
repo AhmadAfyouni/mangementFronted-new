@@ -155,26 +155,76 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
           {expandedSections.info && (
             <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 {/* Project Details Card */}
-                <div className="bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md">
-                  <h3 className="text-lg font-semibold text-twhite mb-3 flex items-center gap-2">
+                <div className="bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
+                  <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-primary" />
                     {t("Details")}
                   </h3>
-                  <div className="space-y-3">
+
+                  <div className="space-y-4 flex-1">
+                    {/* Description */}
                     <div className="flex flex-col">
-                      <span className="text-sm text-tdark">{t("Description")}</span>
-                      <p className="text-twhite">{project.description || t("No description provided")}</p>
+                      <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
+                      <p className="text-twhite text-sm leading-relaxed">
+                        {project.description || t("No description provided")}
+                      </p>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-tdark">{t("Department Count")}</span>
-                      <p className="text-twhite">{project.departments?.length || 0}</p>
+
+                    {/* Project Timeline */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("Start Date")}</span>
+                        <p className="text-twhite text-sm">
+                          {formatDate(project.startDate, currentLanguage as "ar" | "en")}
+                        </p>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("End Date")}</span>
+                        <p className="text-twhite text-sm">
+                          {formatDate(project.endDate, currentLanguage as "ar" | "en")}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm text-tdark">{t("Task Count")}</span>
-                      <p className="text-twhite">{totalTasks}</p>
+
+                    {/* Project Statistics */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("Departments")}</span>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-primary" />
+                          <p className="text-twhite text-sm font-semibold">{project.departments?.length || 0}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("Team Members")}</span>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-success" />
+                          <p className="text-twhite text-sm font-semibold">{project.members?.length || 0}</p>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Task Breakdown */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("Total Tasks")}</span>
+                        <div className="flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-warning" />
+                          <p className="text-twhite text-sm font-semibold">{totalTasks}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm text-tdark font-medium mb-1">{t("Project Tasks")}</span>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary" />
+                          <p className="text-twhite text-sm font-semibold">{project.projectTasks?.length || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+
+
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-gray-700/50">
@@ -187,46 +237,14 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                   </div>
                 </div>
 
-                {/* Status Overview Card */}
-                <div className="bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md">
-                  <h3 className="text-lg font-semibold text-twhite mb-3 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-warning" />
-                    {t("Status")}
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-tdark">{t("Pending")}</span>
-                      <span className="text-twhite font-medium">{project.taskPending}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-tdark">{t("On Going")}</span>
-                      <span className="text-twhite font-medium">{project.taskOnGoing}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-tdark">{t("On Test")}</span>
-                      <span className="text-twhite font-medium">{project.taskOnTest}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-tdark">{t("Done")}</span>
-                      <span className="text-twhite font-medium">{project.taskDone}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pie Chart Card */}
-                <div className="bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md">
-                  <h3 className="text-lg font-semibold text-twhite mb-3 flex items-center gap-2">
-                    <Users className="w-4 h-4 text-success" />
-                    {t("Task Distribution")}
-                  </h3>
-                  <div className="w-full h-48">
-                    <TaskStatusPieChart
-                      taskDone={project.taskDone}
-                      taskOnGoing={project.taskOnGoing}
-                      taskOnTest={project.taskOnTest}
-                      taskPending={project.taskPending}
-                    />
-                  </div>
+                {/* Enhanced Pie Chart Card - Now spans 2 columns */}
+                <div className="md:col-span-2">
+                  <TaskStatusPieChart
+                    taskDone={project.taskDone}
+                    taskOnGoing={project.taskOnGoing}
+                    taskOnTest={project.taskOnTest}
+                    taskPending={project.taskPending}
+                  />
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProjectStatus } from '@/types/Project.type';
 import { updateProjectStatus } from '@/services/project.service';
-import { CheckCircle, Play, Loader2 } from 'lucide-react';
+import { CheckCircle, Play, Loader2, Clock, TrendingUp, Trophy, Pause, AlertCircle } from 'lucide-react';
 import useCustomTheme from '@/hooks/useCustomTheme';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -19,7 +19,8 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
     t
 }) => {
     const { isLightMode } = useCustomTheme();
-    const queryClient = useQueryClient()
+    const queryClient = useQueryClient();
+
     // Use mutation for status update
     const { mutate, isPending } = useMutation({
         mutationFn: ({ status }: { status: ProjectStatus }) =>
@@ -27,7 +28,7 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
         onSuccess: (data) => {
             if (data.status) {
                 onStatusUpdated(data.status);
-                queryClient.invalidateQueries({ queryKey: ["project-details"] })
+                queryClient.invalidateQueries({ queryKey: ["project-details"] });
             }
         },
         onError: (error) => {
@@ -51,31 +52,85 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
         mutate({ status });
     };
 
-    // If status is COMPLETED, don't show any buttons
+    // Get status configuration
+    const getStatusConfig = (status: ProjectStatus) => {
+        const configs = {
+            [ProjectStatus.PENDING]: {
+                icon: Clock,
+                color: 'text-warning',
+                bgColor: 'bg-warning/10',
+                borderColor: 'border-warning/30',
+                label: t("Pending"),
+                description: t("Project is awaiting approval to start")
+            },
+            [ProjectStatus.IN_PROGRESS]: {
+                icon: TrendingUp,
+                color: 'text-primary',
+                bgColor: 'bg-primary/10',
+                borderColor: 'border-primary/30',
+                label: t("In Progress"),
+                description: t("Project is actively being worked on")
+            },
+            [ProjectStatus.COMPLETED]: {
+                icon: Trophy,
+                color: 'text-success',
+                bgColor: 'bg-success/10',
+                borderColor: 'border-success/30',
+                label: t("Completed"),
+                description: t("Project has been successfully completed")
+            }
+        };
+        return configs[status];
+    };
+
+    const currentConfig = currentStatus ? getStatusConfig(currentStatus as ProjectStatus) : null;
+
+    // If status is COMPLETED, show completion celebration
     if (isStatusActive(ProjectStatus.COMPLETED)) {
         return (
-            <div className={`rounded-xl p-4 ${isLightMode ? 'bg-gray-100' : 'bg-dark'} border ${isLightMode ? 'border-gray-200' : 'border-gray-700'} shadow-md`}>
-                <div className="flex items-center gap-2">
-                    <CheckCircle size={20} className="text-green-500" />
-                    <h3 className={`text-lg font-semibold ${isLightMode ? 'text-gray-800' : 'text-white'}`}>
-                        {t("Project Completed")}
-                    </h3>
+            <div className="bg-dark rounded-2xl p-6 border border-gray-700/50 shadow-lg">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 rounded-full bg-success/20 border border-success/30">
+                        <Trophy className="w-6 h-6 text-success" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-twhite">{t("Project Completed")}</h3>
+                        <p className="text-sm text-tdark">{t("Congratulations on completing this project!")}</p>
+                    </div>
+                </div>
+
+                {/* Completion Status */}
+                <div className="bg-success/10 border border-success/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-success" />
+                        <span className="text-success font-medium">{t("Project Status: Completed")}</span>
+                    </div>
+                    <p className="text-sm text-tdark mt-2">{t("This project has reached its completion milestone")}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`rounded-xl p-4 ${isLightMode ? 'bg-gray-100' : 'bg-dark'} border ${isLightMode ? 'border-gray-200' : 'border-gray-700'} shadow-md`}>
-            <h3 className={`text-lg font-semibold mb-3 ${isLightMode ? 'text-gray-800' : 'text-white'}`}>
-                {t("Project Status")}
-            </h3>
+        <div className="bg-dark rounded-2xl p-6 border border-gray-700/50 shadow-lg">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-primary/20 border border-primary/30">
+                    <AlertCircle className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-twhite">{t("Project Status")}</h3>
+                    <p className="text-sm text-tdark">{t("Manage your project lifecycle")}</p>
+                </div>
+            </div>
 
-            <div className="flex flex-wrap gap-2">
+            {/* Action Buttons */}
+            <div className="space-y-3">
                 {isPending ? (
-                    <div className="px-4 py-2 rounded-md bg-gray-700 text-white flex items-center gap-2">
-                        <Loader2 size={18} className="animate-spin" />
-                        {t("Updating status...")}
+                    <div className="flex items-center justify-center p-4 bg-secondary/50 rounded-xl border border-gray-700/30">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary mr-2" />
+                        <span className="text-twhite font-medium">{t("Updating status...")}</span>
                     </div>
                 ) : (
                     <>
@@ -83,11 +138,11 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
                         {isStatusActive(ProjectStatus.PENDING) && (
                             <button
                                 onClick={() => handleUpdateStatus(ProjectStatus.IN_PROGRESS)}
-                                className="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                                className="w-full bg-primary hover:bg-primary/80 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                                 disabled={isPending}
                             >
-                                <Play size={18} />
-                                {t("Move to In Progress")}
+                                <Play className="w-5 h-5" />
+                                {t("Start Project")}
                             </button>
                         )}
 
@@ -95,10 +150,10 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
                         {isStatusActive(ProjectStatus.IN_PROGRESS) && (
                             <button
                                 onClick={() => handleUpdateStatus(ProjectStatus.COMPLETED)}
-                                className="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors bg-green-600 text-white hover:bg-green-700"
+                                className="w-full bg-success hover:bg-success/80 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                                 disabled={isPending}
                             >
-                                <CheckCircle size={18} />
+                                <CheckCircle className="w-5 h-5" />
                                 {t("Mark as Completed")}
                             </button>
                         )}
@@ -106,21 +161,44 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
                 )}
             </div>
 
-            <div className="mt-3 text-sm flex items-center gap-2">
-                <span className="text-gray-400">{t("Current Status")}:</span>
-                <span className={`font-medium px-2 py-1 rounded-full text-xs ${isStatusActive(ProjectStatus.PENDING)
-                    ? 'bg-orange-500/20 text-orange-300'
-                    : isStatusActive(ProjectStatus.IN_PROGRESS)
-                        ? 'bg-blue-500/20 text-blue-300'
-                        : 'bg-green-500/20 text-green-300'
-                    }`}>
-                    {isStatusActive(ProjectStatus.PENDING) && t("Pending")}
-                    {isStatusActive(ProjectStatus.IN_PROGRESS) && t("In Progress")}
-                    {isStatusActive(ProjectStatus.COMPLETED) && t("Completed")}
-                </span>
+            {/* Status Timeline */}
+            <div className="mt-6 pt-4 border-t border-gray-700/50">
+                <h4 className="text-sm font-medium text-tdark mb-3">{t("Project Timeline")}</h4>
+                <div className="flex items-center justify-between">
+                    {Object.values(ProjectStatus).map((status, index) => {
+                        const config = getStatusConfig(status);
+                        const isActive = isStatusActive(status);
+                        const isPassed = currentStatus === ProjectStatus.IN_PROGRESS && status === ProjectStatus.PENDING ||
+                            currentStatus === ProjectStatus.COMPLETED && (status === ProjectStatus.PENDING || status === ProjectStatus.IN_PROGRESS);
+
+                        return (
+                            <React.Fragment key={status}>
+                                <div className="flex flex-col items-center">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive
+                                        ? `${config.bgColor} ${config.borderColor} ${config.color}`
+                                        : isPassed
+                                            ? 'bg-success/20 border-success/50 text-success'
+                                            : 'bg-secondary/50 border-gray-600 text-tdark'
+                                        }`}>
+                                        <config.icon className="w-4 h-4" />
+                                    </div>
+                                    <span className={`text-xs mt-1 font-medium ${isActive ? config.color : isPassed ? 'text-success' : 'text-tdark'
+                                        }`}>
+                                        {config.label}
+                                    </span>
+                                </div>
+                                {index < Object.values(ProjectStatus).length - 1 && (
+                                    <div className={`flex-1 h-0.5 mx-2 transition-all duration-300 ${isPassed ? 'bg-success/50' : 'bg-gray-700/50'
+                                        }`} />
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
             </div>
+
         </div>
     );
 };
 
-export default ProjectStatusControls; 
+export default ProjectStatusControls;

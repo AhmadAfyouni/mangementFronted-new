@@ -59,7 +59,7 @@ export interface MyTask {
     id: string;
     name: string;
     project: string;
-    status: "PENDING" | "ONGOING" | "DONE";
+    status: "PENDING" | "ONGOING" | "DONE" | "CLOSED" | "CANCELED";
     dueDate: string;
     timeSpent: number;
     progress: number;

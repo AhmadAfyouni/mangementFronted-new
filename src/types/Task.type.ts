@@ -271,7 +271,7 @@ export type ReceiveTaskType = {
   priority: "LOW" | "MEDIUM" | "HIGH";
   emp?: TaskEmployeeType | null;
   assignee?: TaskEmployeeType | null;
-  status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | string;
+  status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | "CLOSED" | "CANCELED" | string;
   createdAt: string;
   updatedAt: string;
   due_date: string;
@@ -352,7 +352,7 @@ export type ExtendedReceiveTaskType = {
   priority: "LOW" | "MEDIUM" | "HIGH";
   emp?: TaskEmployeeType;
   assignee?: TaskEmployeeType;
-  status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | string;
+  status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | "CLOSED" | "CANCELED" | string;
   createdAt: string;
   updatedAt: string;
   due_date: string;

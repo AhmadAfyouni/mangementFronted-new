@@ -12,13 +12,17 @@ const MyTasks: React.FC = () => {
     const { data: myTasks, isLoading: isLoadingMyTasks, error } = useMyTasks();
 
     // Filter options
-    const filters: TaskStatus[] = ['all', 'PENDING', 'ONGOING', 'DONE'];
+    const filters: TaskStatus[] = ['all', 'PENDING', 'ONGOING', 'DONE', 'CLOSED', 'CANCELED'];
 
     // Memoized functions to prevent re-renders
     const getStatusColor = useCallback((status: string): string => {
         switch (status) {
             case 'DONE':
                 return 'bg-green-100 text-green-800';
+            case 'CLOSED':
+                return 'bg-red-100 text-red-800';
+            case 'CANCELED':
+                return 'bg-purple-100 text-purple-800';
             case 'ONGOING':
                 return 'bg-amber-100 text-amber-800';
             default:
