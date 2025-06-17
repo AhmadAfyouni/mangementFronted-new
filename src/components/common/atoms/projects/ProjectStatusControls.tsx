@@ -1,9 +1,8 @@
-import React from 'react';
-import { ProjectStatus } from '@/types/Project.type';
 import { updateProjectStatus } from '@/services/project.service';
-import { CheckCircle, Play, Loader2, Clock, TrendingUp, Trophy, Pause, AlertCircle } from 'lucide-react';
-import useCustomTheme from '@/hooks/useCustomTheme';
+import { ProjectStatus } from '@/types/Project.type';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AlertCircle, CheckCircle, Clock, Loader2, Play, TrendingUp, Trophy } from 'lucide-react';
+import React from 'react';
 
 interface ProjectStatusControlsProps {
     projectId: string;
@@ -18,7 +17,6 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
     onStatusUpdated,
     t
 }) => {
-    const { isLightMode } = useCustomTheme();
     const queryClient = useQueryClient();
 
     // Use mutation for status update
@@ -82,8 +80,6 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
         };
         return configs[status];
     };
-
-    const currentConfig = currentStatus ? getStatusConfig(currentStatus as ProjectStatus) : null;
 
     // If status is COMPLETED, show completion celebration
     if (isStatusActive(ProjectStatus.COMPLETED)) {
