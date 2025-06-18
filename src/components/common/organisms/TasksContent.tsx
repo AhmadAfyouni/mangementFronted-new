@@ -119,6 +119,7 @@ const TasksContent = ({
                   title={sec.name}
                   taskCount={(tasks && tasks[sec._id]?.length) || 0}
                   tasks={(tasks && tasks[sec._id]) || []}
+                  section={sec}
                 />
               );
             })}

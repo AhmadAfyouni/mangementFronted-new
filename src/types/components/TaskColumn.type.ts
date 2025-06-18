@@ -1,3 +1,4 @@
+import { SectionType } from "../Section.type";
 import { ReceiveTaskType } from "../Task.type";
 
 export interface TaskColumnProps {
@@ -5,4 +6,5 @@ export interface TaskColumnProps {
   title: string;
   taskCount: number;
   tasks: ReceiveTaskType[];
+  section?: SectionType; // SectionType, but keep as any for now for compatibility
 }

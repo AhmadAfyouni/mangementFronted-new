@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import fileUploadService from "@/services/fileUpload.service";
+import { useMokkBar } from "@/components/Providers/Mokkbar";
 
 interface FormFields {
   start_date: string;
@@ -34,6 +35,7 @@ const NewTransaction = () => {
   );
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const { setSnackbarConfig } = useMokkBar();
 
   const {
     reset,
@@ -41,7 +43,7 @@ const NewTransaction = () => {
     handleSubmit,
     watch,
     setValue,
-    formState: { isDirty },
+    formState: { isDirty, errors },
   } = useForm<FormFields>({
     defaultValues: {
       start_date: new Date().toISOString().split("T")[0],
@@ -108,6 +110,50 @@ const NewTransaction = () => {
         router.back();
       },
     });
+
+  // Validation function
+  const validateForm = (data: FormFields): boolean => {
+    const errors: string[] = [];
+
+    // Validate start date
+    if (!data.start_date || data.start_date.trim() === "") {
+      errors.push(t("Start Date is required"));
+    }
+
+    // Validate template fields
+    if (template?.transactionFields) {
+      template.transactionFields.forEach((field) => {
+        const fieldValue = data.fields[field.name];
+
+        // Check if field is empty or undefined
+        if (
+          fieldValue === undefined ||
+          fieldValue === null ||
+          (typeof fieldValue === "string" && fieldValue.trim() === "") ||
+          (typeof fieldValue === "number" && isNaN(fieldValue))
+        ) {
+          // For file fields, also check if there's an uploaded file URL
+          if (field.type === "file" && !fileStatuses[field.name]?.url) {
+            errors.push(`${field.name} ${t("is required")}`);
+          } else if (field.type !== "file") {
+            errors.push(`${field.name} ${t("is required")}`);
+          }
+        }
+      });
+    }
+
+    // Show validation errors using MokkBar
+    if (errors.length > 0) {
+      setSnackbarConfig({
+        open: true,
+        message: errors.join(", "),
+        severity: "error",
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   // Handle file change for a specific field
   const handleFileChange = async (
@@ -204,9 +250,14 @@ const NewTransaction = () => {
     setValue(`fields.${fieldName}`, "");
   };
 
-  // Submit handler
+  // Submit handler with validation
   const onSubmit = (data: FormFields) => {
     if (!template) return;
+
+    // Validate form before submission
+    if (!validateForm(data)) {
+      return;
+    }
 
     // Format the fields with proper values, including file URLs
     const formattedFields = Object.entries(data.fields).map(
@@ -247,6 +298,19 @@ const NewTransaction = () => {
       default:
         return "date";
     }
+  };
+
+  // Helper function to check if a field has an error
+  const hasFieldError = (fieldName: string): boolean => {
+    return !!errors.fields?.[fieldName];
+  };
+
+  // Helper function to get error message for a field
+  const getFieldErrorMessage = (fieldName: string): string => {
+    if (errors.fields?.[fieldName]) {
+      return `${fieldName} ${t("is required")}`;
+    }
+    return "";
   };
 
   if (!template) return null;
@@ -303,47 +367,102 @@ const NewTransaction = () => {
           {/* Start Date Input */}
           <div>
             <label className="block text-sm font-medium text-twhite mb-2">
-              {t("Start Date")}
+              {t("Start Date")} <span className="text-red-400">*</span>
             </label>
             <input
-              {...register("start_date", { required: true })}
+              {...register("start_date", {
+                required: {
+                  value: true,
+                  message: t("Start Date is required")
+                }
+              })}
               type={getStartDateInputType()}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200"
+              className={`w-full px-4 py-2.5 rounded-lg border ${errors.start_date
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-600 focus:ring-dark"
+                } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200`}
             />
+            {errors.start_date && (
+              <p className="text-red-400 text-xs mt-1">{errors.start_date.message}</p>
+            )}
           </div>
 
           {/* Transaction Fields */}
           {template.transactionFields.map((field, index) => (
             <div key={index}>
               <label className="block text-sm font-medium text-twhite mb-2">
-                {field.name}
+                {field.name} <span className="text-red-400">*</span>
               </label>
               {field.type === "text" && (
-                <input
-                  {...register(`fields.${field.name}`)}
-                  type="text"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200"
-                />
+                <>
+                  <input
+                    {...register(`fields.${field.name}`, {
+                      required: {
+                        value: true,
+                        message: `${field.name} ${t("is required")}`
+                      }
+                    })}
+                    type="text"
+                    className={`w-full px-4 py-2.5 rounded-lg border ${hasFieldError(field.name)
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-600 focus:ring-dark"
+                      } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200`}
+                  />
+                  {hasFieldError(field.name) && (
+                    <p className="text-red-400 text-xs mt-1">{getFieldErrorMessage(field.name)}</p>
+                  )}
+                </>
               )}
               {field.type === "textarea" && (
-                <textarea
-                  {...register(`fields.${field.name}`)}
-                  rows={4}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200"
-                />
+                <>
+                  <textarea
+                    {...register(`fields.${field.name}`, {
+                      required: {
+                        value: true,
+                        message: `${field.name} ${t("is required")}`
+                      }
+                    })}
+                    rows={4}
+                    className={`w-full px-4 py-2.5 rounded-lg border ${hasFieldError(field.name)
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-600 focus:ring-dark"
+                      } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200`}
+                  />
+                  {hasFieldError(field.name) && (
+                    <p className="text-red-400 text-xs mt-1">{getFieldErrorMessage(field.name)}</p>
+                  )}
+                </>
               )}
               {field.type === "number" && (
-                <input
-                  {...register(`fields.${field.name}`)}
-                  type="number"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200"
-                />
+                <>
+                  <input
+                    {...register(`fields.${field.name}`, {
+                      required: {
+                        value: true,
+                        message: `${field.name} ${t("is required")}`
+                      }
+                    })}
+                    type="number"
+                    className={`w-full px-4 py-2.5 rounded-lg border ${hasFieldError(field.name)
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-600 focus:ring-dark"
+                      } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200`}
+                  />
+                  {hasFieldError(field.name) && (
+                    <p className="text-red-400 text-xs mt-1">{getFieldErrorMessage(field.name)}</p>
+                  )}
+                </>
               )}
               {field.type === "file" && (
                 <div>
                   <input
                     type="hidden"
-                    {...register(`fields.${field.name}`)}
+                    {...register(`fields.${field.name}`, {
+                      required: {
+                        value: true,
+                        message: `${field.name} ${t("is required")}`
+                      }
+                    })}
                     value={fileStatuses[field.name]?.url || ""}
                   />
 
@@ -400,7 +519,10 @@ const NewTransaction = () => {
                           }
                         }}
                         disabled={fileStatuses[field.name]?.isUploading}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200 file:mx-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-dark file:text-twhite hover:file:bg-dark/90"
+                        className={`w-full px-4 py-2.5 rounded-lg border ${hasFieldError(field.name) && !fileStatuses[field.name]?.url
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-600 focus:ring-dark"
+                          } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 file:mx-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-dark file:text-twhite hover:file:bg-dark/90`}
                       />
                       {fileStatuses[field.name]?.isUploading && (
                         <div className="mt-2">
@@ -423,20 +545,36 @@ const NewTransaction = () => {
                           {fileStatuses[field.name].error}
                         </p>
                       )}
+                      {hasFieldError(field.name) && !fileStatuses[field.name]?.url && (
+                        <p className="text-red-400 text-xs mt-1">{getFieldErrorMessage(field.name)}</p>
+                      )}
                     </div>
                   )}
                 </div>
               )}
               {field.type === "select" && (
-                <select
-                  {...register(`fields.${field.name}`)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-600 bg-secondary text-twhite focus:outline-none focus:ring-2 focus:ring-dark focus:border-transparent transition duration-200"
-                >
-                  <option value="">{t("Select an option")}</option>
-                  <option value="low">{t("Low")}</option>
-                  <option value="medium">{t("Medium")}</option>
-                  <option value="high">{t("High")}</option>
-                </select>
+                <>
+                  <select
+                    {...register(`fields.${field.name}`, {
+                      required: {
+                        value: true,
+                        message: `${field.name} ${t("is required")}`
+                      }
+                    })}
+                    className={`w-full px-4 py-2.5 rounded-lg border ${hasFieldError(field.name)
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-600 focus:ring-dark"
+                      } bg-secondary text-twhite focus:outline-none focus:ring-2 focus:border-transparent transition duration-200`}
+                  >
+                    <option value="">{t("Select an option")}</option>
+                    <option value="low">{t("Low")}</option>
+                    <option value="medium">{t("Medium")}</option>
+                    <option value="high">{t("High")}</option>
+                  </select>
+                  {hasFieldError(field.name) && (
+                    <p className="text-red-400 text-xs mt-1">{getFieldErrorMessage(field.name)}</p>
+                  )}
+                </>
               )}
             </div>
           ))}

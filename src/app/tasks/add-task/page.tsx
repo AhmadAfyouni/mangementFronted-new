@@ -15,8 +15,9 @@ import { DeptTree } from "@/types/trees/Department.tree.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
 import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, CheckCircle, Clock, DollarSign, FileText, FolderOpen, GitBranch, Hash, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { apiClient } from "@/utils/axios/usage";
 
 // Define interfaces for API responses
 interface SectionType {
@@ -192,6 +193,8 @@ const AddTaskPage: React.FC = () => {
               t={t}
               dateConstraints={dateConstraints}
               selectedProjectData={selectedProjectData}
+              watch={watch}
+              setValue={setValue}
             />
           </CollapsibleCard>
 
@@ -432,7 +435,7 @@ const TimeBudgetSection: React.FC<TimeBudgetSectionProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Estimated Hours */}
-      <div>
+      {/* <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
           <Clock className="w-4 h-4 text-blue-400" />
           {t("Estimated Hours")}
@@ -444,7 +447,7 @@ const TimeBudgetSection: React.FC<TimeBudgetSectionProps> = ({
           placeholder={t("Enter actual hours")}
           className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors"
         />
-      </div>
+      </div> */}
 
       {/* Rate */}
       <div>
@@ -501,7 +504,10 @@ interface DatesTimelineSectionProps {
   t: (key: string) => string;
   dateConstraints: { min: string | undefined; max: string | undefined };
   selectedProjectData: ProjectType | null | undefined;
+  watch: ReturnType<typeof useTaskForm>["formMethods"]["watch"];
+  setValue: ReturnType<typeof useTaskForm>["formMethods"]["setValue"];
 }
+
 
 const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
   register,
@@ -509,7 +515,59 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
   t,
   dateConstraints,
   selectedProjectData,
+  watch,
+  setValue,
 }) => {
+  const [isExpectedEndDisabled, setIsExpectedEndDisabled] = useState(false);
+  const expectedEndWasSetByUser = useRef(false);
+  const [estimatedHours, setEstimatedHours] = useState<number | null>(null);
+  const [estimatedWorkingDays, setEstimatedWorkingDays] = useState<number | null>(null);
+
+  const startDate = watch("start_date");
+  const dueDate = watch("due_date");
+
+  // Auto-fetch expected end date when both start and due date are set
+  useEffect(() => {
+    if (startDate && dueDate) {
+      setIsExpectedEndDisabled(true);
+      apiClient
+        .get<{ data: { estimatedHours: number; workingDays: number; startDate: string; endDate: string } }>(
+          "/company-settings/calculate-working-days",
+          { startDate, endDate: dueDate }
+        )
+        .then((res) => {
+          if (res.data && res.data.endDate) {
+            setValue("expected_end_date", res.data.endDate.split("T")[0]);
+            setEstimatedHours(res.data.estimatedHours);
+            setEstimatedWorkingDays(res.data.workingDays);
+            expectedEndWasSetByUser.current = false;
+          }
+        })
+        .catch(() => {
+          setIsExpectedEndDisabled(false);
+          setEstimatedHours(null);
+          setEstimatedWorkingDays(null);
+        })
+    } else {
+      setIsExpectedEndDisabled(false);
+      setEstimatedHours(null);
+      setEstimatedWorkingDays(null);
+      if (!expectedEndWasSetByUser.current) {
+        setValue("expected_end_date", "");
+      }
+    }
+  }, [startDate, dueDate, setValue]);
+
+  // Track if user sets expected_end_date manually
+  useEffect(() => {
+    const subscription = watch((values, { name }) => {
+      if (name === "expected_end_date" && !isExpectedEndDisabled) {
+        expectedEndWasSetByUser.current = true;
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, isExpectedEndDisabled]);
+
   return (
     <div className="space-y-4">
       {/* Project Date Info Display */}
@@ -591,25 +649,31 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
           )}
         </div>
 
-        {/* Expected End Date */}
-        <div>
-          <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-400" />
-            {t("Expected End Date")}
-          </label>
-          <input
-            {...register("expected_end_date")}
-            type="date"
-            min={dateConstraints.min}
-            max={dateConstraints.max}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors"
-          />
-          {dateConstraints.min && (
-            <p className="text-blue-400 mt-1 text-xs">
-              {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
-            </p>
-          )}
-        </div>
+        {/* Estimated Working Hours and Days */}
+        {isExpectedEndDisabled && estimatedHours !== null && (
+          <div className="flex gap-4 mt-2">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-400 mb-1 block">{t("Estimated Working Hours")}</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
+                value={Math.round(estimatedHours)}
+                readOnly
+                disabled
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-400 mb-1 block">{t("Estimated Working Days")}</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
+                value={estimatedWorkingDays !== null ? estimatedWorkingDays : ''}
+                readOnly
+                disabled
+              />
+            </div>
+          </div>
+        )}
 
         {/* Actual End Date */}
         <div>
@@ -977,3 +1041,6 @@ const TaskPageHeader: React.FC<TaskPageHeaderProps> = ({
     </div>
   );
 };
+
+
+
