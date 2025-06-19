@@ -1,7 +1,8 @@
 import React from 'react';
 import { ReceiveTaskType } from "@/types/Task.type";
 import useLanguage from "@/hooks/useLanguage";
-import { Clock, CheckCircle2, AlertCircle, Target, CalendarDays } from "lucide-react";
+import { Clock, CheckCircle2, AlertCircle, Target, CalendarDays, Eye } from "lucide-react";
+import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 
 interface HomeTasksReportProps {
   tasksData: ReceiveTaskType[] | undefined;
@@ -62,7 +63,7 @@ const HomeTasksReport: React.FC<HomeTasksReportProps> = ({
           {tasks.length}
         </span>
       </div>
-      
+
       {tasks.length === 0 ? (
         <div className="bg-secondary rounded-lg p-6 text-center text-gray-400 border border-gray-700">
           {emptyMessage}
@@ -82,22 +83,22 @@ const HomeTasksReport: React.FC<HomeTasksReportProps> = ({
                       {task.name}
                     </h4>
                   </div>
-                  
+
                   {task.description && (
                     <p className="text-gray-400 mb-3 line-clamp-2">{task.description}</p>
                   )}
-                  
+
                   <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} gap-4 items-center flex-wrap`}>
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getPriorityStyle(task.priority)}`}>
                       <Target className="w-3 h-3" />
                       {t(task.priority)}
                     </span>
-                    
+
                     <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                       <CalendarDays className="w-3 h-3" />
                       {new Date(task.due_date).toLocaleDateString(isRTL ? 'ar' : 'en')}
                     </span>
-                    
+
                     {task.assignee && (
                       <span className="text-xs text-gray-400">
                         {t("Assigned to")}: {task.assignee.name}
@@ -105,36 +106,42 @@ const HomeTasksReport: React.FC<HomeTasksReportProps> = ({
                     )}
                   </div>
                 </div>
-                
+
                 <div className={`flex flex-col items-end gap-2 ${isRTL ? 'items-start' : ''}`}>
                   <span
-                    className={`px-3 py-1 text-xs font-medium rounded-lg ${
-                      task.status === "DONE"
-                        ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                        : task.is_over_due
+                    className={`px-3 py-1 text-xs font-medium rounded-lg ${task.status === "DONE"
+                      ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                      : task.is_over_due
                         ? "bg-red-500/20 text-red-400 border border-red-500/50"
                         : "bg-blue-500/20 text-blue-400 border border-blue-500/50"
-                    }`}
+                      }`}
                   >
                     {t(task.status)}
                   </span>
-                  
+
                   {task.rate !== undefined && (
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (
                         <span
                           key={i}
-                          className={`text-xs ${
-                            i < (task.rate || 0)
-                              ? "text-yellow-400"
-                              : "text-gray-600"
-                          }`}
+                          className={`text-xs ${i < (task.rate || 0)
+                            ? "text-yellow-400"
+                            : "text-gray-600"
+                            }`}
                         >
                           ★
                         </span>
                       ))}
                     </div>
                   )}
+
+                  {/* Eye button for viewing task details */}
+                  <RouteWrapper
+                    href={`/tasks/${task.id}`}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 border border-gray-600/20 hover:border-blue-500/30"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </RouteWrapper>
                 </div>
               </div>
             </div>
@@ -147,20 +154,20 @@ const HomeTasksReport: React.FC<HomeTasksReportProps> = ({
   return (
     <div className={`${isCentered ? 'max-w-4xl mx-auto' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {renderTaskList(
-        currentTasks, 
-        t("Current Tasks"), 
+        currentTasks,
+        t("Current Tasks"),
         t("No current tasks"),
         <Clock className="w-6 h-6 text-blue-400" />
       )}
       {renderTaskList(
-        overdueTasks, 
-        t("Overdue Tasks"), 
+        overdueTasks,
+        t("Overdue Tasks"),
         t("No overdue tasks"),
         <AlertCircle className="w-6 h-6 text-red-400" />
       )}
       {renderTaskList(
-        completedTasks, 
-        t("Completed Tasks"), 
+        completedTasks,
+        t("Completed Tasks"),
         t("No completed tasks"),
         <CheckCircle2 className="w-6 h-6 text-green-400" />
       )}

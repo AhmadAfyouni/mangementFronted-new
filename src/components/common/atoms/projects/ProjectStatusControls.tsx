@@ -1,7 +1,8 @@
+import { useMokkBar } from '@/components/Providers/Mokkbar';
 import { updateProjectStatus } from '@/services/project.service';
 import { ProjectStatus } from '@/types/Project.type';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, CheckCircle, Clock, Loader2, Play, TrendingUp, Trophy } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Loader2, Play, TrendingUp, Trophy, RotateCcw } from 'lucide-react';
 import React from 'react';
 
 interface ProjectStatusControlsProps {
@@ -18,6 +19,7 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
     t
 }) => {
     const queryClient = useQueryClient();
+    const { setSnackbarConfig } = useMokkBar()
 
     // Use mutation for status update
     const { mutate, isPending } = useMutation({
@@ -27,11 +29,17 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
             if (data.status) {
                 onStatusUpdated(data.status);
                 queryClient.invalidateQueries({ queryKey: ["project-details"] });
+                queryClient.invalidateQueries({ queryKey: ["project-details", data._id] });
             }
         },
         onError: (error) => {
             console.error("Error updating project status:", error);
-            alert(t("Failed to update project status"));
+
+            setSnackbarConfig({
+                open: true,
+                message: t("Failed to update project status"),
+                severity: "warning"
+            })
         }
     });
 
@@ -81,33 +89,6 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
         return configs[status];
     };
 
-    // If status is COMPLETED, show completion celebration
-    if (isStatusActive(ProjectStatus.COMPLETED)) {
-        return (
-            <div className="bg-dark rounded-2xl p-6 border border-gray-700/50 shadow-lg">
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-full bg-success/20 border border-success/30">
-                        <Trophy className="w-6 h-6 text-success" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-twhite">{t("Project Completed")}</h3>
-                        <p className="text-sm text-tdark">{t("Congratulations on completing this project!")}</p>
-                    </div>
-                </div>
-
-                {/* Completion Status */}
-                <div className="bg-success/10 border border-success/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-success" />
-                        <span className="text-success font-medium">{t("Project Status: Completed")}</span>
-                    </div>
-                    <p className="text-sm text-tdark mt-2">{t("This project has reached its completion milestone")}</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="bg-dark rounded-2xl p-6 border border-gray-700/50 shadow-lg">
             {/* Header */}
@@ -130,28 +111,53 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
                     </div>
                 ) : (
                     <>
-                        {/* Show In Progress button only when status is PENDING */}
+                        {/* PENDING Status - Show Start Project button */}
                         {isStatusActive(ProjectStatus.PENDING) && (
                             <button
                                 onClick={() => handleUpdateStatus(ProjectStatus.IN_PROGRESS)}
-                                className="w-full bg-primary hover:bg-primary/80 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                                className="w-full bg-primary hover:bg-primary/80 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
                                 disabled={isPending}
                             >
-                                <Play className="w-5 h-5" />
+                                <Play className="w-4 h-4" />
                                 {t("Start Project")}
                             </button>
                         )}
 
-                        {/* Show Completed button only when status is IN_PROGRESS */}
+                        {/* IN_PROGRESS Status - Show Back to Pending and Mark as Completed buttons */}
                         {isStatusActive(ProjectStatus.IN_PROGRESS) && (
-                            <button
-                                onClick={() => handleUpdateStatus(ProjectStatus.COMPLETED)}
-                                className="w-full bg-success hover:bg-success/80 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                                disabled={isPending}
-                            >
-                                <CheckCircle className="w-5 h-5" />
-                                {t("Mark as Completed")}
-                            </button>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => handleUpdateStatus(ProjectStatus.PENDING)}
+                                    className="bg-warning hover:bg-warning/80 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
+                                    disabled={isPending}
+                                >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                    <span className="text-sm">{t("Back to Pending")}</span>
+                                </button>
+                                <button
+                                    onClick={() => handleUpdateStatus(ProjectStatus.COMPLETED)}
+                                    className="bg-success hover:bg-success/80 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
+                                    disabled={isPending}
+                                >
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    <span className="text-sm">{t("Mark as Completed")}</span>
+                                </button>
+                            </div>
+                        )}
+
+                        {/* COMPLETED Status - Show Back to In Progress button */}
+                        {isStatusActive(ProjectStatus.COMPLETED) && (
+                            <div className="space-y-3">
+                                {/* Back to In Progress button */}
+                                <button
+                                    onClick={() => handleUpdateStatus(ProjectStatus.IN_PROGRESS)}
+                                    className="w-full bg-primary hover:bg-primary/80 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                                    disabled={isPending}
+                                >
+                                    <RotateCcw className="w-4 h-4" />
+                                    {t("Back to In Progress")}
+                                </button>
+                            </div>
                         )}
                     </>
                 )}
@@ -192,7 +198,6 @@ const ProjectStatusControls: React.FC<ProjectStatusControlsProps> = ({
                     })}
                 </div>
             </div>
-
         </div>
     );
 };

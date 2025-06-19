@@ -218,8 +218,8 @@ const BasicFields: React.FC<{
     })) || [];
 
   return (
-    <div className="gap-6">
-      <div className="gap-4">
+    <div className="space-y-6">
+      <div className="space-y-4">
         <CustomInput
           label={t("Transaction Name")}
           name="name"

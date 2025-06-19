@@ -42,7 +42,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   };
 
   const { data: project, isLoading } = useCustomQuery<ProjectDetailsType>({
-    queryKey: ["project-details"],
+    queryKey: ["project-details", id],
     url: `/projects/project-details/${id}`,
   });
 
@@ -155,9 +155,9 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
           {expandedSections.info && (
             <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-stretch">
                 {/* Project Details Card */}
-                <div className="bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
+                <div className="md:col-span-2 bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
                   <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-primary" />
                     {t("Details")}
@@ -215,13 +215,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                           <p className="text-twhite text-sm font-semibold">{totalTasks}</p>
                         </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("Project Tasks")}</span>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-primary" />
-                          <p className="text-twhite text-sm font-semibold">{project.projectTasks?.length || 0}</p>
-                        </div>
-                      </div>
+
                     </div>
 
 
@@ -238,7 +232,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 </div>
 
                 {/* Enhanced Pie Chart Card - Now spans 2 columns */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-3">
                   <TaskStatusPieChart
                     taskDone={project.taskDone}
                     taskOnGoing={project.taskOnGoing}
@@ -275,6 +269,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
               <HomeTasksReport
                 tasksData={project.projectTasks}
                 isCentered={false}
+
               />
             </div>
           )}

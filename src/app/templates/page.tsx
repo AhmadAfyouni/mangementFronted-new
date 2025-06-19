@@ -1,4 +1,5 @@
 "use client";
+import { useState, useMemo } from "react";
 import TemplateCard from "@/components/common/atoms/templates/TemplateCard";
 import TemplateEmptyState from "@/components/common/atoms/templates/TemplateEmptyState";
 import TemplateLoadingSkeleton from "@/components/common/atoms/templates/TemplateLoadingSkeleton";
@@ -8,6 +9,7 @@ import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { templateType } from "@/types/new-template.type";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 const calculateActiveDepartments = (templates: templateType[] | undefined) => {
   if (!templates) return 0;
@@ -23,9 +25,152 @@ const calculateActiveDepartments = (templates: templateType[] | undefined) => {
   return uniqueDeptIds.size;
 };
 
+// Pagination Component
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+  itemsPerPage: number;
+  t: (key: string) => string;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage,
+  t
+}) => {
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range = [];
+    const rangeWithDots = [];
+
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-4 py-3 bg-secondary rounded-lg">
+      {/* Results Info */}
+      <div className="text-sm text-tmid">
+        {t("Showing")} <span className="font-medium text-twhite">{startItem}</span> {t("to")} <span className="font-medium text-twhite">{endItem}</span> {t("of")} <span className="font-medium text-twhite">{totalItems}</span> {t("results")}
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center gap-2">
+        {/* Previous Button */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-tmid hover:text-twhite disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark rounded-lg transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          {t("Previous")}
+        </button>
+
+        {/* Page Numbers */}
+        <div className="flex items-center gap-1">
+          {getPageNumbers().map((pageNum, index) => {
+            if (pageNum === '...') {
+              return (
+                <div key={`dots-${index}`} className="px-3 py-2">
+                  <MoreHorizontal className="w-4 h-4 text-tmid" />
+                </div>
+              );
+            }
+
+            const isCurrentPage = pageNum === currentPage;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => onPageChange(pageNum as number)}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${isCurrentPage
+                  ? 'bg-tblack text-twhite border border-gray-600'
+                  : 'text-tmid hover:text-twhite hover:bg-dark'
+                  }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Next Button */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-tmid hover:text-twhite disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark rounded-lg transition-colors"
+        >
+          {t("Next")}
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Items Per Page Selector
+interface ItemsPerPageSelectorProps {
+  itemsPerPage: number;
+  onItemsPerPageChange: (items: number) => void;
+  t: (key: string) => string;
+}
+
+const ItemsPerPageSelector: React.FC<ItemsPerPageSelectorProps> = ({
+  itemsPerPage,
+  onItemsPerPageChange,
+  t
+}) => {
+  const options = [5, 10, 20, 50];
+
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-tmid">{t("Show")}</span>
+      <select
+        value={itemsPerPage}
+        onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+        className="bg-secondary border border-gray-600 rounded px-2 py-1 text-twhite focus:border-blue-500 focus:outline-none"
+      >
+        {options.map(option => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+      <span className="text-tmid">{t("per page")}</span>
+    </div>
+  );
+};
+
 // Main Templates Component
 const Templates = () => {
   const { t } = useLanguage();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const {
     data: templates,
@@ -36,6 +181,29 @@ const Templates = () => {
     url: "/templates",
     queryKey: ["templates"],
   });
+
+  // Calculate pagination
+  const { paginatedTemplates, totalPages } = useMemo(() => {
+    if (!templates) return { paginatedTemplates: [], totalPages: 0 };
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedTemplates = templates.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(templates.length / itemsPerPage);
+
+    return { paginatedTemplates, totalPages };
+  }, [templates, currentPage, itemsPerPage]);
+
+  // Reset to first page when items per page changes
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
+  // Reset to first page when templates change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [templates]);
 
   const renderHeader = () => (
     <div className="col-span-full mb-8">
@@ -181,10 +349,35 @@ const Templates = () => {
     }
 
     return (
-      <div className="flex flex-col justify-center gap-2">
-        {templates.map((template, index) => (
-          <TemplateCard key={index} template={template} />
-        ))}
+      <div className="bg-dark rounded-xl p-6">
+        {/* Items per page selector */}
+        <div className="flex justify-between items-center mb-6">
+          <ItemsPerPageSelector
+            itemsPerPage={itemsPerPage}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            t={t}
+          />
+          <div className="text-sm text-tmid">
+            {t("Page")} {currentPage} {t("of")} {totalPages}
+          </div>
+        </div>
+
+        {/* Templates List */}
+        <div className="flex flex-col justify-center gap-2">
+          {paginatedTemplates.map((template, index) => (
+            <TemplateCard key={template._id || index} template={template} />
+          ))}
+        </div>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={templates.length}
+          itemsPerPage={itemsPerPage}
+          t={t}
+        />
       </div>
     );
   };

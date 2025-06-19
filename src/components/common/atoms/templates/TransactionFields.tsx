@@ -56,7 +56,7 @@ const TransactionFields: React.FC<TransactionFieldsProps> = ({
   };
 
   return (
-    <div className="gap-4">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-twhite">
           {t("Transactions Fields")}
@@ -65,7 +65,7 @@ const TransactionFields: React.FC<TransactionFieldsProps> = ({
           {t("Add Field")}
         </CustomButton>
       </div>
-      <div className="gap-4">
+      <div className="space-y-4">
         {transactionFields.map((field, index) => (
           <div
             key={index}
