@@ -14,8 +14,6 @@ import {
   ArrowLeft,
   Briefcase,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Layers,
   Users
@@ -27,19 +25,7 @@ import ProjectStatusControls from "@/components/common/atoms/projects/ProjectSta
 const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   const { t, currentLanguage } = useLanguage();
   const router = useRouter();
-  const [expandedSections, setExpandedSections] = useState({
-    info: true,
-    tasks: true,
-    structure: true
-  });
-
-  // Toggle section visibility
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+  const [activeTab, setActiveTab] = useState<'info' | 'tasks' | 'structure'>('info');
 
   const { data: project, isLoading } = useCustomQuery<ProjectDetailsType>({
     queryKey: ["project-details", id],
@@ -90,6 +76,153 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
     return "bg-warning/20 text-warning border-warning/50";
   };
 
+  const tabs = [
+    {
+      id: 'info' as const,
+      label: t("Project Information"),
+      icon: Briefcase,
+      iconColor: 'text-primary',
+      bgColor: 'bg-primary/20'
+    },
+    {
+      id: 'tasks' as const,
+      label: t("Project Tasks"),
+      icon: Clock,
+      iconColor: 'text-warning',
+      bgColor: 'bg-warning/20'
+    },
+    {
+      id: 'structure' as const,
+      label: t("Project Structure"),
+      icon: Users,
+      iconColor: 'text-success',
+      bgColor: 'bg-success/20'
+    }
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'info':
+        return (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-stretch">
+              {/* Project Details Card */}
+              <div className="md:col-span-2 bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
+                <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" />
+                  {t("Details")}
+                </h3>
+
+                <div className="space-y-4 flex-1">
+                  {/* Description */}
+                  <div className="flex flex-col">
+                    <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
+                    <p className="text-twhite text-sm leading-relaxed">
+                      {project.description || t("No description provided")}
+                    </p>
+                  </div>
+
+                  {/* Project Timeline */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-tdark font-medium mb-1">{t("Start Date")}</span>
+                      <p className="text-twhite text-sm">
+                        {formatDate(project.startDate, currentLanguage as "ar" | "en")}
+                      </p>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-tdark font-medium mb-1">{t("End Date")}</span>
+                      <p className="text-twhite text-sm">
+                        {formatDate(project.endDate, currentLanguage as "ar" | "en")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Project Statistics */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-tdark font-medium mb-1">{t("Departments")}</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" />
+                        <p className="text-twhite text-sm font-semibold">{project.departments?.length || 0}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-tdark font-medium mb-1">{t("Team Members")}</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-success" />
+                        <p className="text-twhite text-sm font-semibold">{project.members?.length || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Task Breakdown */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-tdark font-medium mb-1">{t("Total Tasks")}</span>
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-warning" />
+                        <p className="text-twhite text-sm font-semibold">{totalTasks}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-700/50">
+                  <ProjectStatusControls
+                    projectId={project._id}
+                    currentStatus={projectStatus}
+                    onStatusUpdated={handleStatusUpdate}
+                    t={t}
+                  />
+                </div>
+              </div>
+
+              {/* Enhanced Pie Chart Card - Now spans 2 columns */}
+              <div className="md:col-span-3">
+                <TaskStatusPieChart
+                  taskDone={project.taskDone}
+                  taskOnGoing={project.taskOnGoing}
+                  taskOnTest={project.taskOnTest}
+                  taskPending={project.taskPending}
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'tasks':
+        return (
+          <div className="p-6">
+            <HomeTasksReport
+              tasksData={project.projectTasks}
+              isCentered={false}
+            />
+          </div>
+        );
+
+      case 'structure':
+        return (
+          <div className="p-6">
+            <div className="w-full h-[600px] overflow-hidden">
+              <ProjectDetailsHierarchyTree
+                data={project.departments}
+                width="100%"
+                onPress={(deptId) => {
+                  router.push(
+                    `/projects/details/project-tasks/${project._id}/${deptId}`
+                  );
+                }}
+              />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <GridContainer>
       <div className="col-span-full px-4 md:px-6">
@@ -107,7 +240,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 {project.name}
               </h1>
               <p className="text-tdark text-sm md:text-base">
-                {t("ID")}: {project._id}
+                {t("ID")}: {project._id.slice(-5).toUpperCase()}
               </p>
             </div>
           </div>
@@ -134,181 +267,36 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
           </div>
         </div>
 
-        {/* Project Information Section */}
-        <div className="mb-8 overflow-hidden bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50">
-          <div
-            className="flex items-center justify-between p-4 cursor-pointer hover:bg-secondary/50 transition-colors"
-            onClick={() => toggleSection('info')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <Briefcase className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="text-xl font-bold text-twhite">{t("Project Information")}</h2>
-            </div>
-            {expandedSections.info ? (
-              <ChevronUp className="w-5 h-5 text-twhite" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-twhite" />
-            )}
-          </div>
+        {/* Tabs Container */}
+        <div className="bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50 overflow-hidden">
+          {/* Tab Navigation */}
+          <div className="flex flex-wrap border-b border-gray-700/50 bg-secondary/30">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
 
-          {expandedSections.info && (
-            <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-stretch">
-                {/* Project Details Card */}
-                <div className="md:col-span-2 bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
-                  <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-primary" />
-                    {t("Details")}
-                  </h3>
-
-                  <div className="space-y-4 flex-1">
-                    {/* Description */}
-                    <div className="flex flex-col">
-                      <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
-                      <p className="text-twhite text-sm leading-relaxed">
-                        {project.description || t("No description provided")}
-                      </p>
-                    </div>
-
-                    {/* Project Timeline */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("Start Date")}</span>
-                        <p className="text-twhite text-sm">
-                          {formatDate(project.startDate, currentLanguage as "ar" | "en")}
-                        </p>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("End Date")}</span>
-                        <p className="text-twhite text-sm">
-                          {formatDate(project.endDate, currentLanguage as "ar" | "en")}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Project Statistics */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("Departments")}</span>
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-primary" />
-                          <p className="text-twhite text-sm font-semibold">{project.departments?.length || 0}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("Team Members")}</span>
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-success" />
-                          <p className="text-twhite text-sm font-semibold">{project.members?.length || 0}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Task Breakdown */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-tdark font-medium mb-1">{t("Total Tasks")}</span>
-                        <div className="flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-warning" />
-                          <p className="text-twhite text-sm font-semibold">{totalTasks}</p>
-                        </div>
-                      </div>
-
-                    </div>
-
-
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-3 px-6 py-4 font-medium transition-all duration-200 border-b-2 ${isActive
+                    ? 'text-twhite border-primary bg-dark/50'
+                    : 'text-tdark border-transparent hover:text-twhite hover:bg-dark/30'
+                    }`}
+                >
+                  <div className={`p-1.5 rounded-lg ${isActive ? tab.bgColor : 'bg-gray-700/50'}`}>
+                    <Icon className={`w-4 h-4 ${isActive ? tab.iconColor : 'text-tdark'}`} />
                   </div>
-
-                  <div className="mt-4 pt-4 border-t border-gray-700/50">
-                    <ProjectStatusControls
-                      projectId={project._id}
-                      currentStatus={projectStatus}
-                      onStatusUpdated={handleStatusUpdate}
-                      t={t}
-                    />
-                  </div>
-                </div>
-
-                {/* Enhanced Pie Chart Card - Now spans 2 columns */}
-                <div className="md:col-span-3">
-                  <TaskStatusPieChart
-                    taskDone={project.taskDone}
-                    taskOnGoing={project.taskOnGoing}
-                    taskOnTest={project.taskOnTest}
-                    taskPending={project.taskPending}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Tasks Section */}
-        <div className="mb-8 overflow-hidden bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50">
-          <div
-            className="flex items-center justify-between p-4 cursor-pointer hover:bg-secondary/50 transition-colors"
-            onClick={() => toggleSection('tasks')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-warning/20">
-                <Clock className="w-5 h-5 text-warning" />
-              </div>
-              <h2 className="text-xl font-bold text-twhite">{t("Project Tasks")}</h2>
-            </div>
-            {expandedSections.tasks ? (
-              <ChevronUp className="w-5 h-5 text-twhite" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-twhite" />
-            )}
+                  <span className="text-sm md:text-base">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {expandedSections.tasks && (
-            <div className="p-4">
-              <HomeTasksReport
-                tasksData={project.projectTasks}
-                isCentered={false}
-
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Hierarchy Tree Section */}
-        <div className="mb-8 overflow-hidden bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50">
-          <div
-            className="flex items-center justify-between p-4 cursor-pointer hover:bg-secondary/50 transition-colors"
-            onClick={() => toggleSection('structure')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-success/20">
-                <Users className="w-5 h-5 text-success" />
-              </div>
-              <h2 className="text-xl font-bold text-twhite">{t("Project Structure")}</h2>
-            </div>
-            {expandedSections.structure ? (
-              <ChevronUp className="w-5 h-5 text-twhite" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-twhite" />
-            )}
+          {/* Tab Content */}
+          <div className="min-h-[400px]">
+            {renderTabContent()}
           </div>
-
-          {expandedSections.structure && (
-            <div className="p-4">
-              <div className="w-full h-[600px] overflow-hidden">
-                <ProjectDetailsHierarchyTree
-                  data={project.departments}
-                  width="100%"
-                  onPress={(deptId) => {
-                    router.push(
-                      `/projects/details/project-tasks/${project._id}/${deptId}`
-                    );
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </GridContainer>

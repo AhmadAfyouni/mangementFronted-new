@@ -1,6 +1,18 @@
 import useLanguage from "@/hooks/useLanguage";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { Layers, Star, Target } from "lucide-react";
+import {
+  Layers,
+  Target,
+  Plus,
+  ChevronRight,
+  ExternalLink,
+  Hash,
+  Calendar,
+  User,
+  CheckCircle2,
+  Clock,
+  AlertCircle
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface TaskSidebarProps {
@@ -12,8 +24,40 @@ interface TaskSidebarProps {
 interface Subtask {
   id: string;
   name: string;
+  status?: string;
+  priority?: string;
+  assignee?: {
+    name: string;
+  };
+  due_date?: string;
   [key: string]: unknown;
 }
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case "DONE":
+      return <CheckCircle2 className="w-4 h-4 text-green-400" />;
+    case "ONGOING":
+      return <Clock className="w-4 h-4 text-blue-400" />;
+    case "PENDING":
+      return <AlertCircle className="w-4 h-4 text-amber-400" />;
+    default:
+      return <Clock className="w-4 h-4 text-gray-400" />;
+  }
+};
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case "HIGH":
+      return "bg-red-500/20 text-red-400 border-red-500/30";
+    case "MEDIUM":
+      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    case "LOW":
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    default:
+      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  }
+};
 
 export const TaskSidebar: React.FC<TaskSidebarProps> = ({
   task,
@@ -23,88 +67,204 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
   const { t } = useLanguage();
   const router = useRouter();
 
-  // Ensure subtasks is an array
+  // Ensure subtasks is an array and assignee is always { name: string } | undefined
   const subtasks: Subtask[] = Array.isArray(task.subtasks)
-    ? task.subtasks
-    : Array.isArray((task as unknown as { subTasks?: Subtask[] }).subTasks)
-      ? (task as unknown as { subTasks: Subtask[] }).subTasks
+    ? task.subtasks.map((sub: any) => ({
+      ...sub,
+      assignee: sub.assignee && sub.assignee.name
+        ? { name: sub.assignee.name }
+        : undefined,
+    }))
+    : Array.isArray((task as any).subTasks)
+      ? (task as any).subTasks
       : [];
 
   const handleTaskClick = (taskId: string) => {
     router.push(`/tasks/${taskId}`);
   };
 
+  const parentTask = task.parent_task && allTasks
+    ? allTasks.find((t: ReceiveTaskType) => t.id === task.parent_task)
+    : null;
+
+  const completedSubtasks = subtasks.filter(sub => sub.status === "DONE").length;
+  const totalSubtasks = subtasks.length;
+
   return (
     <div className="space-y-6">
-      {/* Subtasks */}
-      <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-        <h2 className="text-xl font-bold text-twhite mb-4 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-purple-400" />
-          {t("Subtasks")}
-        </h2>
-
-        {subtasks.length > 0 ? (
-          <div className="space-y-2">
-            {subtasks.map((subtask: Subtask, index: number) => (
-              <div
-                key={index}
-                className="group flex items-center gap-2 p-3 bg-dark rounded-lg cursor-pointer 
-                  transition-all ease-in-out 
-                  hover:bg-opacity-80 hover:scale-[1.02] hover:shadow-md hover:border-l-4 hover:border-purple-500"
-                onClick={() => handleTaskClick(subtask.id)}
-                title={subtask.name}
-              >
-                <Layers className="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition-colors" />
-                <span className="text-twhite group-hover:text-purple-200 transition-colors">
-                  {subtask.name}
-                </span>
+      {/* Parent Task Card */}
+      {parentTask && (
+        <div className="bg-secondary rounded-xl border border-gray-700 overflow-hidden transition-all duration-200 hover:border-gray-600">
+          <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-6 py-4 border-b border-gray-700/50">
+            <h2 className="text-xl font-bold text-twhite flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-500/20">
+                <Target className="w-5 h-5 text-orange-400" />
               </div>
-            ))}
+              {t("Parent Task")}
+            </h2>
           </div>
-        ) : (
-          <p className="text-gray-400 text-center py-4">{t("No subtasks yet.")}</p>
-        )}
 
-        {(
-          <button
-            onClick={onAddSubtask}
-            className="w-full mt-4 py-2 bg-dark text-twhite rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            {t("Add Subtask")}
-          </button>
-        )}
-      </div>
+          <div className="p-6">
+            <div
+              className="group p-4 bg-dark/50 rounded-lg border border-gray-700/50 cursor-pointer 
+                transition-all duration-200 hover:bg-dark/70 hover:border-orange-400/50 hover:shadow-lg"
+              onClick={() => handleTaskClick(parentTask.id)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-twhite group-hover:text-orange-200 transition-colors truncate">
+                    {parentTask.name}
+                  </h3>
 
-      {/* Task Rating */}
-      {task.rate !== undefined && task.rate !== null && (
-        <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-twhite mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-400" />
-            {t("Task Rating")}
-          </h2>
-          <div className="flex justify-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-8 h-8 ${i < (task.rate || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-600"}`}
-              />
-            ))}
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(parentTask.priority)}`}>
+                      {t(parentTask.priority || "LOW")}
+                    </span>
+                    {getStatusIcon(parentTask.status || "PENDING")}
+                  </div>
+
+                  {parentTask.assignee && (
+                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
+                      <User className="w-3 h-3" />
+                      {parentTask.assignee.name}
+                    </div>
+                  )}
+                </div>
+
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-orange-400 transition-colors flex-shrink-0" />
+              </div>
+            </div>
           </div>
-          <p className="text-center text-gray-400 mt-2">{task.rate}/5</p>
         </div>
       )}
 
-      {/* Parent Task */}
-      {task.parent_task && (
+      {/* Subtasks Card */}
+      <div className="bg-secondary rounded-xl border border-gray-700 overflow-hidden transition-all duration-200 hover:border-gray-600">
+        <div className="bg-dark/30 px-6 py-4 border-b border-gray-700/50">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-twhite flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/20">
+                <Layers className="w-5 h-5 text-purple-400" />
+              </div>
+              {t("Subtasks")}
+            </h2>
+
+            {/* Progress indicator */}
+            {totalSubtasks > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-400">
+                  {completedSubtasks}/{totalSubtasks}
+                </div>
+                <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-300"
+                    style={{ width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6">
+          {/* Add Subtask Button */}
+          <button
+            onClick={onAddSubtask}
+            className="w-full p-4 bg-dark/50 border-2 border-dashed border-gray-600 rounded-lg 
+              text-gray-400 hover:text-purple-400 hover:border-purple-400/50 hover:bg-purple-500/5
+              transition-all duration-200 group flex items-center justify-center gap-3"
+          >
+            <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span className="font-medium">{t("Add New Subtask")}</span>
+          </button>
+
+          {/* Subtasks List */}
+          {totalSubtasks > 0 && (
+            <div className="mt-4 space-y-3">
+              <div className="text-sm font-medium text-gray-300 px-2">
+                {t("Existing Subtasks")}
+              </div>
+
+              {subtasks.map((subtask: Subtask, index: number) => (
+                <div
+                  key={subtask.id || index}
+                  className="group p-4 bg-dark/50 rounded-lg border border-gray-700/50 cursor-pointer 
+                    transition-all duration-200 hover:bg-dark/70 hover:border-purple-400/50 hover:shadow-md"
+                  onClick={() => handleTaskClick(subtask.id)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Hash className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                        <h4 className="font-medium text-twhite group-hover:text-purple-200 transition-colors truncate">
+                          {subtask.name}
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center gap-3 text-xs">
+                        {getStatusIcon(subtask.status || "PENDING")}
+
+                        {subtask.priority && (
+                          <span className={`px-2 py-1 rounded-full font-medium border ${getPriorityColor(subtask.priority)}`}>
+                            {t(subtask.priority)}
+                          </span>
+                        )}
+
+                        {subtask.assignee && (
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <User className="w-3 h-3" />
+                            {subtask.assignee.name}
+                          </div>
+                        )}
+
+                        {subtask.due_date && (
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(subtask.due_date).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition-colors flex-shrink-0" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {totalSubtasks === 0 && (
+            <div className="mt-6 text-center py-8">
+              <div className="p-4 rounded-full bg-gray-700/30 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Layers className="w-8 h-8 text-gray-500 opacity-50" />
+              </div>
+              <p className="text-gray-400 text-sm mb-2">{t("No subtasks created yet")}</p>
+              <p className="text-gray-500 text-xs">{t("Break down this task into smaller, manageable pieces")}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Stats Card */}
+      {totalSubtasks > 0 && (
         <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-twhite mb-4 flex items-center gap-2">
-            <Target className="w-5 h-5 text-orange-400" />
-            {t("Parent Task")}
-          </h2>
-          <div className="p-3 bg-dark rounded-lg">
-            <span className="text-twhite">
-              {allTasks?.find((t: ReceiveTaskType) => t.id === task.parent_task)?.name || t("No Parent Task")}
-            </span>
+          <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-blue-500/20">
+              <Hash className="w-4 h-4 text-blue-400" />
+            </div>
+            {t("Quick Stats")}
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 bg-dark/50 rounded-lg text-center">
+              <div className="text-2xl font-bold text-green-400">{completedSubtasks}</div>
+              <div className="text-xs text-gray-400">{t("Completed")}</div>
+            </div>
+            <div className="p-3 bg-dark/50 rounded-lg text-center">
+              <div className="text-2xl font-bold text-blue-400">{totalSubtasks - completedSubtasks}</div>
+              <div className="text-xs text-gray-400">{t("Remaining")}</div>
+            </div>
           </div>
         </div>
       )}

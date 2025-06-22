@@ -175,8 +175,8 @@ export const getPriorityColor = (priority: string) => {
       return "bg-yellow-100 text-yellow-500";
     case "LOW":
       return "bg-green-100 text-green-500";
-    // default:
-    //   return "bg-blue-100 text-blue-600";
+    default:
+      return "bg-blue-100 text-blue-600";
   }
 };
 export const getPriorityBorderColor = (priority: string) => {

@@ -60,7 +60,7 @@ const ProjectRowComponent: React.FC<{
       {/* Project ID */}
       <div className="flex items-center">
         <span className="text-sm font-medium text-blue-400 hover:text-blue-300">
-          {project._id.slice(-6).toUpperCase()}
+          {project._id.slice(-5).toUpperCase()}
         </span>
       </div>
 

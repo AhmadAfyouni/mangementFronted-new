@@ -66,7 +66,6 @@ const AddSubTaskModal: React.FC<{
   const { data: sections } = useCustomQuery<{ id: string, name: string }[]>({
     queryKey: ["sections"],
     url: `/sections`,
-    nestedData: true,
   });
 
   const { mutate: addSubTask, isPending } = useCreateMutation({
@@ -185,10 +184,10 @@ const AddSubTaskModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
+    <div className="fixed inset-0 flex items-center justify-center z-[100]">
+      <div className="absolute inset-0 bg-black bg-opacity-50 z-[99]" onClick={onClose}></div>
 
-      <div className={`relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 ${isLightMode ? "bg-light-droppable-fade" : "bg-dark"}`}>
+      <div className={`relative z-[100] w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 ${isLightMode ? "bg-light-droppable-fade" : "bg-dark"}`}>
         {/* Header with close button */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-twhite">
@@ -432,11 +431,12 @@ const AddSubTaskModal: React.FC<{
                       }`}
                   >
                     <option value="">{t("Select a method")}</option>
-                    {["Manual", "Automatic"].map((method) => (
-                      <option key={method} value={method}>
-                        {t(method)}
-                      </option>
-                    ))}
+                    <option className="text-tmid" value="time_based">
+                      {t("Time Based")}
+                    </option>
+                    <option className="text-tmid" value="date_based">
+                      {t("Date Based")}
+                    </option>
                   </select>
                   {errors.progressCalculationMethod && (
                     <p className="text-red-500 mt-1 text-sm">{errors.progressCalculationMethod.message}</p>
@@ -555,7 +555,7 @@ const AddSubTaskModal: React.FC<{
                     }`}
                 >
                   <option value="">{t("Select an employee")}</option>
-                  {employees?.tree.map((employee) => (
+                  {employees?.tree.filter((item) => item.department == parentTask?.department?.name).map((employee) => (
                     <option key={employee.id} value={employee.id}>
                       {employee.name}
                     </option>

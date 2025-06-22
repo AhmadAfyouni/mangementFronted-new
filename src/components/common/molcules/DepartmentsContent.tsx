@@ -7,7 +7,7 @@ import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
 import { DepartmentType } from "@/types/DepartmentType.type";
-import { Briefcase, Building2, FileText, Users } from "lucide-react";
+import { Briefcase, Building2, FileText, Users, Hash, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { DevelopmentProgramsModal, FilesReportsModal, TextModal } from "./departments/DepartmentsComponents";
@@ -32,6 +32,319 @@ interface DepartmentsContentProps {
   pagination: PaginationProps;
 }
 
+const DepartmentRowComponent: React.FC<{
+  department: DepartmentType;
+  isAdmin: boolean;
+  hasEditPermission: boolean;
+  NavigateButton: any;
+  t: (key: string) => string;
+  onOpenFilesModal: (department: DepartmentType) => void;
+  onOpenProgramsModal: (department: DepartmentType) => void;
+  onViewText: (content: string, title: string) => void;
+  departmentsData: DepartmentType[];
+}> = ({
+  department,
+  isAdmin,
+  hasEditPermission,
+  NavigateButton,
+  t,
+  onOpenFilesModal,
+  onOpenProgramsModal,
+  onViewText,
+  departmentsData
+}) => {
+
+    const getCategoryStyles = (category: string) => {
+      if (category === 'primary-department') {
+        return {
+          bg: 'bg-blue-500/20',
+          text: 'text-blue-400',
+          border: 'border-blue-500/30',
+          icon: <Building2 className="w-3 h-3 flex-shrink-0" />
+        };
+      } else if (category === 'secondary-department') {
+        return {
+          bg: 'bg-purple-500/20',
+          text: 'text-purple-400',
+          border: 'border-purple-500/30',
+          icon: <Briefcase className="w-3 h-3 flex-shrink-0" />
+        };
+      } else {
+        return {
+          bg: 'bg-green-500/20',
+          text: 'text-green-400',
+          border: 'border-green-500/30',
+          icon: <Users className="w-3 h-3 flex-shrink-0" />
+        };
+      }
+    };
+
+    const getPriorityBorderColor = (category: string) => {
+      if (category === 'primary-department') {
+        return 'border-l-blue-500';
+      } else if (category === 'secondary-department') {
+        return 'border-l-purple-500';
+      } else {
+        return 'border-l-green-500';
+      }
+    };
+
+    const handleLongText = (text: string | undefined, maxLength = 50): React.ReactNode => {
+      if (!text) return <span className="text-gray-500">{t("No Goal Set")}</span>;
+
+      if (text.length <= maxLength) return text;
+
+      return (
+        <div>
+          <span>{text.substring(0, maxLength)}...</span>
+          <button
+            className="ml-2 text-blue-400 hover:text-blue-300 text-xs"
+            onClick={() => onViewText(text, `${department.name} - ${t("Goal")}`)}
+          >
+            {t("View More")}
+          </button>
+        </div>
+      );
+    };
+
+    const categoryStyles = getCategoryStyles(department.category);
+
+    return (
+      <div
+        className={`grid grid-cols-7 gap-6 px-8 py-4 group border-l-4 ${getPriorityBorderColor(department.category)} hover:bg-secondary/50 transition-all duration-300 bg-dark border-b border-1 border-main`}
+      >
+        {/* Department ID */}
+        <div className="flex items-center">
+          <span className="text-sm font-medium text-blue-400 hover:text-blue-300">
+            {department.id.slice(-5).toUpperCase()}
+          </span>
+        </div>
+
+        {/* Department Info */}
+        <div className="flex items-center pr-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg text-white ${categoryStyles.bg}`}>
+              {categoryStyles.icon}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium text-twhite group-hover:text-blue-300 transition-colors duration-300 truncate">
+                {department.name}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                <Hash className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{department.category.replace('-', ' ')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Badge */}
+        <div className="flex items-center px-4">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${categoryStyles.bg} ${categoryStyles.text} ${categoryStyles.border}`}>
+            {categoryStyles.icon}
+            <span className="truncate">{department.category.replace('-', ' ')}</span>
+          </span>
+        </div>
+
+        {/* Parent Department */}
+        <div className="flex items-center px-4">
+          {department.parent_department ? (
+            <div className="flex items-center gap-2 text-sm text-gray-300">
+              <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="truncate">
+                {departmentsData.find(
+                  (dep) => dep.id === department.parent_department?.id
+                )?.name || t("Unknown")}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-amber-400">
+              <Building2 className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <span className="truncate">{t("Main Department")}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Goal */}
+        <div className="flex items-center px-4">
+          <div className="text-sm text-gray-300 truncate">
+            {handleLongText(department.goal)}
+          </div>
+        </div>
+
+        {/* Files & Reports */}
+        <div className="flex items-center px-4">
+          <button
+            onClick={() => onOpenFilesModal(department)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-blue-900/20 text-blue-400 hover:bg-blue-900/30 border border-blue-900/30 transition-all duration-200"
+          >
+            <FileText className="w-4 h-4" />
+            <span>
+              {(department.supportingFiles?.length || 0) + (department.requiredReports?.length || 0)}
+            </span>
+          </button>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-center gap-3 pl-4">
+          {/* Programs Button */}
+          <button
+            onClick={() => onOpenProgramsModal(department)}
+            className="flex items-center gap-1 p-2 rounded-lg bg-emerald-900/20 text-emerald-400 hover:bg-emerald-900/30 border border-emerald-900/30 transition-all duration-200"
+            title={t("Development Programs")}
+          >
+            <Briefcase className="w-4 h-4" />
+            <span className="text-xs font-medium">{department.developmentPrograms?.length || 0}</span>
+          </button>
+
+          {/* Edit Button */}
+          {(isAdmin || hasEditPermission) && (
+            <NavigateButton
+              data={department}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/20 hover:border-green-500/30"
+              title={t("Edit")}
+            >
+              <Image
+                src={PencilIcon}
+                alt="edit icon"
+                height={16}
+                width={16}
+              />
+            </NavigateButton>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+const Pagination: React.FC<{
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  itemsPerPage: number;
+  onItemsPerPageChange: (items: number) => void;
+  totalItems: number;
+  t: (key: string) => string;
+}> = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange, totalItems, t }) => {
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else {
+      if (totalPages > 1) rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-dark border-t border-gray-700">
+      {/* Items per page selector */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-gray-400">{t("Show")}</span>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          className="bg-secondary border border-gray-600 text-twhite rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[80px]"
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+        <span className="text-sm text-gray-400">{t("per page")}</span>
+      </div>
+
+      {/* Page info */}
+      <div className="text-sm text-gray-400">
+        {t("Showing")} {startItem} {t("to")} {endItem} {t("of")} {totalItems} {t("results")}
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center gap-2">
+        {/* First page */}
+        <button
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("First page")}
+        >
+          <ChevronsLeft className="w-4 h-4" />
+        </button>
+
+        {/* Previous page */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Previous page")}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        {/* Page numbers */}
+        <div className="flex items-center gap-1">
+          {getVisiblePages().map((page, index) => (
+            <React.Fragment key={index}>
+              {page === '...' ? (
+                <span className="px-3 py-2 text-gray-400">...</span>
+              ) : (
+                <button
+                  onClick={() => onPageChange(page as number)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                    ? 'bg-blue-500 text-white border border-blue-500'
+                    : 'border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50'
+                    }`}
+                >
+                  {page}
+                </button>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Next page */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Next page")}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* Last page */}
+        <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Last page")}
+        >
+          <ChevronsRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
   departmentsData,
   pagination,
@@ -44,8 +357,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     "/departments/add-department"
   );
 
-
-
   // State for modals
   const [textModal, setTextModal] = useState<TextModalState>({
     isOpen: false,
@@ -53,9 +364,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     title: "",
   });
 
-
-
-  // State for Files & Reports and Development Programs modals
   const [filesReportsModal, setFilesReportsModal] = useState<{
     isOpen: boolean;
     department: DepartmentType | null;
@@ -71,29 +379,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     isOpen: false,
     department: null,
   });
-
-  // Function to handle long text
-  const handleLongText = (
-    text: string | undefined,
-    title: string,
-    maxLength = 100
-  ): React.ReactNode => {
-    if (!text) return "-";
-
-    if (text.length <= maxLength) return text;
-
-    return (
-      <div>
-        <span>{text.substring(0, maxLength)}...</span>
-        <button
-          className="ml-2 text-blue-500 hover:underline focus:outline-none"
-          onClick={() => setTextModal({ isOpen: true, content: text, title })}
-        >
-          {t("View More")}
-        </button>
-      </div>
-    );
-  };
 
   // Function to open file
   const handleOpenFile = (url: string) => {
@@ -117,320 +402,97 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
     window.open(fullUrl, "_blank");
   };
 
-  // Filter visible columns for better organization
-  const visibleColumns = [
-    { id: "name", label: "Name" },
-    { id: "category", label: "Category" },
-    { id: "parent", label: "Parent Department" },
-    { id: "goal", label: "Goal" },
-    { id: "files", label: "Files & Reports" },
-    { id: "programs", label: "Development Programs" },
-  ];
-
-  // Generate array of page numbers for pagination
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    // Calculate start and end page numbers to show
-    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
-
-    // Adjust if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
+  const handleViewText = (content: string, title: string) => {
+    setTextModal({ isOpen: true, content, title });
   };
 
-  // Get the appropriate color based on category
-  const getCategoryStyles = (category: string) => {
-    if (category === 'primary-department') {
-      return {
-        bg: isLightMode ? 'bg-blue-100' : 'bg-blue-900/30',
-        text: 'text-blue-500',
-        icon: <Building2 className="w-4 h-4 text-blue-500" />
-      };
-    } else if (category === 'secondary-department') {
-      return {
-        bg: isLightMode ? 'bg-purple-100' : 'bg-purple-900/30',
-        text: 'text-purple-500',
-        icon: <Briefcase className="w-4 h-4 text-purple-500" />
-      };
-    } else {
-      return {
-        bg: isLightMode ? 'bg-green-100' : 'bg-green-900/30',
-        text: 'text-green-500',
-        icon: <Users className="w-4 h-4 text-green-500" />
-      };
-    }
+  const handleOpenFilesModal = (department: DepartmentType) => {
+    setFilesReportsModal({ isOpen: true, department });
+  };
+
+  const handleOpenProgramsModal = (department: DepartmentType) => {
+    setDevelopmentProgramsModal({ isOpen: true, department });
   };
 
   return (
-    <div className={`${isLightMode ? 'bg-light-droppable-fade' : 'bg-droppable-fade'} rounded-xl shadow-md p-4 md:p-6 flex flex-col gap-6 col-span-12`}>
-      <div className="overflow-x-auto rounded-xl shadow-md">
-        <table className="min-w-full bg-main rounded-xl shadow-lg border-separate border-spacing-0">
-          <thead>
-            <tr className={`${isLightMode ? "bg-darkest text-tblackAF" : "bg-tblack text-twhite"} sticky top-0 z-10`}>
-              {visibleColumns.map((column) => (
-                <th
-                  key={column.id}
-                  className="text-start py-4 px-5 first:rounded-tl-xl last:rounded-tr-xl uppercase font-semibold text-sm"
-                >
-                  {t(column.label)}
-                </th>
+    <div className="rounded-xl shadow-md flex flex-col gap-4 col-span-12">
+      {/* Departments Table */}
+      <div className="overflow-hidden rounded-lg shadow-lg shadow-black/20 border border-gray-700/50">
+        {!departmentsData || departmentsData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-main">
+            <Building2 className="w-16 h-16 text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-twhite mb-2">{t("No Departments Found")}</h3>
+            <p className="text-tdark">{t("There are no departments in the system. Add departments to see them listed here.")}</p>
+          </div>
+        ) : (
+          <>
+            {/* Table Header */}
+            <div className="bg-secondary/50 border-b border-gray-700">
+              <div className="grid grid-cols-7 gap-6 px-8 py-4">
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Hash className="w-4 h-4 text-blue-400" />
+                  {t("Department ID")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Building2 className="w-4 h-4 text-blue-400" />
+                  {t("Department")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Briefcase className="w-4 h-4 text-purple-400" />
+                  {t("Category")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Users className="w-4 h-4 text-green-400" />
+                  {t("Parent")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <FileText className="w-4 h-4 text-gray-400" />
+                  {t("Goal")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <FileText className="w-4 h-4 text-blue-400" />
+                  {t("Files")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
+                  <Briefcase className="w-4 h-4 text-yellow-400" />
+                  {t("Actions")}
+                </div>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div>
+              {departmentsData.map((department) => (
+                <DepartmentRowComponent
+                  key={department.id}
+                  department={department}
+                  isAdmin={isAdmin}
+                  hasEditPermission={hasEditPermission}
+                  NavigateButton={NavigateButton}
+                  t={t}
+                  onOpenFilesModal={handleOpenFilesModal}
+                  onOpenProgramsModal={handleOpenProgramsModal}
+                  onViewText={handleViewText}
+                  departmentsData={departmentsData}
+                />
               ))}
-              <th className="text-center py-4 px-5 uppercase font-semibold text-sm rounded-tr-xl">
-                {t("Actions")}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800">
-            {departmentsData && departmentsData.length > 0 ? (
-              departmentsData.map((department) => {
-                const categoryStyles = getCategoryStyles(department.category);
+            </div>
 
-                return (
-                  <tr
-                    key={department.id}
-                    className={`${isLightMode
-                      ? "hover:bg-gray-100 text-gray-800 divide-gray-200"
-                      : "hover:bg-dark text-twhite divide-gray-800"
-                      } transition-all duration-200`}
-                  >
-                    {/* Name */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${categoryStyles.bg}`}>
-                          {categoryStyles.icon}
-                        </div>
-                        <div>
-                          <div className="font-semibold">{department.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {t("ID")}: {department.id.substring(0, 8)}...
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Category */}
-                    <td className="py-4 px-5">
-                      <div className={`inline-flex items-center gap-1.5 py-1 px-3 rounded-full ${categoryStyles.bg} ${categoryStyles.text} text-xs font-medium`}>
-                        {department.category}
-                      </div>
-                    </td>
-
-                    {/* Parent Department */}
-                    <td className="py-4 px-5">
-                      {department.parent_department
-                        ? (
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                            <span>
-                              {departmentsData.find(
-                                (dep) => dep.id === department.parent_department?.id
-                              )?.name || "-"}
-                            </span>
-                          </div>
-                        )
-                        : (
-                          <div className="text-gray-500 font-medium">
-                            {t("Main Department")}
-                          </div>
-                        )
-                      }
-                    </td>
-
-                    {/* Goal */}
-                    <td className="py-4 px-5">
-                      {handleLongText(
-                        department.goal,
-                        `${department.name} - ${t("Goal")}`
-                      )}
-                    </td>
-
-                    {/* Files & Reports */}
-                    <td className="py-4 px-5">
-                      <button
-                        onClick={() =>
-                          setFilesReportsModal({ isOpen: true, department })
-                        }
-                        className={`px-4 py-2 rounded-lg transition-all duration-200 shadow-sm ${isLightMode
-                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:shadow"
-                          : "bg-blue-900/20 text-blue-400 hover:bg-blue-900/30 hover:shadow"
-                          }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          <span>
-                            {department.supportingFiles?.length || 0} {t("Files")}, {department.requiredReports?.length || 0} {t("Reports")}
-                          </span>
-                        </div>
-                      </button>
-                    </td>
-
-                    {/* Development Programs */}
-                    <td className="py-4 px-5">
-                      <button
-                        onClick={() =>
-                          setDevelopmentProgramsModal({
-                            isOpen: true,
-                            department,
-                          })
-                        }
-                        className={`px-4 py-2 rounded-lg transition-all duration-200 shadow-sm ${isLightMode
-                          ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:shadow"
-                          : "bg-emerald-900/20 text-emerald-400 hover:bg-emerald-900/30 hover:shadow"
-                          }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="w-4 h-4" />
-                          <span>
-                            {department.developmentPrograms?.length || 0} {t("Programs")}
-                          </span>
-                        </div>
-                      </button>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-4 px-5">
-                      <div className="flex justify-center gap-2">
-                        {/* Edit Button */}
-                        {(isAdmin || hasEditPermission) && (
-                          <NavigateButton
-                            data={department}
-                            className="cursor-pointer p-2 w-10 h-10 flex justify-center items-center rounded-lg bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30 transition-colors shadow hover:shadow-md"
-                          >
-                            <Image
-                              src={PencilIcon}
-                              alt="edit icon"
-                              height={20}
-                              width={20}
-                            />
-                          </NavigateButton>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td
-                  colSpan={visibleColumns.length + 1}
-                  className="py-8 px-5 text-center"
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <Building2 className="w-12 h-12 text-gray-400 mb-3" />
-                    <p className="text-gray-400 text-lg font-medium">
-                      {t("No departments found matching your search criteria.")}
-                    </p>
-                  </div>
-                </td>
-              </tr>
+            {/* Pagination */}
+            {departmentsData.length > 0 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={pagination.onPageChange}
+                itemsPerPage={pagination.itemsPerPage}
+                onItemsPerPageChange={pagination.onItemsPerPageChange}
+                totalItems={pagination.totalItems}
+                t={t}
+              />
             )}
-          </tbody>
-        </table>
+          </>
+        )}
       </div>
-
-      {/* Improved Pagination Controls */}
-      {departmentsData && departmentsData.length > 0 && (
-        <div className={`flex flex-col md:flex-row justify-between items-center px-2 ${isLightMode ? "text-blackAF" : "text-twhite"}`}>
-          <div className="mb-4 md:mb-0 bg-secondary py-2 px-4 rounded-lg shadow-sm">
-            <span>{t("Showing")} </span>
-            <select
-              value={pagination.itemsPerPage}
-              onChange={(e) => pagination.onItemsPerPageChange(Number(e.target.value))}
-              className={`px-3 py-1 rounded-md mx-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLightMode
-                ? "bg-white text-black border border-gray-300"
-                : "bg-dark text-white border border-gray-700"
-                }`}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span>{t("of")} {pagination.totalItems} {t("items")}</span>
-          </div>
-
-          <div className="flex items-center bg-secondary py-1 px-2 rounded-lg shadow-sm">
-            <button
-              onClick={() => pagination.onPageChange(1)}
-              disabled={pagination.currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
-                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
-                }`}
-            >
-              «
-            </button>
-
-            <button
-              onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-              disabled={pagination.currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
-                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
-                }`}
-            >
-              ‹
-            </button>
-
-            {getPageNumbers().map((page) => (
-              <button
-                key={page}
-                onClick={() => pagination.onPageChange(page)}
-                className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === page
-                  ? isLightMode
-                    ? "bg-blue-500 text-white shadow-md"
-                    : "bg-blue-600 text-white shadow-md"
-                  : isLightMode
-                    ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
-                    : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages}
-              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === pagination.totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
-                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
-                }`}
-            >
-              ›
-            </button>
-
-            <button
-              onClick={() => pagination.onPageChange(pagination.totalPages)}
-              disabled={pagination.currentPage === pagination.totalPages}
-              className={`mx-1 px-3 py-1 rounded-md transition-all duration-200 ${pagination.currentPage === pagination.totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300 hover:shadow"
-                  : "bg-dark hover:bg-gray-800 text-white border border-gray-700 hover:shadow"
-                }`}
-            >
-              »
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Text Modal */}
       {textModal.isOpen && (

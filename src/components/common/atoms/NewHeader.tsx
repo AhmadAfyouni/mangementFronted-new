@@ -27,6 +27,12 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Notification from "./ui/Notification";
 import RouteWrapper from "./ui/RouteWrapper";
+import { useDashboard } from "@/hooks/useDashboard";
+import useTaskTimer from "@/hooks/useTaskTimer";
+import useCustomQuery from "@/hooks/useCustomQuery";
+import { ReceiveTaskType } from "@/types/Task.type";
+import { TaskTree } from "@/types/trees/Task.tree.type";
+import { Eye } from "lucide-react";
 
 const NewHeader = ({
   setIsExpanded,
@@ -143,6 +149,30 @@ const NewHeader = ({
     };
   }, [isDropdownOpen]);
 
+  // --- Running Task Logic ---
+  // Get user's tasks (myTasks is more universal than dailyTasks)
+  const { data: tasksData, isLoading: isTasksLoading } = useCustomQuery<{
+    info: ReceiveTaskType[];
+    tree: TaskTree[];
+  }>({
+    queryKey: ["tasks"],
+    url: `/tasks/tree`,
+  });
+
+
+  // Find the first running task (has a timeLog with start and no end)
+  const runningTask = tasksData?.info.find(
+    (task) =>
+      Array.isArray(task.timeLogs) &&
+      task.timeLogs.some((log) => log.start && !log.end)
+  );
+
+  // Always call useTaskTimer to avoid conditional hooks
+  const timerProps = useTaskTimer(
+    runningTask ? runningTask.id : "dummy-id",
+    runningTask ? runningTask.timeLogs || [] : []
+  );
+
   return (
     <>
       <div
@@ -163,34 +193,66 @@ const NewHeader = ({
           />
         </div>
 
-        {/* Search Bar - Hidden on Mobile */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className={`hidden md:flex items-center rounded-lg overflow-hidden transform transition-all duration-200 ease-out
-            ${isLightMode ? "bg-darker" : "bg-tblack"}
-            w-[30%] group hover:shadow-lg`}
-          dir={getDir()}
-        >
-          <div className="pl-3 pr-2 transition-transform duration-200 group-hover:scale-105">
-            <Image
-              src={SearchIcon}
-              width={20}
-              height={20}
-              alt="search icon"
-              className="transition-opacity duration-200 group-hover:opacity-80"
-            />
-          </div>
-          <input
-            type="text"
-            className="bg-transparent placeholder-white py-2 px-1 outline-none border-none text-twhite w-full transition-all duration-200"
-            placeholder={t("Search")}
-            value={searchText}
-            onChange={handleSearchChange}
-          />
-        </form>
+
 
         {/* Actions Group */}
         <div className="flex items-center gap-2 md:gap-4">
+
+          {/* Running Task Box (replaces search box) */}
+          <div className="flex-1 flex justify-center">
+            {runningTask && timerProps && (
+              <div
+                className="flex items-center bg-secondary rounded-lg shadow-sm min-w-[250px] border-l-4 border-l-orange-300 pl-4"
+                style={{ minHeight: 32 }}
+              >
+                {/* Task info */}
+                <div className="flex flex-col flex-1 min-w-0 py-1 mt-1">
+                  <span className="font-medium text-sm text-white truncate leading-none">
+                    {runningTask.name}
+                  </span>
+                  {/* Digital Clock Style Timer */}
+                  <div className="text-white leading-none font-mono">
+                    <span
+                      className="text-sm font-bold tracking-wider text-emerald-400"
+                      style={{
+                        fontFamily: 'Monaco, "Courier New", monospace',
+                        letterSpacing: '0.1em'
+                      }}
+                    >
+                      {formatTime(timerProps.elapsedTime)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pause button */}
+                <button
+                  className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/50 hover:border-green-500/50"
+                  onClick={timerProps.pauseTimer}
+                  disabled={timerProps.isLoading}
+                  aria-label="Pause"
+                  style={{ outline: "none" }}
+                >
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+                    <rect x="6" y="4" width="4" height="16" rx="2" fill="white" />
+                    <rect x="14" y="4" width="4" height="16" rx="2" fill="white" />
+                  </svg>
+                </button>
+
+                <RouteWrapper
+                  href={`/tasks/${runningTask.id}`}
+                  className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 border border-gray-600/50 hover:border-blue-500/50"
+                >
+                  <button
+                    className="w-full h-full flex items-center justify-center"
+                    title={t("View Details")}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </RouteWrapper>
+              </div>
+            )}
+          </div>
+
           {/* Mobile Search Toggle */}
           <div
             className="md:hidden relative group"
@@ -362,43 +424,19 @@ const NewHeader = ({
         )}
       </div>
 
-      {/* Mobile Search Overlay */}
-      {isMobileSearchOpen && (
-        <div
-          className={`md:hidden fixed top-[56px] left-0 right-0 p-2 z-10
-            ${isLightMode ? "bg-darkest" : "bg-main"}
-            border-b border-slate-600
-            animate-in fade-in slide-in-from-top duration-200`}
-        >
-          <form
-            onSubmit={handleSearchSubmit}
-            className={`flex items-center rounded-lg overflow-hidden
-              ${isLightMode ? "bg-darker" : "bg-tblack"}
-              w-full`}
-            dir={getDir()}
-          >
-            <div className="pl-3 pr-2">
-              <Image
-                src={SearchIcon}
-                width={20}
-                height={20}
-                alt="search icon"
-                className="opacity-80"
-              />
-            </div>
-            <input
-              type="text"
-              className="bg-transparent placeholder-white py-2 px-1 outline-none border-none text-twhite w-full"
-              placeholder={t("Search")}
-              autoFocus
-              value={searchText}
-              onChange={handleSearchChange}
-            />
-          </form>
-        </div>
-      )}
+      {/* Mobile Search Overlay - removed, as search is replaced by running task box */}
     </>
   );
 };
+
+// Helper for formatting time (hh:mm:ss)
+function formatTime(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
 
 export default NewHeader;

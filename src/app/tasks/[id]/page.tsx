@@ -45,7 +45,6 @@ export default function TaskDetailsPage() {
   });
 
   const [isTimeTrackingOpen, setIsTimeTrackingOpen] = useState(false);
-
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
   const [isStatusMenuOpen, setStatusMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -65,16 +64,8 @@ export default function TaskDetailsPage() {
       setDescription(task.description || "");
       setTaskName(task.name || "");
       setExpectedEndDate(task.expected_end_date || "");
-
-      console.log('Task data loaded:', {
-        due_date: task.due_date,
-        expected_end_date: task.expected_end_date,
-        calendar,
-        expectedEndDate
-      }); // Debug log
     }
   }, [task]);
-
 
   const {
     startTimer,
@@ -115,29 +106,25 @@ export default function TaskDetailsPage() {
   const handlePause = async () => {
     await pauseTimer();
   };
+
   const handleUpdate = async () => {
     try {
-      // Ensure dates are in proper format
       const updateData = {
         name: taskName!,
         status: selectedStatus!,
         priority: selectedPriority!,
         description: description!,
         due_date: calendar!,
-        expected_end_date: expectedEndDate || null, // Use null instead of undefined
+        expected_end_date: expectedEndDate || null,
       };
-
-      console.log('Updating task with data:', updateData); // Debug log
 
       await updateTaskData(taskId, updateData);
 
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
 
-      // Exit edit mode after saving
       setIsEditing(false);
 
-      // Show success message
       setSnackbarConfig({
         message: t("Changes saved successfully"),
         open: true,
@@ -146,9 +133,7 @@ export default function TaskDetailsPage() {
     } catch (error) {
       const err = error as AxiosError;
       console.log("Error updating task:", err);
-      console.log("Error response:", err.response?.data); // Additional debug info
 
-      // Revert local state to original task data on save failure
       if (task) {
         setTaskName(task.name);
         setSelectedStatus(task.status);
@@ -158,7 +143,6 @@ export default function TaskDetailsPage() {
         setExpectedEndDate(task.expected_end_date || "");
       }
 
-      // Extract message safely
       let errorMessage = "An error occurred";
       if (err.response?.data && typeof err.response.data === "object" && "message" in err.response.data) {
         errorMessage = (err.response.data as { message: string }).message;
@@ -204,7 +188,6 @@ export default function TaskDetailsPage() {
     handleViewFile,
     isLoadingFile,
     setAttachedFile,
-    // Edit/Delete functionality
     editingComment,
     editText,
     setEditText,
@@ -214,7 +197,6 @@ export default function TaskDetailsPage() {
     deleteComment,
   } = useComments(taskId, true);
 
-  // Enhanced file handling with error handling
   const handleViewFileWithErrorHandling = (fileUrl: string) => {
     try {
       handleViewFile(fileUrl);
@@ -228,7 +210,6 @@ export default function TaskDetailsPage() {
     }
   };
 
-  // Add a function to handle the time tracking submission
   const handleTimeSubmit = async (actualTime: number) => {
     try {
       await updateTaskData(taskId, {
@@ -236,7 +217,6 @@ export default function TaskDetailsPage() {
         actual_hours: actualTime,
       });
 
-      // Update the local state to reflect the DONE status
       setSelectedStatus("DONE");
 
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
@@ -255,7 +235,6 @@ export default function TaskDetailsPage() {
         severity: "error",
       });
 
-      // Revert to previous status on error
       if (task) {
         setSelectedStatus(task.status);
       }
@@ -272,7 +251,6 @@ export default function TaskDetailsPage() {
     );
   }
 
-  // If there was an error loading the task
   if (taskError) {
     return (
       <GridContainer>
@@ -296,41 +274,42 @@ export default function TaskDetailsPage() {
   }
 
   return (
-    <GridContainer>
-      <div className={`col-span-full min-h-screen p-6 ${isRTL ? 'rtl' : 'ltr'} ${task.parent_task
-        ? 'bg-gradient-to-br from-main via-main to-slate-900/10'
-        : 'bg-main'
-        }`} dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="max-w-7xl mx-auto">
-          <TaskHeader
-            task={task}
-            onUpdate={handleUpdate}
-            taskName={taskName}
-            onNameChange={setTaskName}
-            isEditing={isEditing}
-            onEditToggle={() => setIsEditing(!isEditing)}
-          />
+    <div className={`min-h-screen bg-main p-4 ${isRTL ? 'rtl' : 'ltr'} ${task.parent_task
+      ? 'bg-gradient-to-br from-main via-main to-slate-900/10'
+      : 'bg-main'
+      }`} dir={isRTL ? 'rtl' : 'ltr'}>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+      {/* Compact Header */}
+      <div className="max-w-7xl mx-auto mb-4">
+        <TaskHeader
+          task={task}
+          onUpdate={handleUpdate}
+          taskName={taskName}
+          onNameChange={setTaskName}
+          isEditing={isEditing}
+          onEditToggle={() => setIsEditing(!isEditing)}
+        />
+      </div>
 
+      {/* Optimized Grid Layout */}
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-12 gap-4">
+
+          {/* Left Column - Main Content (8 columns) */}
+          <div className="col-span-12 lg:col-span-8 space-y-4">
+
+            {/* Task Info Card - More Compact */}
+            <div className="bg-secondary rounded-lg p-4 border border-gray-700">
               <TaskInfoCard
                 task={task}
                 selectedStatus={selectedStatus}
                 selectedPriority={selectedPriority}
                 due_date={calendar}
-                expected_end_date={expectedEndDate} // Add this line
+                expected_end_date={expectedEndDate}
                 onStatusChange={handleStatusChange}
                 onPriorityChange={setSelectedPriority}
-                onDueDateChange={(date) => {
-                  console.log('Due date changing to:', date);
-                  setCalendar(date);
-                }}
-                onExpectedEndDateChange={(date) => {
-                  console.log('Expected end date changing to:', date);
-                  setExpectedEndDate(date);
-                }}
+                onDueDateChange={setCalendar}
+                onExpectedEndDateChange={setExpectedEndDate}
                 isStatusMenuOpen={isStatusMenuOpen}
                 isPriorityMenuOpen={isPriorityMenuOpen}
                 setStatusMenuOpen={setStatusMenuOpen}
@@ -338,45 +317,33 @@ export default function TaskDetailsPage() {
                 allTasks={allTasks}
                 isEditing={isEditing}
               />
-
-              <TaskDescription
-                description={description || ''}
-                onChange={setDescription}
-                isEditing={isEditing}
-              />
-
-              <TaskFiles
-                files={task.files}
-                onViewFile={handleViewFileWithErrorHandling}
-                isLoadingFile={isLoadingFile}
-                taskId={taskId}
-              />
-
-              <TaskComments
-                comments={comments}
-                comment={comment}
-                setComment={setComment}
-                attachedFile={attachedFile}
-                setAttachedFile={setAttachedFile}
-                fileInputRef={fileInputRef}
-                handleFileChange={handleFileChange}
-                handleSendComment={handleSendComment}
-                handleViewFile={handleViewFileWithErrorHandling}
-                isSubmitting={isSubmitting}
-                isLoadingFile={isLoadingFile}
-                // Edit/Delete props
-                editingComment={editingComment}
-                editText={editText}
-                setEditText={setEditText}
-                startEditComment={startEditComment}
-                cancelEditComment={cancelEditComment}
-                saveCommentEdit={saveCommentEdit}
-                deleteComment={deleteComment}
-              />
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
+            {/* Description and Files in Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div className="xl:col-span-1">
+                <TaskDescription
+                  description={description || ''}
+                  onChange={setDescription}
+                  isEditing={isEditing}
+                />
+              </div>
+              <div className="xl:col-span-1">
+                <TaskFiles
+                  files={task.files}
+                  onViewFile={handleViewFileWithErrorHandling}
+                  isLoadingFile={isLoadingFile}
+                  taskId={taskId}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar (4 columns) */}
+          <div className="col-span-12 lg:col-span-4 space-y-4">
+
+            {/* Time Tracking - Compact */}
+            <div className="bg-secondary rounded-lg p-4 border border-gray-700">
               <TaskTimeTracking
                 displayTime={displayTime}
                 isTaskRunning={isRunning}
@@ -389,44 +356,68 @@ export default function TaskDetailsPage() {
                 isLightMode={isLightMode}
                 isSubtask={!!task.parent_task}
               />
-
-              <TaskSidebar
-                task={task}
-                allTasks={allTasks}
-                onAddSubtask={() => setIsModalOpen(true)}
-              />
             </div>
+
+            {/* Sidebar Content */}
+            <TaskSidebar
+              task={task}
+              allTasks={allTasks}
+              onAddSubtask={() => setIsModalOpen(true)}
+            />
           </div>
         </div>
+      </div>
 
-        {isModalOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
-              onClick={() => setIsModalOpen(false)}
-            />
-            <AddSubTaskModal
-              parentTask={task}
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-            />
-          </>
-        )}
-
-        {/* Replace StarRating with TimeTrackingModal */}
-        <TimeTrackingModal
-          isOpen={isTimeTrackingOpen}
-          onClose={() => {
-            setIsTimeTrackingOpen(false);
-            // Restore previous status if modal is closed without submission
-            if (task && selectedStatus === "DONE") {
-              setSelectedStatus(task.status);
-            }
-          }}
-          onSubmit={handleTimeSubmit}
-          recordedTime={task.totalTimeSpent || 0}
+      {/* Comments Section - Full Width Below All Cards */}
+      <div className="max-w-7xl mx-auto mt-6">
+        <TaskComments
+          comments={comments}
+          comment={comment}
+          setComment={setComment}
+          attachedFile={attachedFile}
+          setAttachedFile={setAttachedFile}
+          fileInputRef={fileInputRef}
+          handleFileChange={handleFileChange}
+          handleSendComment={handleSendComment}
+          handleViewFile={handleViewFileWithErrorHandling}
+          isSubmitting={isSubmitting}
+          isLoadingFile={isLoadingFile}
+          editingComment={editingComment}
+          editText={editText}
+          setEditText={setEditText}
+          startEditComment={startEditComment}
+          cancelEditComment={cancelEditComment}
+          saveCommentEdit={saveCommentEdit}
+          deleteComment={deleteComment}
         />
       </div>
-    </GridContainer>
+
+      {/* Modals */}
+      {isModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsModalOpen(false)}
+          />
+          <AddSubTaskModal
+            parentTask={task}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        </>
+      )}
+
+      <TimeTrackingModal
+        isOpen={isTimeTrackingOpen}
+        onClose={() => {
+          setIsTimeTrackingOpen(false);
+          if (task && selectedStatus === "DONE") {
+            setSelectedStatus(task.status);
+          }
+        }}
+        onSubmit={handleTimeSubmit}
+        recordedTime={task.totalTimeSpent || 0}
+      />
+    </div>
   );
 }
