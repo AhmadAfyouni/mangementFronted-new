@@ -54,7 +54,7 @@ const EnhancedTaskRowComponent: React.FC<{
             {/* Task ID */}
             <div className="flex items-center">
                 <span className="text-sm font-medium text-blue-400 hover:text-blue-300">
-                    {`${task.id.slice(19)}`}
+                    {`${task.id.slice(-5).toUpperCase()}`}
                 </span>
             </div>
 

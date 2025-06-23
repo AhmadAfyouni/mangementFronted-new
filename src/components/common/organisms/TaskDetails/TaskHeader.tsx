@@ -104,6 +104,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
                 <h1 className={`text-3xl font-bold ${isSubtask ? 'text-slate-200' : 'text-twhite'}`}>
                   {taskName || 'Untitled Task'}
                 </h1>
+
               </div>
               {isEditing && (
                 <button

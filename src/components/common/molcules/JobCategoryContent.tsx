@@ -18,6 +18,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { setActiveEntity } from "@/state/slices/searchSlice";
 import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
+import { Briefcase, GraduationCap, Clock, Star, Hash, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, BookOpen } from "lucide-react";
+import React from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -32,44 +34,277 @@ interface JobCategoryContentProps {
   pagination?: PaginationProps; // Optional prop for external pagination control
 }
 
-const SkillsList = ({
-  skills,
-  onShowMore,
-}: {
-  skills: string[];
-  onShowMore: () => void;
-}) => {
-  const { t } = useLanguage();
-  const { isLightMode } = useCustomTheme();
+const JobCategoryRowComponent: React.FC<{
+  category: JobCategoryType;
+  isAdmin: boolean;
+  hasEditPermission: boolean;
+  NavigateButton: any;
+  t: (key: string) => string;
+  onShowMoreSkills: (skills: string[]) => void;
+}> = ({ category, isAdmin, hasEditPermission, NavigateButton, t, onShowMoreSkills }) => {
 
-  const shouldShowMore = skills.length > 2;
-  const displaySkills = skills.slice(0, 2);
+  const getCategoryColor = (name: string) => {
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes("technical") || nameLower.includes("developer") || nameLower.includes("engineer")) {
+      return 'border-l-purple-500';
+    } else if (nameLower.includes("management") || nameLower.includes("manager") || nameLower.includes("director")) {
+      return 'border-l-blue-500';
+    } else if (nameLower.includes("design") || nameLower.includes("creative")) {
+      return 'border-l-pink-500';
+    } else if (nameLower.includes("sales") || nameLower.includes("marketing")) {
+      return 'border-l-amber-500';
+    } else if (nameLower.includes("finance") || nameLower.includes("accounting")) {
+      return 'border-l-green-500';
+    } else {
+      return 'border-l-teal-500';
+    }
+  };
+
+  const getEducationBadgeColor = (education: string) => {
+    const eduLower = education.toLowerCase();
+    if (eduLower.includes("phd") || eduLower.includes("doctorate")) {
+      return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+    } else if (eduLower.includes("master") || eduLower.includes("mba")) {
+      return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    } else if (eduLower.includes("bachelor") || eduLower.includes("degree")) {
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    } else if (eduLower.includes("associate") || eduLower.includes("diploma")) {
+      return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+    } else {
+      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const getExperienceBadgeColor = (experience: string) => {
+    const expLower = experience.toLowerCase();
+    if (expLower.includes("senior") || expLower.includes("10+") || expLower.includes("expert")) {
+      return "bg-red-500/20 text-red-400 border-red-500/30";
+    } else if (expLower.includes("mid") || expLower.includes("5+") || expLower.includes("intermediate")) {
+      return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    } else if (expLower.includes("junior") || expLower.includes("entry") || expLower.includes("1+")) {
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    } else {
+      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const handleLongText = (text: string | undefined, maxLength = 50): React.ReactNode => {
+    if (!text) return <span className="text-gray-500">{t("N/A")}</span>;
+
+    if (text.length <= maxLength) return text;
+
+    return (
+      <div>
+        <span>{text.substring(0, maxLength)}...</span>
+      </div>
+    );
+  };
 
   return (
-    <div className="flex flex-col gap-2">
-      <ul className="list-disc ml-4">
-        {displaySkills.map((skill, index) => (
-          <li key={index}>{skill}</li>
-        ))}
-      </ul>
+    <div
+      className={`grid grid-cols-6 gap-6 px-8 py-4 group border-l-4 ${getCategoryColor(category.name)} hover:bg-secondary/50 transition-all duration-300 bg-dark border-b border-1 border-main`}
+    >
+      {/* Category ID */}
+      <div className="flex items-center">
+        <span className="text-sm font-medium text-blue-400 hover:text-blue-300">
+          {category.id.slice(-5).toUpperCase()}
+        </span>
+      </div>
 
-      {shouldShowMore && (
-        <button
-          onClick={onShowMore}
-          className={`
-            flex items-center justify-center gap-2 
-            mt-1 py-1 px-2 rounded-lg
-            text-xs font-medium transition-all duration-200
-            ${isLightMode
-              ? "bg-primary/10 text-primary hover:bg-primary/20"
-              : "bg-primary/20 text-primary hover:bg-primary/30"
-            }
-          `}
+      {/* Category Info */}
+      <div className="flex items-center pr-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+            {category.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium text-twhite group-hover:text-blue-300 transition-colors duration-300 truncate">
+              {category.name}
+            </div>
+            <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+              <BookOpen className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{handleLongText(category.description, 30)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Education */}
+      <div className="flex items-center px-4">
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getEducationBadgeColor(category.required_education)}`}>
+          <GraduationCap className="w-3 h-3 flex-shrink-0" />
+          <span className="truncate">{category.required_education || t("Not Specified")}</span>
+        </span>
+      </div>
+
+      {/* Experience */}
+      <div className="flex items-center px-4">
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getExperienceBadgeColor(category.required_experience)}`}>
+          <Clock className="w-3 h-3 flex-shrink-0" />
+          <span className="truncate">{category.required_experience || t("Not Specified")}</span>
+        </span>
+      </div>
+
+      {/* Skills */}
+      <div className="flex items-center px-4">
+        {category.required_skills && category.required_skills.length > 0 ? (
+          <button
+            onClick={() => onShowMoreSkills(category.required_skills)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-purple-900/20 text-purple-400 hover:bg-purple-900/30 border border-purple-900/30 transition-all duration-200"
+          >
+            <Star className="w-4 h-4" />
+            <span>{category.required_skills.length} {t("Skills")}</span>
+          </button>
+        ) : (
+          <span className="text-gray-500 text-sm">{t("None")}</span>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-center gap-3 pl-4">
+        {(isAdmin || hasEditPermission) && (
+          <NavigateButton
+            data={category}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/20 hover:border-green-500/30"
+            title={t("Edit")}
+          >
+            <Image
+              src={PencilIcon}
+              alt="edit icon"
+              height={16}
+              width={16}
+            />
+          </NavigateButton>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Pagination: React.FC<{
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  itemsPerPage: number;
+  onItemsPerPageChange: (items: number) => void;
+  totalItems: number;
+  t: (key: string) => string;
+}> = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange, totalItems, t }) => {
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else {
+      if (totalPages > 1) rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-dark border-t border-gray-700">
+      {/* Items per page selector */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-gray-400">{t("Show")}</span>
+        <select
+          value={itemsPerPage}
+          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          className="bg-secondary border border-gray-600 text-twhite rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[80px]"
         >
-          <span>{t("Show More")}</span>
-          <span className="text-xs opacity-60">(+{skills.length - 2})</span>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+        </select>
+        <span className="text-sm text-gray-400">{t("per page")}</span>
+      </div>
+
+      {/* Page info */}
+      <div className="text-sm text-gray-400">
+        {t("Showing")} {startItem} {t("to")} {endItem} {t("of")} {totalItems} {t("results")}
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex items-center gap-2">
+        {/* First page */}
+        <button
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("First page")}
+        >
+          <ChevronsLeft className="w-4 h-4" />
         </button>
-      )}
+
+        {/* Previous page */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Previous page")}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        {/* Page numbers */}
+        <div className="flex items-center gap-1">
+          {getVisiblePages().map((page, index) => (
+            <React.Fragment key={index}>
+              {page === '...' ? (
+                <span className="px-3 py-2 text-gray-400">...</span>
+              ) : (
+                <button
+                  onClick={() => onPageChange(page as number)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                    ? 'bg-blue-500 text-white border border-blue-500'
+                    : 'border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50'
+                    }`}
+                >
+                  {page}
+                </button>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Next page */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Next page")}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* Last page */}
+        <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          title={t("Last page")}
+        >
+          <ChevronsRight className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -129,33 +364,6 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
   // Determine which data to use: If pagination is provided use all data, otherwise use paginatedData
   const displayData = pagination ? categories : paginatedData;
 
-  // Generate array of page numbers for pagination
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    // Get pagination values from props or from our hook
-    const currentPagination = pagination || {
-      currentPage,
-      totalPages,
-    };
-
-    // Calculate start and end page numbers to show
-    let startPage = Math.max(1, currentPagination.currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(currentPagination.totalPages, startPage + maxVisiblePages - 1);
-
-    // Adjust if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
-
   const handleShowMoreSkills = (skills: string[]) => {
     setModalContent(skills);
     setIsModalOpen(true);
@@ -171,19 +379,7 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
   );
 
   if (isLoading || !categories) {
-    return (
-      <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5">
-        <PageSpinner />
-      </div>
-    );
-  }
-
-  if (!categories || categories.length === 0) {
-    return (
-      <div className="absolute top-1/2 left-1/2 -translate-1/2 flex flex-col items-center justify-center gap-5 text-twhite">
-        {t("No Job Categories Found")}
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (error) {
@@ -196,206 +392,91 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
     );
   }
 
-  // Handle the case where search results in no matches
-  if (!displayData || (displayData.length === 0 && searchQuery)) {
-    return (
-      <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
-        <div className="text-center text-twhite py-8">
-          {t("No job categories found matching your search criteria.")}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-secondary rounded-xl shadow-md p-4 flex flex-col gap-4 col-span-12">
-      <div className="overflow-x-auto rounded-xl shadow-md">
-        <table className="min-w-full bg-main text-twhite rounded-lg shadow-md">
-          <thead
-            className={` ${isLightMode ? "bg-darkest text-tblackAF" : "bg-tblack text-twhite"
-              }  `}
-          >
-            <tr>
-              <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
-                {t("Name")}
-              </th>
-              <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
-                {t("Description")}
-              </th>
-              <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
-                {t("Required Education")}
-              </th>
-              <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
-                {t("Required Experience")}
-              </th>
-              <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
-                {t("Required Skills")}
-              </th>
-              {(isAdmin || hasEditPermission) && (
-                <th className="text-center  py-3 px-4 uppercase font-semibold text-sm">
+    <div className="rounded-xl shadow-md flex flex-col gap-4 col-span-12">
+      {/* Job Categories Table */}
+      <div className="overflow-hidden rounded-lg shadow-lg shadow-black/20 border border-gray-700/50">
+        {!categories || categories.length === 0 || (displayData && displayData.length === 0 && searchQuery) ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-main">
+            <Briefcase className="w-16 h-16 text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-twhite mb-2">
+              {!categories || categories.length === 0
+                ? t("No Job Categories Found")
+                : t("No Results Found")}
+            </h3>
+            <p className="text-tdark">
+              {!categories || categories.length === 0
+                ? t("There are no job categories in the system. Add job categories to see them listed here.")
+                : t("No job categories found matching your search criteria.")}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Table Header */}
+            <div className="bg-secondary/50 border-b border-gray-700">
+              <div className="grid grid-cols-6 gap-6 px-8 py-4">
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Hash className="w-4 h-4 text-blue-400" />
+                  {t("Category ID")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Briefcase className="w-4 h-4 text-teal-400" />
+                  {t("Category")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <GraduationCap className="w-4 h-4 text-blue-400" />
+                  {t("Education")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Clock className="w-4 h-4 text-green-400" />
+                  {t("Experience")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                  <Star className="w-4 h-4 text-purple-400" />
+                  {t("Skills")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
+                  <BookOpen className="w-4 h-4 text-yellow-400" />
                   {t("Actions")}
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {displayData &&
-              displayData.map((category) => (
-                <tr
+                </div>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div>
+              {displayData && displayData.map((category) => (
+                <JobCategoryRowComponent
                   key={category.id}
-                  className={` ${isLightMode
-                    ? "hover:bg-darker text-blackAF hover:text-tblackAF"
-                    : "hover:bg-slate-700 text-twhite"
-                    }  group transition-colors`}
-                >
-                  <td className="py-3 px-4 text-center">
-                    {category && category.name}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {category && category.description}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {category && category.required_education}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {category && category.required_experience}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {category &&
-                      category.required_skills &&
-                      category.required_skills.length > 0 ? (
-                      <SkillsList
-                        skills={category.required_skills}
-                        onShowMore={() =>
-                          handleShowMoreSkills(category.required_skills)
-                        }
-                      />
-                    ) : (
-                      t("N/A")
-                    )}
-                  </td>
-                  {(isAdmin || hasEditPermission) && (
-                    <td className="py-3 px-4 flex gap-2">
-                      {(isAdmin || hasEditPermission) && (
-                        <NavigateButton
-                          data={category}
-                          className="cursor-pointer p-2 w-16 text-xs flex justify-center font-bold rounded-full bg-green-500/40 hover:bg-green-500 hover:text-green-100 border-2 border-green-500/30"
-                        >
-                          <Image
-                            src={PencilIcon}
-                            alt="edit icon"
-                            height={20}
-                            width={20}
-                          />
-                        </NavigateButton>
-                      )}
-                    </td>
-                  )}
-                </tr>
+                  category={category}
+                  isAdmin={isAdmin}
+                  hasEditPermission={hasEditPermission}
+                  NavigateButton={NavigateButton}
+                  t={t}
+                  onShowMoreSkills={handleShowMoreSkills}
+                />
               ))}
-          </tbody>
-        </table>
+            </div>
+
+            {/* Pagination - Only show if we're handling pagination internally */}
+            {!pagination && displayData && displayData.length > 0 && totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                onItemsPerPageChange={handleItemsPerPageChange}
+                totalItems={totalItems}
+                t={t}
+              />
+            )}
+          </>
+        )}
       </div>
-
-      {/* Pagination Controls - Only show if we're handling pagination internally */}
-      {!pagination && displayData && displayData.length > 0 && (
-        <div className={`flex flex-col md:flex-row justify-between items-center mt-4 px-2 ${isLightMode ? "text-blackAF" : "text-twhite"
-          }`}>
-          <div className="mb-4 md:mb-0">
-            <span>{t("Showing")} </span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`px-2 py-1 rounded mx-1 ${isLightMode
-                ? "bg-white text-black border border-gray-300"
-                : "bg-tblack text-white border border-gray-700"
-                }`}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span>{t("of")} {totalItems} {t("items")}</span>
-          </div>
-
-          <div className="flex items-center">
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
-                }`}
-            >
-              «
-            </button>
-
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
-                }`}
-            >
-              ‹
-            </button>
-
-            {getPageNumbers().map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`mx-1 px-3 py-1 rounded ${currentPage === page
-                  ? isLightMode
-                    ? "bg-tmid text-main"
-                    : "bg-tmid text-main"
-                  : isLightMode
-                    ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                    : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
-                }`}
-            >
-              ›
-            </button>
-
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={currentPage === totalPages}
-              className={`mx-1 px-3 py-1 rounded ${currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : isLightMode
-                  ? "bg-white hover:bg-gray-100 text-black border border-gray-300"
-                  : "bg-tblack hover:bg-gray-800 text-white border border-gray-700"
-                }`}
-            >
-              »
-            </button>
-          </div>
-        </div>
-      )}
 
       <CustomModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={t("Skills")}
+        title={t("Required Skills")}
         content={modalContent}
         language={currentLanguage as "en" | "ar"}
         actionText={t("Close")}
