@@ -14,25 +14,24 @@ import {
   SearchIcon,
 } from "@/assets";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import { EntityType, setSearchQuery } from "@/state/slices/searchSlice";
+import useTaskTimer from "@/hooks/useTaskTimer";
+import { setSearchQuery } from "@/state/slices/searchSlice";
 import { logout } from "@/state/slices/userSlice";
 import { AppDispatch, RootState } from "@/state/store";
+import { ReceiveTaskType } from "@/types/Task.type";
+import { TaskTree } from "@/types/trees/Task.tree.type";
 import { useQueryClient } from "@tanstack/react-query";
+import { Eye } from "lucide-react";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Notification from "./ui/Notification";
 import RouteWrapper from "./ui/RouteWrapper";
-import { useDashboard } from "@/hooks/useDashboard";
-import useTaskTimer from "@/hooks/useTaskTimer";
-import useCustomQuery from "@/hooks/useCustomQuery";
-import { ReceiveTaskType } from "@/types/Task.type";
-import { TaskTree } from "@/types/trees/Task.tree.type";
-import { Eye } from "lucide-react";
 
 const NewHeader = ({
   setIsExpanded,
@@ -68,9 +67,8 @@ const NewHeader = ({
   }, [pathname, activeEntity, searchText, dispatch]);
 
   const { t } = useTranslation();
-  const router = useRouter();
   const { isLightMode, toggleThemes } = useCustomTheme();
-  const { toggleLanguage, getDir } = useLanguage();
+  const { toggleLanguage } = useLanguage();
   const { setSnackbarConfig } = useMokkBar();
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
   const toggleSidebar = () => setIsExpanded((prev) => !prev);
@@ -83,38 +81,7 @@ const NewHeader = ({
     setSearchText(searchQueries[activeEntity] || "");
   }, [activeEntity, searchQueries]);
 
-  // Create our own debounce implementation without lodash
-  const debouncedSearch = useCallback(
-    (entity: EntityType, query: string) => {
-      if (window.searchTimeout) {
-        clearTimeout(window.searchTimeout);
-      }
-      window.searchTimeout = setTimeout(() => {
-        dispatch(setSearchQuery({ entity, query }));
-      }, 300);
-    },
-    [dispatch]
-  );
 
-  // Handle search input changes
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchText(query);
-    debouncedSearch(activeEntity, query);
-  };
-
-  // Handle search form submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(setSearchQuery({ entity: activeEntity, query: searchText }));
-
-    // If not already on the correct page, navigate to the search results page
-    if (activeEntity === "departments" && !pathname.includes("/departments")) {
-      router.push("/departments");
-    } else if (activeEntity === "employees" && !pathname.includes("/employees")) {
-      router.push("/employees");
-    }
-  };
 
   // Function to close the profile dropdown
   const closeDropdown = () => {
@@ -151,21 +118,23 @@ const NewHeader = ({
 
   // --- Running Task Logic ---
   // Get user's tasks (myTasks is more universal than dailyTasks)
-  const { data: tasksData, isLoading: isTasksLoading } = useCustomQuery<{
+  const { data: tasksData } = useCustomQuery<{
     info: ReceiveTaskType[];
     tree: TaskTree[];
   }>({
     queryKey: ["tasks"],
     url: `/tasks/tree`,
+    refetchInterval: 2000
   });
 
-
   // Find the first running task (has a timeLog with start and no end)
-  const runningTask = tasksData?.info.find(
-    (task) =>
-      Array.isArray(task.timeLogs) &&
-      task.timeLogs.some((log) => log.start && !log.end)
-  );
+  const runningTask = Array.isArray(tasksData?.info)
+    ? tasksData.info.find(
+      (task) =>
+        Array.isArray(task.timeLogs) &&
+        task.timeLogs.some((log) => log.start && !log.end)
+    )
+    : undefined;
 
   // Always call useTaskTimer to avoid conditional hooks
   const timerProps = useTaskTimer(
@@ -192,8 +161,6 @@ const NewHeader = ({
               p-1.5 rounded-lg active:scale-95 hover:shadow-lg`}
           />
         </div>
-
-
 
         {/* Actions Group */}
         <div className="flex items-center gap-2 md:gap-4">

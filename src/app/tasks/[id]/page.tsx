@@ -101,6 +101,7 @@ export default function TaskDetailsPage() {
       return;
     }
     await startTimer();
+    queryClient.invalidateQueries({ queryKey: ["tasks"] });
   };
 
   const handlePause = async () => {

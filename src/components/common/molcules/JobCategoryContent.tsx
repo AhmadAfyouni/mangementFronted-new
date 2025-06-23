@@ -1,25 +1,23 @@
 "use client";
 
 import { PencilIcon } from "@/assets";
+import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
 import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
+import { setActiveEntity } from "@/state/slices/searchSlice";
+import { RootState } from "@/state/store";
 import { JobCategoryType } from "@/types/JobTitle.type";
+import { BookOpen, Briefcase, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, GraduationCap, Hash, Star } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import CustomModal from "../atoms/modals/CustomModal";
 import PageSpinner from "../atoms/ui/PageSpinner";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/state/store";
-import { setActiveEntity } from "@/state/slices/searchSlice";
-import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
-import { Briefcase, GraduationCap, Clock, Star, Hash, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, BookOpen } from "lucide-react";
-import React from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -321,7 +319,6 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
     queryKey: ["jobTitles"],
     url: `/job-categories`,
   });
-  const { isLightMode } = useCustomTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<string[]>([]);
 

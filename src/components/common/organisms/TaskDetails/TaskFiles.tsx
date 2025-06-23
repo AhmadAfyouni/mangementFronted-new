@@ -1,8 +1,8 @@
 // Compact TaskFiles Component
 import { FileManager } from '@/components/common/atoms/fileManager';
 import useLanguage from '@/hooks/useLanguage';
-import { constructFileUrl, getFilenameFromUrl, isFileManagerUrl } from '@/utils/url';
-import { AlertCircle, ExternalLink, Paperclip, XCircle, FolderOpen } from "lucide-react";
+import { constructFileUrl, getFilenameFromUrl } from '@/utils/url';
+import { AlertCircle, ExternalLink, FolderOpen, Paperclip, XCircle } from "lucide-react";
 import { useState } from "react";
 
 interface TaskFilesProps {
@@ -91,7 +91,6 @@ export const TaskFiles: React.FC<TaskFilesProps> = ({
 
             <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {files.map((file, index) => {
-                const isFromFileManager = isFileManagerUrl(file);
                 const fileUrl = constructFileUrl(file);
                 const fileName = getFilenameFromUrl(file) || `File ${index + 1}`;
 

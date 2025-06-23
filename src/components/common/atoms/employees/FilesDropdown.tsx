@@ -208,7 +208,7 @@ const FilesButton: React.FC<FilesButtonProps> = ({ employee, isLightMode }) => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
+    const handleClickOutside = (): void => {
       if (isOpen) {
         setIsOpen(false);
       }

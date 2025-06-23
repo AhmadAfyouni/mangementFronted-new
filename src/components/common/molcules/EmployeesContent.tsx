@@ -5,14 +5,13 @@ import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import useSetPageData from "@/hooks/useSetPageData";
 import { EmployeeType } from "@/types/EmployeeType.type";
+import { Briefcase, Building2, Calendar, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, DollarSign, Mail, MapPin, Phone, User, Users } from "lucide-react";
 import Image from "next/image";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import FilesButton from "../atoms/employees/FilesDropdown";
-import { Building2, Briefcase, Users, Mail, Phone, MapPin, Calendar, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, User, DollarSign } from "lucide-react";
-import React, { useState } from "react";
 
 interface EmployeesContentProps {
   employeesData: EmployeeType[];
@@ -290,7 +289,6 @@ const EmployeesContent: React.FC<EmployeesContentProps> = ({ employeesData }) =>
   const { t } = useTranslation();
   const isAdmin = useRolePermissions("admin");
   const hasEditPermission = usePermissions(["emp_update"]);
-  const { isLightMode } = useCustomTheme();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
