@@ -3,11 +3,10 @@ import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
 import { DepartmentType } from "@/types/DepartmentType.type";
-import { Briefcase, Building2, FileText, Users, Hash, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Briefcase, Building2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FileText, Hash, Users } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { DevelopmentProgramsModal, FilesReportsModal, TextModal } from "./departments/DepartmentsComponents";
@@ -350,7 +349,6 @@ const DepartmentsContent: React.FC<DepartmentsContentProps> = ({
   pagination,
 }) => {
   const { t } = useLanguage();
-  const { isLightMode } = useCustomTheme();
   const isAdmin = useRolePermissions("admin");
   const hasEditPermission = usePermissions(["department_updatesss"]);
   const { NavigateButton } = useSetPageData<DepartmentType>(

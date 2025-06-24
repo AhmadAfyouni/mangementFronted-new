@@ -69,7 +69,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
   // Ensure subtasks is an array and assignee is always { name: string } | undefined
   const subtasks: Subtask[] = Array.isArray(task.subtasks)
-    ? task.subtasks.map((sub: any) => ({
+    ? task.subtasks.map((sub) => ({
       ...sub,
       assignee: sub.assignee && sub.assignee.name
         ? { name: sub.assignee.name }
@@ -140,7 +140,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
       {/* Subtasks Card */}
       <div className="bg-secondary rounded-xl border border-gray-700 overflow-hidden transition-all duration-200 hover:border-gray-600">
-        <div className="bg-dark/30 px-6 py-4 border-b border-gray-700/50">
+        <div className="bg-dark px-6 py-4 border-b border-gray-700/50">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-twhite flex items-center gap-3">
               <div className="p-2 rounded-lg bg-purple-500/20">
@@ -170,7 +170,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
           {/* Add Subtask Button */}
           <button
             onClick={onAddSubtask}
-            className="w-full p-4 bg-dark/50 border-2 border-dashed border-gray-600 rounded-lg 
+            className="w-full p-4 bg-dark border-2 border-dashed border-gray-600 rounded-lg 
               text-gray-400 hover:text-purple-400 hover:border-purple-400/50 hover:bg-purple-500/5
               transition-all duration-200 group flex items-center justify-center gap-3"
           >
@@ -188,7 +188,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
               {subtasks.map((subtask: Subtask, index: number) => (
                 <div
                   key={subtask.id || index}
-                  className="group p-4 bg-dark/50 rounded-lg border border-gray-700/50 cursor-pointer 
+                  className="group p-4 bg-dark rounded-lg border border-gray-700/50 cursor-pointer 
                     transition-all duration-200 hover:bg-dark/70 hover:border-purple-400/50 hover:shadow-md"
                   onClick={() => handleTaskClick(subtask.id)}
                 >
@@ -246,28 +246,6 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
         </div>
       </div>
 
-      {/* Quick Stats Card */}
-      {totalSubtasks > 0 && (
-        <div className="bg-secondary rounded-xl p-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-blue-500/20">
-              <Hash className="w-4 h-4 text-blue-400" />
-            </div>
-            {t("Quick Stats")}
-          </h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-dark/50 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-400">{completedSubtasks}</div>
-              <div className="text-xs text-gray-400">{t("Completed")}</div>
-            </div>
-            <div className="p-3 bg-dark/50 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-400">{totalSubtasks - completedSubtasks}</div>
-              <div className="text-xs text-gray-400">{t("Remaining")}</div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

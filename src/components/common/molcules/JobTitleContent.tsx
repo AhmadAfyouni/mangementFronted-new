@@ -1,25 +1,23 @@
 import { PencilIcon } from "@/assets";
+import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
+import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
 import {
   usePermissions,
   useRolePermissions,
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useSetPageData from "@/hooks/useSetPageData";
+import { setActiveEntity } from "@/state/slices/searchSlice";
+import { RootState } from "@/state/store";
 import { JobTitleType, RoutineTaskType } from "@/types/JobTitle.type";
+import { Briefcase, Building2, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, FileText, Hash, Shield, Users } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import CustomModal from "../atoms/modals/CustomModal";
 import RoutineTasksModal from "../atoms/modals/RoutineTasksModal";
 import PageSpinner from "../atoms/ui/PageSpinner";
-import { Info, Briefcase, Building2, Hash, Users, FileText, Shield, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/state/store";
-import useGlobalSearch, { SearchConfig } from "@/hooks/departments/useGlobalSearch";
-import { setActiveEntity } from "@/state/slices/searchSlice";
-import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
-import React from "react";
 
 const JobTitleRowComponent: React.FC<{
   job: JobTitleType;
@@ -62,18 +60,6 @@ const JobTitleRowComponent: React.FC<{
     } else {
       return "bg-teal-500/20 text-teal-400 border-teal-500/30";
     }
-  };
-
-  const handleLongText = (text: string | undefined, maxLength = 50): React.ReactNode => {
-    if (!text) return <span className="text-gray-500">{t("N/A")}</span>;
-
-    if (text.length <= maxLength) return text;
-
-    return (
-      <div>
-        <span>{text.substring(0, maxLength)}...</span>
-      </div>
-    );
   };
 
   return (
@@ -321,7 +307,6 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   const { t, currentLanguage } = useLanguage();
   const isAdmin = useRolePermissions("admin");
   const hasEditPermission = usePermissions(["job_title_update"]);
-  const { isLightMode } = useCustomTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<{
     title: string;

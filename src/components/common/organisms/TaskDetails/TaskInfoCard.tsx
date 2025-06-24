@@ -1,30 +1,24 @@
-import React, { useRef } from "react";
-import { useRouter } from "next/navigation";
+import useLanguage from "@/hooks/useLanguage";
+import { formatDate, getPriorityColor } from "@/services/task.service";
+import { ReceiveTaskType } from "@/types/Task.type";
 import {
-  User,
+  ArrowUpRight,
   Building2,
-  Target,
-  AlertCircle,
   Calendar,
+  CheckCircle2,
   ChevronDown,
+  Clock,
   Edit2,
   Layers,
-  ArrowUpRight,
-  Clock,
-  BarChart,
-  Repeat,
-  Briefcase,
-  Tag,
-  Hash,
-  CheckCircle2,
-  XCircle,
   PlayCircle,
-  PauseCircle,
-  TestTube
+  Repeat,
+  Tag,
+  Target,
+  TestTube,
+  XCircle
 } from "lucide-react";
-import { ReceiveTaskType } from "@/types/Task.type";
-import { formatDate, getPriorityColor } from "@/services/task.service";
-import useLanguage from "@/hooks/useLanguage";
+import { useRouter } from "next/navigation";
+import React, { useRef } from "react";
 
 interface TaskInfoCardProps {
   task: ReceiveTaskType;

@@ -1,7 +1,7 @@
-import useLanguage from "@/hooks/useLanguage";
-import { Clock, Play, Pause, RotateCcw, Timer, History } from "lucide-react";
 import { TimeLogSection } from "@/components/common/atoms/tasks/TimeLogSection";
+import useLanguage from "@/hooks/useLanguage";
 import { TimeLog } from "@/types/Task.type";
+import { Clock, History, Pause, Play, RotateCcw } from "lucide-react";
 
 interface TaskTimeTrackingProps {
   displayTime: number;
