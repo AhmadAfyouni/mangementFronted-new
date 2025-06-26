@@ -178,7 +178,7 @@ const AddProjectModal: React.FC<{
                       <div className="md:col-span-2">
                         <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                           <Type className="w-4 h-4 text-purple-400" />
-                          {t("Project Name")}
+                          {t("Project Name")} <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
                           <input
@@ -201,11 +201,11 @@ const AddProjectModal: React.FC<{
                         )}
                       </div>
 
-                      {/* Description Field */}
+                      {/* Project Description Field */}
                       <div className="md:col-span-2">
-                        <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-400" />
-                          {t("Description")}
+                        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-purple-400" />
+                          {t("Project Description")} <span className="text-red-400">*</span>
                         </label>
                         <textarea
                           {...register("description")}
@@ -221,12 +221,11 @@ const AddProjectModal: React.FC<{
                         )}
                       </div>
 
-
                       {/* Start Date Field */}
                       <div>
-                        <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-green-400" />
-                          {t("Start Date")}
+                          {t("Start Date")} <span className="text-red-400">*</span>
                         </label>
                         <input
                           type="date"
@@ -243,9 +242,9 @@ const AddProjectModal: React.FC<{
 
                       {/* End Date Field */}
                       <div>
-                        <label className=" text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-yellow-400" />
-                          {t("End Date")}
+                        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-red-400" />
+                          {t("End Date")} <span className="text-red-400">*</span>
                         </label>
                         <input
                           type="date"

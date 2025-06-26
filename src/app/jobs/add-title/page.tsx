@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 "use client";
-import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import ConditionalDropdowns from "@/components/common/atoms/job-title/ConditionalDropdowns";
+import DynamicResponsibilities from "@/components/common/atoms/job-title/DynamicResponsibilities";
 import IsManagerToggle from "@/components/common/atoms/job-title/IsManagerToggle";
 import { PermissionsSection } from "@/components/common/atoms/job-title/PermissionsSection";
 import TitleFormInput from "@/components/common/atoms/job-title/TitleFormInput";
+import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import { useJobTitleForm } from "@/hooks/job-title/useJobTitleForm";
 import useCustomQuery from "@/hooks/useCustomQuery";
@@ -14,14 +15,13 @@ import { getDepartmentOptions } from "@/services/job.service";
 import { DepartmentType } from "@/types/DepartmentType.type";
 import { CreateRoutineTaskDto, JobCategoryType } from "@/types/JobTitle.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
+import { apiClient } from "@/utils/axios/usage";
 import getErrorMessages from "@/utils/handleErrorMessages";
+import { useMutation } from "@tanstack/react-query";
+import { AlertTriangle, Bookmark, Calendar, ChevronDown, ChevronUp, Clock, Plus, Save, Trash2, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import DynamicResponsibilities from "@/components/common/atoms/job-title/DynamicResponsibilities";
-import { ChevronDown, ChevronUp, Save, AlertTriangle, Plus, Clock, Trash2, Bookmark, Calendar, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { apiClient } from "@/utils/axios/usage";
 
 // Form section types for the multi-step form
 const FORM_SECTIONS = {
@@ -72,9 +72,6 @@ const AddJobTitle: React.FC = () => {
   const reset = hookResult.reset || (hookResult.formMethods && hookResult.formMethods.reset);
   const getValues = hookResult.getValues || (hookResult.formMethods && hookResult.formMethods.getValues);
   const setValue = hookResult.setValue || (hookResult.formMethods && hookResult.formMethods.setValue);
-  const errorJobTitle = hookResult.errorJobTitle;
-  const isErrorJobTitle = hookResult.isErrorJobTitle;
-  const isPendingJobTitle = hookResult.isPendingJobTitle;
 
   // Fetch job title data from API endpoint if in edit mode
   const { data: jobTitleData, isLoading: isLoadingJobTitle } = useCustomQuery({
@@ -317,17 +314,20 @@ const AddJobTitle: React.FC = () => {
                 <div className="p-4 space-y-4 bg-secondary/30">
                   <TitleFormInput
                     name="title"
-                    label={t("Title")}
+                    label={t("Job Title")}
                     placeholder={t("Enter job title")}
-                    errors={errors}
                     register={register}
+                    errors={errors}
+                    isRequired={true}
                   />
                   <TitleFormInput
                     name="description"
                     label={t("Description")}
-                    placeholder={t("Enter job description")}
-                    errors={errors}
+                    placeholder={t("Enter description")}
+                    type="textarea"
                     register={register}
+                    errors={errors}
+                    isRequired={true}
                   />
                 </div>
               )}
@@ -347,7 +347,9 @@ const AddJobTitle: React.FC = () => {
                     hasError={errors.responsibilities}
                     isComplete={responsibilities.length > 0}
                   />
-                  <h2 className="text-lg font-semibold">{t("Responsibilities")}</h2>
+                  <h2 className="text-lg font-semibold">
+                    {t("Responsibilities")} <span className="text-red-400">*</span>
+                  </h2>
                 </div>
                 {expandedSections[FORM_SECTIONS.RESPONSIBILITIES] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </div>
@@ -360,6 +362,7 @@ const AddJobTitle: React.FC = () => {
                     register={register}
                     setValue={setValue}
                     errors={errors}
+                    label={t("Responsibilities") + " *"}
                   />
                 </div>
               )}
@@ -379,7 +382,9 @@ const AddJobTitle: React.FC = () => {
                     hasError={false}
                     isComplete={permissionsMode === "custom" ? permissionsSelected.length > 0 : true}
                   />
-                  <h2 className="text-lg font-semibold">{t("Permissions")}</h2>
+                  <h2 className="text-lg font-semibold">
+                    {t("Permissions")} <span className="text-red-400">*</span>
+                  </h2>
                 </div>
                 {expandedSections[FORM_SECTIONS.PERMISSIONS] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </div>
@@ -391,6 +396,9 @@ const AddJobTitle: React.FC = () => {
                     setPermissionsMode={setPermissionsMode}
                     permissionsSelected={permissionsSelected}
                     setPermissionsSelected={setPermissionsSelected}
+                    register={register}
+                    errors={errors}
+                    label={t("Permissions") + " *"}
                   />
 
                   <ConditionalDropdowns
@@ -604,7 +612,7 @@ const AddJobTitle: React.FC = () => {
                                   <div className="grid grid-cols-1 gap-5">
                                     {/* Task Name and Description */}
                                     <div>
-                                      <label className="block text-sm font-medium mb-1.5">{t("Task Name")}</label>
+                                      <label className="block text-sm font-medium mb-1.5">{t("Task Name")} <span className="text-red-400">*</span></label>
                                       <input
                                         type="text"
                                         value={task.name}
@@ -636,7 +644,7 @@ const AddJobTitle: React.FC = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {/* Priority */}
                                     <div>
-                                      <label className="block text-sm font-medium mb-1.5">{t("Priority")}</label>
+                                      <label className="block text-sm font-medium mb-1.5">{t("Priority")} <span className="text-red-400">*</span></label>
                                       <div className="relative">
                                         <select
                                           value={task.priority}
@@ -659,7 +667,7 @@ const AddJobTitle: React.FC = () => {
 
                                     {/* Recurring Type */}
                                     <div>
-                                      <label className="block text-sm font-medium mb-1.5">{t("Recurrence")}</label>
+                                      <label className="block text-sm font-medium mb-1.5">{t("Recurrence")} <span className="text-red-400">*</span></label>
                                       <div className="relative">
                                         <select
                                           value={task.recurringType}
@@ -762,6 +770,7 @@ const AddJobTitle: React.FC = () => {
                                       {task.subTasks && task.subTasks.map((subtask, subIndex) => (
                                         <div key={subIndex} className="bg-dark p-4 rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
                                           <div className="flex justify-between items-start mb-3">
+                                            <label className="block text-xs text-gray-400 mb-1">{t("Subtask Name")} <span className="text-red-400">*</span></label>
                                             <input
                                               type="text"
                                               value={subtask.name}
@@ -870,75 +879,87 @@ const AddJobTitle: React.FC = () => {
                 <div className="flex items-center">
                   <SectionIndicator
                     hasError={errors.department_id || errors.category}
-                    isComplete={selectedDept && selectedCategory}
+                    isComplete={getValues("department_id") && getValues("category")}
                   />
-                  <h2 className="text-lg font-semibold">{t("Department & Category")}</h2>
+                  <h2 className="text-lg font-semibold">{t("Department Information")}</h2>
                 </div>
                 {expandedSections[FORM_SECTIONS.DEPARTMENT_INFO] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </div>
 
               {expandedSections[FORM_SECTIONS.DEPARTMENT_INFO] && (
                 <div className="p-4 space-y-4 bg-secondary/30">
-                  <TitleFormInput
-                    name="category"
-                    label={t("Job Category")}
-                    placeholder={t("Select a Job Category")}
-                    type="select"
-                    selectedOption={selectedCategory}
-                    options={categories}
-                    errors={errors}
+                  {/* Department and Category Dropdowns */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5">{t("Department")} <span className="text-red-400">*</span></label>
+                      <div className="relative">
+                        <select
+                          value={selectedDept}
+                          onChange={(e) => {
+                            setSelectedDept(e.target.value);
+                            setValue("department_id", e.target.value);
+                          }}
+                          className="w-full bg-dark border border-gray-700 rounded-lg px-3 py-2 appearance-none focus:border-secondary focus:ring-1 focus:ring-secondary"
+                        >
+                          <option value="">{t("Select Department")}</option>
+                          {departments?.info?.map((dept) => (
+                            <option key={dept.id} value={dept.id}>
+                              {dept.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <ChevronDown size={16} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5">{t("Category")} <span className="text-red-400">*</span></label>
+                      <div className="relative">
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => {
+                            setSelectedCategory(e.target.value);
+                            setValue("category", e.target.value);
+                          }}
+                          className="w-full bg-dark border border-gray-700 rounded-lg px-3 py-2 appearance-none focus:border-secondary focus:ring-1 focus:ring-secondary"
+                        >
+                          <option value="">{t("Select Category")}</option>
+                          {categories?.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <ChevronDown size={16} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Is Manager Toggle */}
+                  <IsManagerToggle
+                    isManager={isManager}
+                    setIsManager={setIsManager}
                     register={register}
-                    onChange={setSelectedCategory}
-                  />
-
-                  <TitleFormInput
-                    name="department_id"
-                    label={t("Department")}
-                    placeholder={t("Select a Department")}
-                    type="select"
-                    selectedOption={selectedDept}
-                    options={departments?.tree}
                     errors={errors}
-                    register={register}
-                    onChange={setSelectedDept}
+                    label={t("Is Manager")}
                   />
-
-                  <IsManagerToggle isManager={isManager} setIsManager={setIsManager} />
-
                 </div>
               )}
             </div>
 
-            <div className="pt-4 border-t border-gray-700">
+            {/* Submit Button */}
+            <div className="text-center">
               <button
                 type="submit"
-                className={`w-full py-3 mt-4 bg-secondary hover:bg-secondary/80 
-                  text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2
-                  ${isPendingJobTitle ? "opacity-70 cursor-not-allowed" : ""}`}
-                disabled={isPendingJobTitle}
+                className="bg-secondary hover:bg-secondary/80 transition-colors text-white font-medium px-6 py-3 rounded-lg"
               >
-                {!isPendingJobTitle ? (
-                  <>
-                    <Save size={18} />
-                    {isEditMode ? t("Update Job Title") : t("Create Job Title")}
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                    {isEditMode ? t("Updating...") : t("Creating...")}
-                  </div>
-                )}
+                {isEditMode ? t("Update Job Title") : t("Create Job Title")}
               </button>
             </div>
-
-            {isErrorJobTitle && (
-              <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mt-4">
-                <p className="text-red-500 text-center flex items-center justify-center gap-2">
-                  <AlertTriangle size={18} />
-                  {errorJobTitle + ""}
-                </p>
-              </div>
-            )}
           </form>
         )}
       </div>

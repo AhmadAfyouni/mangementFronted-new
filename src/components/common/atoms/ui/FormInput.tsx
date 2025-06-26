@@ -41,6 +41,7 @@ interface CommonInputProps<TFieldValues extends FieldValues> {
   additionalClassName?: string;
   addButtonClassName?: string;
   errorClassName?: string;
+  isRequired?: boolean;
 }
 
 interface CommonInputRenderProps<TFieldValues extends FieldValues>
@@ -76,6 +77,7 @@ export const FormInput = <TFieldValues extends FieldValues>({
   additionalClassName = "",
   addButtonClassName = "",
   errorClassName = "",
+  isRequired = false,
 }: CommonInputProps<TFieldValues>) => {
   // State for managing dynamic option adding
   const [isAddingOption, setIsAddingOption] = useState(false);
@@ -114,7 +116,9 @@ export const FormInput = <TFieldValues extends FieldValues>({
 
   // Default render label function with consistent spacing
   const defaultRenderLabel = () => (
-    <label className="block text-sm font-medium mb-1">{t(label)}</label>
+    <label className="block text-sm font-medium mb-1">
+      {t(label)} {isRequired && <span className="text-red-400">*</span>}
+    </label>
   );
 
   // Default input rendering based on type

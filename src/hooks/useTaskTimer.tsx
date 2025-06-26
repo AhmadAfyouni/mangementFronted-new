@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { TimeLog } from "@/types/Task.type";
 import { apiClient } from "@/utils/axios/usage";
+import { useTranslation } from "react-i18next";
 
 interface UseTaskTimerReturn {
     // Timer state
@@ -27,6 +28,7 @@ interface UseTaskTimerReturn {
  */
 const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerReturn => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     // Core timer state
     const [elapsedTime, setElapsedTime] = useState(0);
@@ -143,15 +145,15 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
                 startTimeRef.current = Date.now();
                 return { success: true };
             } else {
-                return { success: false, message: "Failed to start timer" };
+                return { success: false, message: t("Failed to start timer") };
             }
         } catch (error) {
             console.error("Error starting timer:", error);
-            return { success: false, message: "Failed to start timer" };
+            return { success: false, message: t("Failed to start timer") };
         } finally {
             setIsLoading(false);
         }
-    }, [makeApiCall]);
+    }, [makeApiCall, t]);
 
     // Pause timer action
     const pauseTimer = useCallback(async (): Promise<{ success: boolean; message?: string }> => {
@@ -176,11 +178,11 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
             return result;
         } catch (error) {
             console.error("Error pausing timer:", error);
-            return { success: false, message: "Failed to pause timer" };
+            return { success: false, message: t("Failed to pause timer") };
         } finally {
             setIsLoading(false);
         }
-    }, [elapsedTime, makeApiCall]);
+    }, [elapsedTime, makeApiCall, t]);
 
     return {
         elapsedTime,

@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "react-modal";
+import { useTranslation } from "react-i18next";
 
 const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
   isOpen,
@@ -23,6 +24,8 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
     resolver: yupResolver(addTaskTypeSchema) as any,
     defaultValues: taskTypeData || {},
   });
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (taskTypeData) {
@@ -79,14 +82,14 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
         >
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Task Type Name
+              {t("Task Type Name")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               {...register("name")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter task type name"
+              placeholder={t("Enter task type name")}
             />
             {errors.name && (
               <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>
@@ -94,13 +97,13 @@ const CreateTaskType: React.FC<CreateTaskTypeProps> = ({
           </div>
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Description
+              {t("Description")} <span className="text-red-400">*</span>
             </label>
             <textarea
               {...register("description")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.description ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter description"
+              placeholder={t("Enter description")}
               rows={3}
             />
             {errors.description && (

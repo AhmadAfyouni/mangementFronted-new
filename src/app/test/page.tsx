@@ -1,7 +1,9 @@
-import React from "react";
+"use client";
 
-const page = () => {
-  return <div>page</div>;
-};
+import { useTranslation } from "react-i18next";
 
-export default page;
+export default function TestPage() {
+  const { t } = useTranslation();
+
+  return <div>{t("page")}</div>;
+}

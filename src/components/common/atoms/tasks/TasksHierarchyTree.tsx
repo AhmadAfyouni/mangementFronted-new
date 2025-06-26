@@ -18,6 +18,7 @@ import ReactFlow, {
   Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import { useTranslation } from "react-i18next";
 
 type TaskHierarchyTreeProps = {
   data: TaskTree[];
@@ -121,6 +122,7 @@ const TaskHierarchyTree: React.FC<TaskHierarchyTreeProps> = ({
   lightMode = false,
 }) => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const CustomNode = ({ data, id }: NodeProps) => {
     const isHovered = hoveredNode === id;
@@ -150,7 +152,7 @@ const TaskHierarchyTree: React.FC<TaskHierarchyTreeProps> = ({
             <span className="font-semibold text-sm text-white">{data.status || "PENDING"}</span>
           </div>
           {data.isOverdue && (
-            <span className="text-xs text-red-400 font-medium">Overdue</span>
+            <span className="text-xs text-red-400 font-medium">{t("Overdue")}</span>
           )}
         </div>
 
@@ -223,7 +225,7 @@ const TaskHierarchyTree: React.FC<TaskHierarchyTreeProps> = ({
     <div className="relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden">
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <Layers className="w-5 h-5 text-gray-400" />
-        <h3 className="text-lg font-bold text-white">Task Hierarchy</h3>
+        <h3 className="text-lg font-bold text-white">{t("Task Hierarchy")}</h3>
       </div>
       <ReactFlow
         nodes={nodes}

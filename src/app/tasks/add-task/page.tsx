@@ -14,10 +14,10 @@ import { ReceiveTaskType, TaskFormInputs } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
-import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, CheckCircle, Clock, DollarSign, FileText, FolderOpen, GitBranch, Hash, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
-import { useMemo, useState, useEffect, useRef } from "react";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
 import { apiClient } from "@/utils/axios/usage";
+import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, CheckCircle, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FieldErrors, UseFormRegister } from "react-hook-form";
 
 // Define interfaces for API responses
 interface SectionType {
@@ -145,7 +145,6 @@ const AddTaskPage: React.FC = () => {
             iconTextColor="text-purple-400"
             isOpen={openSections.basic}
             onToggle={() => toggleSection('basic')}
-            count={4}
           >
             <BasicInformationSection
               register={register}
@@ -162,7 +161,6 @@ const AddTaskPage: React.FC = () => {
             iconTextColor="text-blue-400"
             isOpen={openSections.assignment}
             onToggle={() => toggleSection('assignment')}
-            count={5}
           >
             <AssignmentSection
               register={register}
@@ -185,7 +183,6 @@ const AddTaskPage: React.FC = () => {
             iconTextColor="text-green-400"
             isOpen={openSections.dates}
             onToggle={() => toggleSection('dates')}
-            count={4}
           >
             <DatesTimelineSection
               register={register}
@@ -206,7 +203,6 @@ const AddTaskPage: React.FC = () => {
             iconTextColor="text-yellow-400"
             isOpen={openSections.time}
             onToggle={() => toggleSection('time')}
-            count={4}
           >
             <TimeBudgetSection
               register={register}
@@ -296,8 +292,8 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-5 bg-gradient-to-br from-dark to-gray-800/50 rounded-xl border border-purple-500/30">
             <div>
               <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                <Repeat className="w-4 h-4 text-purple-400" />
-                {t("Recurring Type")} <span className="text-red-400">*</span>
+                <RotateCcw className="w-4 h-4 text-orange-400" />
+                {t("Recurring Type")} {isRecurring && <span className="text-red-400">*</span>}
               </label>
               <div className="relative">
                 <select
@@ -327,8 +323,8 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
 
             <div>
               <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                <Hash className="w-4 h-4 text-blue-400" />
-                {t("Interval (Days)")} <span className="text-red-400">*</span>
+                <Clock className="w-4 h-4 text-orange-400" />
+                {t("Interval (Days)")} {isRecurring && <span className="text-red-400">*</span>}
               </label>
               <input
                 {...register("intervalInDays")}
@@ -347,8 +343,8 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
 
             <div>
               <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-green-400" />
-                {t("Recurring End Date")} <span className="text-red-400">*</span>
+                <Calendar className="w-4 h-4 text-orange-400" />
+                {t("Recurring End Date")} {isRecurring && <span className="text-red-400">*</span>}
               </label>
               <input
                 {...register("recurringEndDate")}
@@ -433,7 +429,7 @@ const TimeBudgetSection: React.FC<TimeBudgetSectionProps> = ({
   t,
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {/* Estimated Hours */}
       {/* <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
@@ -449,20 +445,7 @@ const TimeBudgetSection: React.FC<TimeBudgetSectionProps> = ({
         />
       </div> */}
 
-      {/* Rate */}
-      <div>
-        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-yellow-400" />
-          {t("Hourly Rate")}
-        </label>
-        <input
-          {...register("rate")}
-          type="number"
-          step="0.01"
-          placeholder={t("Enter hourly rate")}
-          className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-yellow-500 focus:ring focus:ring-yellow-500/20 focus:outline-none transition-colors"
-        />
-      </div>
+
 
       {/* Progress Calculation Method */}
       <div>
@@ -596,7 +579,7 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Start Date */}
         <div>
           <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
@@ -885,9 +868,9 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
   t,
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Task Name */}
-      <div className="lg:col-span-2">
+      <div className="md:col-span-1">
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
           <Type className="w-4 h-4 text-purple-400" />
           {t("Task Name")} <span className="text-red-400">*</span>
@@ -913,37 +896,10 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
         )}
       </div>
 
-      {/* Description */}
-      <div className="lg:col-span-2">
-        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-blue-400" />
-          {t("Description")} <span className="text-red-400">*</span>
-        </label>
-        <div className="relative">
-          <textarea
-            {...register("description")}
-            placeholder={t("Enter task description")}
-            rows={4}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors resize-none"
-          />
-          {errors.description && (
-            <div className="absolute right-3 top-3.5 text-red-500">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-          )}
-        </div>
-        {errors.description && (
-          <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" />
-            {errors.description.message}
-          </p>
-        )}
-      </div>
-
       {/* Priority */}
-      <div>
+      <div className="md:col-span-1">
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-orange-400" />
+          <AlertCircle className="w-4 h-4 text-purple-400" />
           {t("Priority")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -969,15 +925,63 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
           </p>
         )}
       </div>
+
+      {/* Description */}
+      <div className="md:col-span-2">
+        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-purple-400" />
+          {t("Description")} <span className="text-red-400">*</span>
+        </label>
+        <div className="relative">
+          <textarea
+            {...register("description")}
+            placeholder={t("Enter task description")}
+            rows={4}
+            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors resize-none"
+          />
+          {errors.description && (
+            <div className="absolute right-3 top-3.5 text-red-500">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+          )}
+        </div>
+        {errors.description && (
+          <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {errors.description.message}
+          </p>
+        )}
+      </div>
+
+
+
+
+      {/* Status */}
+      {/* <div>
+        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-purple-400" />
+          {t("Status")}
+        </label>
+        <div className="relative">
+          <select
+            {...register("status")}
+            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none"
+          >
+            <option value="">{t("Select Status")}</option>
+            <option value="IN_PROGRESS">{t("In Progress")}</option>
+            <option value="COMPLETED">{t("Completed")}</option>
+            <option value="CANCELLED">{t("Cancelled")}</option>
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div> */}
     </div>
   );
 };
-
-
-
-
-
-
 
 
 interface TaskPageHeaderProps {

@@ -16,6 +16,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "react-modal";
+import { useTranslation } from "react-i18next";
 
 const CreateEmployee: React.FC<CreateEmployeeProps> = ({
   isOpen,
@@ -110,6 +111,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
     }
   }, [errors, setSnackbarConfig]);
 
+  const { t } = useTranslation();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -132,13 +135,15 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
         <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Name Field */}
           <div>
-            <label className="block text-tdark text-sm font-medium">Name</label>
+            <label className="block text-tdark text-sm font-medium">
+              {t("Name")} <span className="text-red-400">*</span>
+            </label>
             <input
               type="text"
               {...register("name")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.name ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter employee name"
+              placeholder={t("Enter employee name")}
             />
             {errors.name && (
               <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>
@@ -147,14 +152,14 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {/* DOB Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Date of Birth
+              {t("Date of Birth")} <span className="text-red-400">*</span>
             </label>
             <input
               type="date"
               {...register("dob")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.dob ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter date of birth"
+              placeholder={t("Enter date of birth")}
             />
             {errors.dob && (
               <p className="text-red-500 mt-1 text-sm">{errors.dob.message}</p>
@@ -163,14 +168,14 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {/* Phone Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Phone
+              {t("Phone")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               {...register("phone")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.phone ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter phone number"
+              placeholder={t("Enter phone number")}
             />
             {errors.phone && (
               <p className="text-red-500 mt-1 text-sm">
@@ -181,14 +186,14 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {/* Email Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Email
+              {t("Email")} <span className="text-red-400">*</span>
             </label>
             <input
               type="email"
               {...register("email")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter email"
+              placeholder={t("Enter email")}
             />
             {errors.email && (
               <p className="text-red-500 mt-1 text-sm">
@@ -207,7 +212,7 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
                 {...register("password")}
                 className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-gray-300"
                   }`}
-                placeholder="Enter Password"
+                placeholder={t("Enter Password")}
               />
               {errors.password && (
                 <p className="text-red-500 mt-1 text-sm">
@@ -219,14 +224,14 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {/* Address Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Address
+              {t("Address")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               {...register("address")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.address ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter address"
+              placeholder={t("Enter address")}
             />
             {errors.address && (
               <p className="text-red-500 mt-1 text-sm">
@@ -235,42 +240,51 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
             )}
           </div>
           {/* Department Field */}
-
-          <select
-            {...register("department_id")}
-            className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
-              }`}
-          >
-            <option value="">Select a department</option>
-            {departments &&
-              departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
-          </select>
-          {errors.department_id && (
-            <p className="text-red-500 mt-1 text-sm">
-              {errors.department_id.message}
-            </p>
-          )}
-
-          <select
-            {...register("job_id")}
-            className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
-              }`}
-          >
-            <option value="">Select a job title</option>
-            {jobs &&
-              jobs.map((job) => (
-                <option key={job.id} value={job.id}>
-                  {job.title}
-                </option>
-              ))}
-          </select>
-          {errors.job_id && (
-            <p className="text-red-500 mt-1 text-sm">{errors.job_id.message}</p>
-          )}
+          <div>
+            <label className="block text-tdark text-sm font-medium">
+              {t("Department")} <span className="text-red-400">*</span>
+            </label>
+            <select
+              {...register("department_id")}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+                }`}
+            >
+              <option value="">{t("Select a department")}</option>
+              {departments &&
+                departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+            </select>
+            {errors.department_id && (
+              <p className="text-red-500 mt-1 text-sm">
+                {errors.department_id.message}
+              </p>
+            )}
+          </div>
+          {/* Job Title Field */}
+          <div>
+            <label className="block text-tdark text-sm font-medium">
+              {t("Job Title")} <span className="text-red-400">*</span>
+            </label>
+            <select
+              {...register("job_id")}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.department_id ? "border-red-500" : "border-gray-300"
+                }`}
+            >
+              <option value="">{t("Select a job title")}</option>
+              {jobs &&
+                jobs.map((job) => (
+                  <option key={job.id} value={job.id}>
+                    {job.title}
+                  </option>
+                ))}
+            </select>
+            {errors.job_id && (
+              <p className="text-red-500 mt-1 text-sm">{errors.job_id.message}</p>
+            )}
+          </div>
           {/* Submit Button */}
           <button
             type="submit"
@@ -290,8 +304,8 @@ const CreateEmployee: React.FC<CreateEmployeeProps> = ({
           {feedbackMessage && (
             <p
               className={`mt-2 text-center ${feedbackMessage.includes("successfully")
-                  ? "text-green-500"
-                  : "text-red-500"
+                ? "text-green-500"
+                : "text-red-500"
                 }`}
             >
               {feedbackMessage}

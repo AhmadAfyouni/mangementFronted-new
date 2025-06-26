@@ -1,6 +1,6 @@
+import { AlertCircle, Calendar, Heart, IdCard, Key, MapPin, Mail, Phone, PhoneOutgoing, User } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { User, Phone, Mail, AlertCircle, Calendar, Key, IdCard, MapPin, PhoneOutgoing, Heart } from "lucide-react";
 import { UseFormRegister, FieldErrors, UseFormGetValues } from "react-hook-form";
 import { EmployeeFormInputs } from "@/types/EmployeeType.type";
 
@@ -230,7 +230,7 @@ const PersonalInfoSection = ({
       {/* Gender */}
       <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <HermaphroditicIcon className="w-4 h-4 text-purple-400" />
+          <User className="w-4 h-4 text-purple-400" />
           {t("Gender")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -291,20 +291,3 @@ const PersonalInfoSection = ({
 
 export default PersonalInfoSection;
 
-
-// hermaphroditic icon svg
-const HermaphroditicIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 12l-6 6m6-6l6 6" />
-  </svg>
-);

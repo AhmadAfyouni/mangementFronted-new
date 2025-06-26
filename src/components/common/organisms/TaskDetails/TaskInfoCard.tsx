@@ -83,7 +83,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   const departmentName = assigneeDepartment?.name || "";
 
   const isSubtask = !!task.parent_task;
-  const parentTask = isSubtask && allTasks ? allTasks.find(t => t.id === task.parent_task) : null;
+  const parentTask = isSubtask && allTasks && Array.isArray(allTasks) ? allTasks.find(t => t.id === task.parent_task) : null;
 
   const getTaskTypeInfo = () => {
     if (task.isRoutineTask) {

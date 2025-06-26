@@ -7,10 +7,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { useState } from "react";
 import CreateTaskType from "../../../components/common/molcules/CreateTaskType";
+import { useTranslation } from "react-i18next";
 
 const TaskTypesView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<ITaskType | null>(null);
+  const { t } = useTranslation();
 
   const {
     data: taskTypes,
@@ -25,7 +27,7 @@ const TaskTypesView: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-xl text-tblack">Loading...</p>
+        <p className="text-xl text-tblack">{t("Loading...")}</p>
       </div>
     );
   }
@@ -33,27 +35,27 @@ const TaskTypesView: React.FC = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-xl text-red-500">Failed to load task types.</p>
+        <p className="text-xl text-red-500">{t("Failed to load task types.")}</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto p-4 min-h-screen">
-      <h1 className="text-3xl font-bold text-center mb-6">Task Types</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">{t("Task Types")}</h1>
       {taskTypes && taskTypes.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg shadow-md">
             <thead className="bg-gray-200">
               <tr>
                 <th className="text-left py-3 px-4 uppercase font-semibold text-sm">
-                  Name
+                  {t("Name")}
                 </th>
                 <th className="text-left py-3 px-4 uppercase font-semibold text-sm">
-                  Description
+                  {t("Description")}
                 </th>
                 <th className="text-left py-3 px-4 uppercase font-semibold text-sm">
-                  Actions
+                  {t("Actions")}
                 </th>
               </tr>
             </thead>
@@ -84,7 +86,7 @@ const TaskTypesView: React.FC = () => {
           </table>
         </div>
       ) : (
-        <p className="text-center text-tdark mt-4">No task types found.</p>
+        <p className="text-center text-tdark mt-4">{t("No task types found.")}</p>
       )}
       <div className="flex justify-center mt-6">
         <button
@@ -94,7 +96,7 @@ const TaskTypesView: React.FC = () => {
             setIsModalOpen(true);
           }}
         >
-          Add Task Type
+          {t("Add Task Type")}
         </button>
       </div>
 

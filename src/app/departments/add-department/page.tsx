@@ -189,6 +189,7 @@ const AddDept = () => {
                 value={departmentData && departmentData.name}
                 onChange={(e) => setValue("name", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
+                isRequired={true}
               />
 
               {/* Category Field with enhanced UI */}
@@ -198,11 +199,11 @@ const AddDept = () => {
                   label={t("Category")}
                   placeholder={t("Select Category")}
                   selectOptions={requiredCategoryOptions}
-                  value={departmentData?.category || ''}
+                  value={departmentData && departmentData.category}
                   onChange={(e) => setValue("category", e.target.value)}
-                  showAddButton={false}
-                  onAddClick={() => setIsAddingCategory(true)}
                   className="bg-dark border border-dark/40 rounded-lg"
+                  isLightMode={isLightMode}
+                  isRequired={true}
                 />
                 {isAddingCategory && (
                   <div className="mt-2 p-3 bg-dark/50 border border-dark/40 rounded-lg animate-fadeIn">
@@ -228,23 +229,20 @@ const AddDept = () => {
                 )}
               </div>
 
+              {/* Parent Department Field */}
               <DeptFormInput
                 type="select"
                 label={t("Parent Department")}
-                value={departmentData?.parent_department ?
-                  (typeof departmentData.parent_department === 'object' && departmentData.parent_department !== null) ?
-                    (departmentData.parent_department as { id: string }).id : departmentData.parent_department as string :
-                  ''}
+                placeholder={t("Select Parent Department")}
+                selectOptions={departments?.tree.map((dept) => ({
+                  id: dept.id,
+                  name: dept.name,
+                }))}
+                value={departmentData?.parent_department_id}
                 onChange={(e) => setValue("parent_department_id", e.target.value)}
-                placeholder={t("Select a parent department")}
-                selectOptions={
-                  departments &&
-                  departments.tree &&
-                  departments.tree.map((dept) => {
-                    return { label: dept.name, value: dept.id };
-                  })
-                }
                 className="bg-dark border border-dark/40 rounded-lg"
+                isLightMode={isLightMode}
+                isRequired={true}
               />
             </div>
 
@@ -259,18 +257,32 @@ const AddDept = () => {
               <DeptFormInput
                 label={t("Goal")}
                 placeholder={t("Enter department goal")}
+                isTextArea={true}
+                rows={3}
                 value={departmentData && departmentData.goal}
                 onChange={(e) => setValue("goal", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
+                isRequired={true}
               />
 
               <DeptFormInput
-                isTextArea={true}
                 label={t("Main Tasks")}
                 placeholder={t("Enter main tasks")}
+                isTextArea={true}
+                rows={4}
                 value={departmentData && departmentData.mainTasks}
                 onChange={(e) => setValue("mainTasks", e.target.value)}
-                rows={4}
+                className="bg-dark border border-dark/40 rounded-lg"
+                isRequired={true}
+              />
+
+              <DeptFormInput
+                label={t("Description")}
+                placeholder={t("Enter description")}
+                isTextArea={true}
+                rows={3}
+                value={departmentData && departmentData.description}
+                onChange={(e) => setValue("description", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
               />
             </div>

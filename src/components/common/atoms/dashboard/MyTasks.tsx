@@ -2,8 +2,11 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { MyTask } from "@/types/dashboard.type";
 import { FileIcon, Inbox, MessageSquare } from "lucide-react";
 import { memo, useCallback, useState } from "react";
+import { useTranslation } from 'react-i18next';
 
 const MyTasks: React.FC = () => {
+    const { t } = useTranslation();
+
     type TaskStatus = "all" | MyTask['status'];
 
     const [activeFilter, setActiveFilter] = useState<TaskStatus>('all');
@@ -48,10 +51,10 @@ const MyTasks: React.FC = () => {
                     <div className="flex flex-col items-center justify-center py-12">
                         <div className="text-red-400 mb-4">⚠️</div>
                         <h3 className="text-lg font-medium text-gray-600 mb-2">
-                            Error loading tasks
+                            {t("Error loading tasks")}
                         </h3>
                         <p className="text-sm text-gray-500">
-                            Please try again later
+                            {t("Please try again later")}
                         </p>
                     </div>
                 </div>
@@ -71,14 +74,14 @@ const MyTasks: React.FC = () => {
             <div className="flex flex-col items-center justify-center py-12">
                 <Inbox size={48} className="text-gray-300 mb-4" />
                 <h3 className="text-lg font-medium text-gray-600 mb-2">
-                    {customMessage || 'No tasks found'}
+                    {customMessage || t('No tasks found')}
                 </h3>
                 <p className="text-sm text-gray-500">
                     {isLoadingMyTasks
-                        ? 'Loading tasks...'
+                        ? t('Loading tasks...')
                         : hasTasksButEmptyFilter
-                            ? 'Try a different filter'
-                            : 'No tasks available'
+                            ? t('Try a different filter')
+                            : t('No tasks available')
                     }
                 </p>
             </div>
@@ -91,8 +94,8 @@ const MyTasks: React.FC = () => {
                     <td colSpan={4} className="px-6 py-8 text-center rounded-b-xl">
                         {renderEmptyState(
                             hasTasksButEmptyFilter
-                                ? 'No tasks match filter'
-                                : 'No tasks available'
+                                ? t('No tasks match filter')
+                                : t('No tasks available')
                         )}
                     </td>
                 </tr>
@@ -102,11 +105,11 @@ const MyTasks: React.FC = () => {
         return (
             <div className="bg-secondary rounded-xl shadow p-6 h-full">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-twhite">My Tasks</h2>
+                    <h2 className="text-xl font-bold text-twhite">{t("My Tasks")}</h2>
                     {myTasks && myTasks.length > 5 && (
                         <div className="mt-6 text-center">
                             <button className="text-sm text-tmid font-medium transition-colors">
-                                View All
+                                {t("View All")}
                             </button>
                         </div>
                     )}
@@ -123,7 +126,7 @@ const MyTasks: React.FC = () => {
                                 }`}
                             onClick={() => setActiveFilter(filter)}
                         >
-                            {filter}
+                            {filter === 'all' ? t('all') : filter}
                         </button>
                     ))}
                 </div>
@@ -137,16 +140,16 @@ const MyTasks: React.FC = () => {
                             <thead className="bg-dark">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider ltr:rounded-tl-xl  rtl:rounded-tr-xl">
-                                        Task
+                                        {t("Task")}
                                     </th>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider">
-                                        Status
+                                        {t("Status")}
                                     </th>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider">
-                                        Progress
+                                        {t("Progress")}
                                     </th>
                                     <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider ltr:rounded-tr-xl  rtl:rounded-tl-xl">
-                                        Activity
+                                        {t("Activity")}
                                     </th>
                                 </tr>
                             </thead>
@@ -177,10 +180,10 @@ const MyTasks: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12">
                     <div className="text-red-400 mb-4">⚠️</div>
                     <h3 className="text-lg font-medium text-gray-600 mb-2">
-                        Component Error
+                        {t("Component Error")}
                     </h3>
                     <p className="text-sm text-gray-500">
-                        Something went wrong. Please refresh the page.
+                        {t("Something went wrong. Please refresh the page.")}
                     </p>
                 </div>
             </div>
@@ -195,6 +198,8 @@ const TaskRow = memo<{
     formatDate: (dateString: string) => string;
     getStatusColor: (status: string) => string;
 }>(({ task, isLast, formatDate, getStatusColor }) => {
+    const { t } = useTranslation();
+
     // Get progress color based on percentage
     const getProgressColor = (progress: number) => {
         if (progress >= 75) return "bg-green-500";
@@ -225,7 +230,7 @@ const TaskRow = memo<{
                     <div className="flex justify-between items-center">
                         <span className="text-xs text-gray-400">{task.progress}%</span>
                         {task.status === "DONE" && (
-                            <span className="text-xs text-green-400">Completed</span>
+                            <span className="text-xs text-green-400">{t("Completed")}</span>
                         )}
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2.5">

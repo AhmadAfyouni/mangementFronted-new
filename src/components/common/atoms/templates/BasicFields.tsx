@@ -44,7 +44,7 @@ const OptionalEmployeeSelect = ({
     <div className="ml-6 mt-4 p-4 border-l-2 border-dashed border-slate-600 bg-main rounded-lg">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs text-slate-400 italic">
-          {t("Optional Employee Selection")}
+          {t("Employee Selection")}
         </span>
       </div>
 
@@ -250,24 +250,29 @@ const BasicFields: React.FC<{
         {/* Approval Track Section */}
         <div className="gap-4">
           <div className="p-4 bg-dark rounded-lg">
-            <CustomReactSelect
-              label={t("Select Approval Track Departments")}
-              isMulti
-              options={departmentOptions}
-              value={
-                formData.departments_approval_track
-                  .map((track) =>
-                    departmentOptions.find(
-                      (opt) => opt.value === track.department
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-400">
+                {t("Select Approval Track Departments")} <span className="text-red-400">*</span>
+              </label>
+              <CustomReactSelect
+                label={t("Select Approval Track Departments")}
+                isMulti
+                options={departmentOptions}
+                value={
+                  formData.departments_approval_track
+                    .map((track) =>
+                      departmentOptions.find(
+                        (opt) => opt.value === track.department
+                      )
                     )
-                  )
-                  .filter(Boolean) as Option[]
-              }
-              onChange={handleApprovalTrackChange}
-              placeholder={t("Select in approval order")}
-              noOptionsMessage={() => t("No more options available")}
-              isClearable={false}
-            />
+                    .filter(Boolean) as Option[]
+                }
+                onChange={handleApprovalTrackChange}
+                placeholder={t("Select in approval order")}
+                noOptionsMessage={() => t("No more options available")}
+                isClearable={false}
+              />
+            </div>
 
             {formData.departments_approval_track.map((track, index) => {
               const currentDept = departments?.tree?.find(
@@ -298,22 +303,27 @@ const BasicFields: React.FC<{
         {/* Execution Section */}
         <div className="gap-4">
           <div className="p-4 bg-dark rounded-lg">
-            <CustomReactSelect
-              label={t("Execution Departments")}
-              isMulti
-              options={departmentOptions}
-              value={
-                formData.departments_execution_ids
-                  .map((exec) =>
-                    departmentOptions.find(
-                      (opt) => opt.value === exec.department
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-400">
+                {t("Execution Departments")} <span className="text-red-400">*</span>
+              </label>
+              <CustomReactSelect
+                label={t("Execution Departments")}
+                isMulti
+                options={departmentOptions}
+                value={
+                  formData.departments_execution_ids
+                    .map((exec) =>
+                      departmentOptions.find(
+                        (opt) => opt.value === exec.department
+                      )
                     )
-                  )
-                  .filter(Boolean) as Option[]
-              }
-              onChange={handleExecutionDepartmentsChange}
-              placeholder={t("Select departments")}
-            />
+                    .filter(Boolean) as Option[]
+                }
+                onChange={handleExecutionDepartmentsChange}
+                placeholder={t("Select departments")}
+              />
+            </div>
 
             {formData.departments_execution_ids.map((dept, index) => {
               const currentDept = departments?.tree?.find(

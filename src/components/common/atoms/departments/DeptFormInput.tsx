@@ -29,6 +29,7 @@ interface BaseProps {
     >
   ) => void;
   index?: number;
+  isRequired?: boolean;
 }
 
 interface SelectProps extends BaseProps {
@@ -79,6 +80,7 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
   onChange,
   index,
   showRemoveButton = false,
+  isRequired = false,
 }) => {
   const baseInputStyles = `w-full px-4 py-2 mt-1 rounded-lg border-none outline-none ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-main"
     }`;
@@ -165,7 +167,7 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
     <div className="w-full">
       {label && (
         <label className="text-tmid block text-sm font-medium mb-1">
-          {label}
+          {label} {isRequired && <span className="text-red-400">*</span>}
         </label>
       )}
       {renderInput()}

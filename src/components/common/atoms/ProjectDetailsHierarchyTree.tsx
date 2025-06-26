@@ -2,17 +2,16 @@
 
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import dagre from "dagre";
-import { motion } from "framer-motion";
-import { Building2, ExternalLink, FolderOpen, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Layers } from "lucide-react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import ReactFlow, {
   Background,
   Controls,
   Edge,
-  Handle,
   Node,
-  NodeProps,
-  Position,
+  useEdgesState,
+  useNodesState
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -27,36 +26,59 @@ type ProjectDetailsHierarchyTreeProps = {
 };
 
 const generateLayout = (data: DeptTree[]) => {
+  if (!data || data.length === 0) {
+    return { nodes: [], edges: [] };
+  }
+
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({
     rankdir: "TB",
-    align: "UL",
-    nodesep: 80,
-    ranksep: 120,
-    marginx: 50,
-    marginy: 50
+    align: "UC", // Center alignment
+    nodesep: 120, // More space between nodes horizontally
+    ranksep: 150, // More space between levels vertically
+    marginx: 80,
+    marginy: 80
   });
 
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  data.forEach((item) => {
+  data.forEach((item, index) => {
     dagreGraph.setNode(item.id, { label: item.name, width: 200, height: 80 });
-    nodes.push({
+
+    const nodeData = {
       id: item.id,
-      type: "custom",
+      type: "default",
       data: {
-        label: item.name,
-        isRootDept: item.parentId === null,
-        employeeCount: item.emps?.length || 0,
+        label: item.name
       },
       position: { x: 0, y: 0 },
-    });
+      style: {
+        background: item.parentId === null
+          ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)'
+          : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        color: 'white',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        borderRadius: '16px',
+        padding: '20px',
+        minWidth: '220px',
+        minHeight: '90px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        fontSize: '16px',
+        fontWeight: '600',
+        textAlign: 'center' as const,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
+    };
+
+    nodes.push(nodeData);
 
     if (item.parentId) {
       dagreGraph.setEdge(item.parentId, item.id);
-      edges.push({
+      const edgeData = {
         id: `e-${item.parentId}-${item.id}`,
         source: item.parentId,
         target: item.id,
@@ -65,15 +87,22 @@ const generateLayout = (data: DeptTree[]) => {
           stroke: "#6b7280",
           strokeWidth: 2,
         },
-      });
+      };
+      edges.push(edgeData);
     }
   });
 
   dagre.layout(dagreGraph);
 
   nodes.forEach((node) => {
-    const { x, y } = dagreGraph.node(node.id);
-    node.position = { x: x - 100, y: y - 40 };
+    const nodeData = dagreGraph.node(node.id);
+    if (nodeData) {
+      const { x, y } = nodeData;
+      node.position = {
+        x: x - 110, // Center the nodes (half of minWidth: 220)
+        y: y - 45   // Center vertically (half of minHeight: 90)
+      };
+    }
   });
 
   return { nodes, edges };
@@ -86,112 +115,80 @@ const ProjectDetailsHierarchyTree: React.FC<ProjectDetailsHierarchyTreeProps> = 
   lightMode = false,
   onPress,
 }) => {
+  const { t } = useTranslation();
 
-  const CustomNode = ({ data, selected }: NodeProps) => {
+  // Remove custom node type to avoid errors
 
-    const departmentClass = data.isRootDept
-      ? "bg-gradient-to-br from-purple-500/20 to-purple-600/20 border-purple-500/50"
-      : "bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/50";
-
-    const defaultNodeStyles = `
-      relative min-w-[200px] p-4 cursor-pointer transition-all duration-300
-      ${lightMode ? "bg-white" : "bg-secondary"}
-      ${departmentClass}
-      ${"shadow-md"}
-      border-2 rounded-xl
-      ${selected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
-    `;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.02 }}
-        className={nodeStyles ? nodeStyles(lightMode, false) : defaultNodeStyles}
-        onClick={() => onPress(data.id)}
-      >
-        {/* Department Info */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${data.isRootDept ? "bg-purple-500/20" : "bg-blue-500/20"
-              }`}>
-              <Building2 className={`w-5 h-5 ${data.isRootDept ? "text-purple-400" : "text-blue-400"
-                }`} />
-            </div>
-            <h3 className="font-bold text-twhite text-base leading-tight">
-              {data.label}
-            </h3>
-          </div>
-          <ExternalLink className={`w-4 h-4 text-gray-400 transition-transform `} />
-        </div>
-
-        {/* Employee Count */}
-        {data.employeeCount > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <Users className="w-4 h-4" />
-            <span>{data.employeeCount} Employees</span>
-          </div>
-        )}
-
-        {/* Root Badge */}
-        {data.isRootDept && (
-          <div className="absolute -top-2 -right-2">
-            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-500 text-white">
-              Root
-            </span>
-          </div>
-        )}
-
-        {/* Handles */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{
-            background: nodeColors.target,
-            top: -6,
-          }}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          className="!w-3 !h-3 !bg-blue-500 !border-2 !border-gray-700"
-          style={{
-            background: nodeColors.source,
-            bottom: -6,
-          }}
-        />
-      </motion.div>
-    );
-  };
-
-  const nodeTypes = { custom: CustomNode };
-
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      const { nodes: generatedNodes, edges: generatedEdges } = generateLayout(data);
-      setNodes(generatedNodes);
-      setEdges(generatedEdges);
+      try {
+        const { nodes: generatedNodes, edges: generatedEdges } = generateLayout(data);
+        setNodes(generatedNodes);
+        setEdges(generatedEdges);
+      } catch (error) {
+        console.error("Error generating layout:", error);
+        setNodes([]);
+        setEdges([]);
+      }
+    } else {
+      setNodes([]);
+      setEdges([]);
     }
-  }, [data]);
+  }, [data, setNodes, setEdges]);
+
+  // Show empty state if no data
+  if (!data || data.length === 0) {
+    return (
+      <div className="relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <Layers className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-twhite mb-2">{t("noProjectStructure")}</h3>
+          <p className="text-tdark">{t("noDepartmentsFound")}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden`}>
+    <div className="relative h-[600px] w-full bg-main rounded-2xl shadow-inner overflow-hidden">
+      {/* Debug info */}
+      <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-xs p-2 rounded">
+        Nodes: {nodes.length} | Edges: {edges.length} | Data: {data?.length || 0}
+      </div>
+
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <FolderOpen className="w-5 h-5 text-gray-400" />
-        <h3 className="text-lg font-bold text-twhite">Project Structure</h3>
+        <Layers className="w-5 h-5 text-gray-400" />
+        <h3 className="text-lg font-bold text-twhite">{t("projectStructure")}</h3>
       </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        className="!bg-transparent"
-        proOptions={{ hideAttribution: true }} // This hides the attribution button
+        fitViewOptions={{
+          padding: 0.15,
+          includeHiddenNodes: false,
+          minZoom: 0.5,
+          maxZoom: 1.2
+        }}
+        style={{ background: '#1f2937' }}
+        proOptions={{ hideAttribution: true }}
+        onInit={(reactFlowInstance) => {
+          setTimeout(() => {
+            reactFlowInstance.fitView({
+              padding: 0.15,
+              duration: 800 // Smooth animation
+            });
+          }, 300);
+        }}
+        onNodeClick={(event, node) => onPress(node.id)}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        minZoom={0.3}
+        maxZoom={1.5}
       >
         <Background
           gap={20}
@@ -199,7 +196,7 @@ const ProjectDetailsHierarchyTree: React.FC<ProjectDetailsHierarchyTreeProps> = 
           color={lightMode ? "#e5e7eb" : "#374151"}
         />
         <Controls
-          className="!bg-secondary !border-gray-700 !rounded-lg !shadow-lg"
+          className="bg-secondary border-gray-700 rounded-lg shadow-lg"
           showInteractive={false}
         />
       </ReactFlow>

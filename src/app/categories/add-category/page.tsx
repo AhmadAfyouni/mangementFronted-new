@@ -127,6 +127,7 @@ const AddJobCategory: React.FC = () => {
             errors={errors}
             isLightMode={isLightMode}
             t={t}
+            isRequired={true}
           />
 
           {/* Description Field */}
@@ -141,6 +142,7 @@ const AddJobCategory: React.FC = () => {
             t={t}
             rows={4}
             valueTransformer={(value) => value.trim()}
+            isRequired={true}
           />
 
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -163,6 +165,7 @@ const AddJobCategory: React.FC = () => {
                   setRequiredEducationOptions,
                 })
               }
+              isRequired={true}
             />
             {/* Required Experience Field */}
             <FormInput
@@ -182,17 +185,23 @@ const AddJobCategory: React.FC = () => {
                   setValue,
                 });
               }}
+              isRequired={true}
             />
           </div>
 
           {/* Required Skills Field */}
-          <DynamicSkills
-            skills={skills}
-            setSkills={setSkills}
-            register={register}
-            setValue={setValue}
-            errors={errors}
-          />
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              {t("Required Skills")} <span className="text-red-400">*</span>
+            </label>
+            <DynamicSkills
+              skills={skills}
+              setSkills={setSkills}
+              register={register}
+              setValue={setValue}
+              errors={errors}
+            />
+          </div>
 
           {/* Submit Button */}
           <button

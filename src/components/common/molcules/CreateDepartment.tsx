@@ -133,7 +133,7 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
         <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="block text-sm font-medium">
-              {t("Department Name")}
+              {t("Department Name")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -148,7 +148,7 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium">
-              {t("Description")}
+              {t("Description")} <span className="text-red-400">*</span>
             </label>
             <textarea
               {...register("description")}
@@ -165,7 +165,7 @@ const CreateDepartment: React.FC<CreateDepartmentProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium">
-              {t("Parent Department (Optional)")}
+              {t("Parent Department")}
             </label>
             <select
               {...register("parent_department_id")}

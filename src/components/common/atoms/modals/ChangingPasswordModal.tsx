@@ -62,16 +62,15 @@ const ChangingPasswordModal = ({
         <form onSubmit={handleChangePasswordSubmit(handlePasswordChange)}>
           <div>
             <label className="block  text-sm font-medium">
-              {t("New Password")}
+              {t("New Password")} <span className="text-red-400">*</span>
             </label>
             <input
               type="password"
               {...registerChangePassword("newPassword")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg  bg-secondary    focus:outline-none  border ${
-                changePasswordErrors.newPassword
+              className={`w-full px-4 py-2 mt-1 rounded-lg  bg-secondary    focus:outline-none  border ${changePasswordErrors.newPassword
                   ? "border-red-600"
                   : "border-[#1b1a40]"
-              }`}
+                }`}
               placeholder={t("Enter new password")}
             />
             {changePasswordErrors.newPassword && (
@@ -82,16 +81,15 @@ const ChangingPasswordModal = ({
           </div>
           <div className="mt-4">
             <label className="block  text-sm font-medium">
-              {t("Confirm Password")}
+              {t("Confirm Password")} <span className="text-red-400">*</span>
             </label>
             <input
               type="password"
               {...registerChangePassword("confirmPassword")}
-              className={`w-full px-4 py-2 mt-1 rounded-lg    bg-secondary  focus:outline-none  border ${
-                changePasswordErrors.confirmPassword
+              className={`w-full px-4 py-2 mt-1 rounded-lg    bg-secondary  focus:outline-none  border ${changePasswordErrors.confirmPassword
                   ? "border-red-600"
                   : "border-[#1b1a40]"
-              }`}
+                }`}
               placeholder={t("Confirm new password")}
             />
             {changePasswordErrors.confirmPassword && (

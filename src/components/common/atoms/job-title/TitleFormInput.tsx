@@ -13,6 +13,7 @@ interface TitleFormInputProps {
   errors: FieldErrors;
   register: UseFormRegister<JobTitleFormInputs>;
   selectedOption?: string;
+  isRequired?: boolean;
 }
 
 const TitleFormInput = ({
@@ -26,11 +27,14 @@ const TitleFormInput = ({
   errors,
   register,
   selectedOption,
+  isRequired = false,
 }: TitleFormInputProps) => {
   const { isLightMode } = useCustomTheme();
   return (
     <div>
-      <label className="block text-sm font-medium">{label}</label>
+      <label className="block text-sm font-medium">
+        {label} {isRequired && <span className="text-red-400">*</span>}
+      </label>
       {type === "textarea" ? (
         <textarea
           {...register(name, {
@@ -39,8 +43,8 @@ const TitleFormInput = ({
               return Array.isArray(value)
                 ? value
                 : value && value.toString().length > 0
-                ? value.split(",")
-                : [];
+                  ? value.split(",")
+                  : [];
             },
           })}
           className={`w-full px-4 py-2 mt-1 rounded-lg outline-none border-none focus:ring-2 focus:ring-accent border 
