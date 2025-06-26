@@ -1,4 +1,4 @@
-import { Calendar, DollarSign, ClipboardList, Building2, Briefcase, AlertCircle } from "lucide-react";
+import { Calendar, DollarSign, Building2, Briefcase, AlertCircle, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { UseFormRegister, UseFormSetValue, UseFormGetValues, FieldErrors } from "react-hook-form";
@@ -114,7 +114,7 @@ const EmploymentInfoSection = ({
       {/* Employment Date */}
       <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-blue-400" />
+          <Calendar className="w-4 h-4 text-purple-400" />
           {t("Employment Date")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -141,7 +141,7 @@ const EmploymentInfoSection = ({
       {/* Base Salary */}
       <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-blue-400" />
+          <DollarSign className="w-4 h-4 text-purple-400" />
           {t("Base Salary")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -168,7 +168,7 @@ const EmploymentInfoSection = ({
       {/* Job Tasks */}
       <div className="md:col-span-2">
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <ClipboardList className="w-4 h-4 text-blue-400" />
+          <FileText className="w-4 h-4 text-purple-400" />
           {t("Job Tasks")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -195,7 +195,7 @@ const EmploymentInfoSection = ({
       {/* Department */}
       <div>
         <label className="block text-sm font-medium mb-1 flex items-center gap-2 text-gray-400">
-          <Building2 className="w-4 h-4 text-blue-400" />
+          <Building2 className="w-4 h-4 text-purple-400" />
           {t("Department")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">
@@ -231,7 +231,7 @@ const EmploymentInfoSection = ({
       {/* Job Title */}
       <div>
         <label className="block text-sm font-medium mb-1 flex items-center gap-2 text-gray-400">
-          <Briefcase className="w-4 h-4 text-blue-400" />
+          <Briefcase className="w-4 h-4 text-purple-400" />
           {t("Job Title")} <span className="text-red-400">*</span>
         </label>
         <div className="relative">

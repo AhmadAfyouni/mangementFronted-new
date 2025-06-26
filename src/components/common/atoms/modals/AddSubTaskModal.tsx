@@ -263,7 +263,7 @@ const AddSubTaskModal: React.FC<{
               {/* Task Name Field */}
               <div>
                 <label className="block text-tmid text-sm font-medium">
-                  {t("Task Name")}
+                  {t("Task Name")} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -280,7 +280,7 @@ const AddSubTaskModal: React.FC<{
               {/* Description Field */}
               <div>
                 <label className="block text-tmid text-sm font-medium">
-                  {t("Description")}
+                  {t("Description")} <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   {...register("description")}
@@ -297,7 +297,7 @@ const AddSubTaskModal: React.FC<{
               {/* Priority Field */}
               <div>
                 <label className="block text-tmid text-sm font-medium">
-                  {t("Priority")}
+                  {t("Priority")} <span className="text-red-400">*</span>
                 </label>
                 <select
                   {...register("priority")}
@@ -327,7 +327,7 @@ const AddSubTaskModal: React.FC<{
                 {/* Start Date Field */}
                 <div>
                   <label className="block text-tmid text-sm font-medium">
-                    {t("Start Date")}
+                    {t("Start Date")} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="date"
@@ -343,7 +343,7 @@ const AddSubTaskModal: React.FC<{
                 {/* Due Date Field */}
                 <div>
                   <label className="block text-tmid text-sm font-medium">
-                    {t("Due Date")}
+                    {t("Due Date")} <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="date"

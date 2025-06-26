@@ -10,6 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "react-modal";
+import { useTranslation } from "react-i18next";
 
 const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
   isOpen,
@@ -26,6 +27,8 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
     resolver: yupResolver(addTaskStatusSchema) as any,
     defaultValues: taskStatusData || {},
   });
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (taskStatusData) {
@@ -88,14 +91,14 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
         >
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Task Status Name
+              {t("Task Status Name")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               {...register("name")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter task status name"
+              placeholder={t("Enter task status name")}
             />
             {errors.name && (
               <p className="text-red-500 mt-1 text-sm">{errors.name.message}</p>
@@ -103,13 +106,13 @@ const CreateTaskStatus: React.FC<CreateTaskStatusProps> = ({
           </div>
           <div>
             <label className="block text-tdark text-sm font-medium">
-              Description
+              {t("Description")} <span className="text-red-400">*</span>
             </label>
             <textarea
               {...register("description")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border focus:outline-none ${errors.description ? "border-red-500" : "border-gray-300"
                 }`}
-              placeholder="Enter description"
+              placeholder={t("Enter description")}
               rows={3}
             />
             {errors.description && (

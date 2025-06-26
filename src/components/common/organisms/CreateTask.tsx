@@ -129,7 +129,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
         <form className="gap-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="block text-tdark text-sm font-medium">
-              {t("Task Name")}
+              {t("Task Name")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -147,7 +147,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
           {/* Description Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              {t("Description")}
+              {t("Description")} <span className="text-red-400">*</span>
             </label>
             <textarea
               {...register("description")}
@@ -165,7 +165,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
           {/* Priority Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              {t("Priority")}
+              {t("Priority")} <span className="text-red-400">*</span>
             </label>
             <input
               type="number"
@@ -192,7 +192,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
                 }`}
               disabled={isEmployeeDisabled} // Disable based on selection
             >
-              <option value="">{t("Select an employee (optional)")}</option>
+              <option value="">{t("Select an employee")}</option>
               {employees &&
                 employees.map((emp: any) => (
                   <option key={emp.id} value={emp.id}>
@@ -216,7 +216,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
                 }`}
               disabled={isDepartmentDisabled}
             >
-              <option value="">{t("Select a department (optional)")}</option>
+              <option value="">{t("Select a department")}</option>
               {departments &&
                 departments.map((dept: any) => (
                   <option key={dept.id} value={dept.id}>
@@ -232,7 +232,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
           </div>
           <div>
             <label className="block text-tdark text-sm font-medium">
-              {t("Due Date")}
+              {t("Due Date")} <span className="text-red-400">*</span>
             </label>
             <input
               type="date"
@@ -266,8 +266,8 @@ const CreateTask: React.FC<CreateTaskProps> = ({
           {feedbackMessage && (
             <p
               className={`mt-2 text-center ${feedbackMessage.includes("successfully")
-                  ? "text-green-500"
-                  : "text-red-500"
+                ? "text-green-500"
+                : "text-red-500"
                 }`}
             >
               {feedbackMessage}

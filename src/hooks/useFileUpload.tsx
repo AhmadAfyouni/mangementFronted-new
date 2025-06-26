@@ -2,9 +2,11 @@
 import { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useTranslation } from "react-i18next";
 
 export const useFileUpload = (uploadEndpoint: string) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { t } = useTranslation();
 
   const handleFileChange = (index: number, file: File | null) => {
     const updatedFiles = [...selectedFiles];
@@ -56,11 +58,12 @@ export const useFileUpload = (uploadEndpoint: string) => {
       reader.onloadend = () =>
         reader.result
           ? resolve(reader.result as ArrayBuffer)
-          : reject("Failed to read file");
+          : reject(t("Failed to read file"));
       reader.onerror = () => reject(reader.error);
       reader.readAsArrayBuffer(file);
     });
   };
+
 
   return {
     selectedFiles,

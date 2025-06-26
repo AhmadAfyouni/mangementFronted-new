@@ -89,8 +89,7 @@ const DocumentsSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Document Name */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-green-400" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Document Name")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -206,8 +205,7 @@ const DocumentsSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Certificate Name */}
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-blue-400" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Certificate Name")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -248,9 +246,8 @@ const DocumentsSection = ({
 
                   {/* Grade/Score */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <Award className="w-4 h-4 text-blue-400" />
-                      {t("Grade/Score")} <span className="text-red-400">*</span>
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
+                      {t("Grade")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
                       <input

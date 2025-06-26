@@ -2,9 +2,8 @@
 // @ts-nocheck
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React from "react";
+import { AlertCircle, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Star, FileText, ClipboardList, AlertCircle } from "lucide-react";
 
 const EvaluationSection = ({
   evaluationsFields,
@@ -29,8 +28,7 @@ const EvaluationSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Evaluation Type */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-pink-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Evaluation Type")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -55,8 +53,7 @@ const EvaluationSection = ({
                   </div>
                   {/* Description */}
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-pink-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Description")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -81,9 +78,8 @@ const EvaluationSection = ({
                   </div>
                   {/* Plan */}
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <ClipboardList className="w-4 h-4 text-pink-400/60" />
-                      {t("Development Plan")} <span className="text-red-400">*</span>
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
+                      {t("Plan")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
                       <textarea

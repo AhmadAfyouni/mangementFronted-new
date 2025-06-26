@@ -57,7 +57,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
             disabled={isProjectDisabled}
           >
             <option className="" value="">
-              {t("Select a project (optional)")}
+              {t("Select a project")}
             </option>
             {projects?.map((project) => (
               <option className="" key={project._id} value={project._id}>
@@ -86,7 +86,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
             disabled={isDepartmentDisabled}
           >
             <option value="" className="">
-              {t("Select a department (optional)")}
+              {t("Select a department")}
             </option>
             {departments?.tree.map((dept) => (
               <option className="" key={dept.id} value={dept.id}>
@@ -113,7 +113,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
             }`}
         >
           <option className="" value="">
-            {t("Select a section (optional)")}
+            {t("Select a section")}
           </option>
           {sections?.map((section) => (
             <option className="" key={section._id} value={section._id}>
@@ -139,7 +139,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
             }`}
         >
           <option className="" value="">
-            {t("Select a parent task (optional)")}
+            {t("Select a parent task")}
           </option>
           {tasks?.map((task) => (
             <option className="" key={task.id} value={task.id}>
@@ -205,7 +205,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
               }`}
           >
             <option className="" value="">
-              {t("Select an assignee (optional)")}
+              {t("Select an assignee")}
             </option>
             {employees?.tree.map((employee) => (
               <option className="" key={employee.id} value={employee.id}>

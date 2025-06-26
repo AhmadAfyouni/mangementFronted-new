@@ -2,9 +2,8 @@
 // @ts-nocheck
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React from "react";
+import { AlertCircle, Banknote, DollarSign, Gift } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { AlertCircle, DollarSign, Gift, Banknote, Hash } from "lucide-react";
 
 const CompensationSection = ({
   allowancesFields,
@@ -41,8 +40,7 @@ const CompensationSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Allowance Type */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Allowance Type")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -67,8 +65,7 @@ const CompensationSection = ({
                   </div>
                   {/* Amount */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Amount")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -123,8 +120,7 @@ const CompensationSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Description */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <Gift className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Description")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -149,8 +145,7 @@ const CompensationSection = ({
                   </div>
                   {/* Amount */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Amount")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -205,8 +200,7 @@ const CompensationSection = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Bank Name */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <Banknote className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Bank Name")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -231,8 +225,7 @@ const CompensationSection = ({
                   </div>
                   {/* Account Number */}
                   <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                      <Hash className="w-4 h-4 text-yellow-400/60" />
+                    <label className="text-xs font-medium text-gray-400 mb-1 block">
                       {t("Account Number")} <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">

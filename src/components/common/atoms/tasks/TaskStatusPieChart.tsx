@@ -1,8 +1,10 @@
 "use client";
 
+import React from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { TrendingUp, CheckCircle, Clock, AlertCircle, XCircle, Ban } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -22,6 +24,8 @@ const TaskStatusPieChart = ({
   taskClosed?: number;
   taskCanceled?: number;
 }) => {
+  const { t } = useTranslation();
+
   // Calculate totals
   const totalTasks = taskPending + taskOnGoing + taskOnTest + taskDone + taskClosed + taskCanceled;
   const completionRate = totalTasks > 0 ? Math.round((taskDone / totalTasks) * 100) : 0;
@@ -29,52 +33,52 @@ const TaskStatusPieChart = ({
   // Status data with icons and enhanced styling
   const statusData = [
     {
-      label: "Pending",
+      label: t("Pending"),
       value: taskPending,
       color: "#FF9800",
       lightColor: "#FFE0B2",
       icon: Clock,
-      description: "Awaiting start"
+      description: t("Awaiting start")
     },
     {
-      label: "Ongoing",
+      label: t("Ongoing"),
       value: taskOnGoing,
       color: "#2196F3",
       lightColor: "#E3F2FD",
       icon: TrendingUp,
-      description: "In progress"
+      description: t("In progress")
     },
     {
-      label: "On Test",
+      label: t("On Test"),
       value: taskOnTest,
       color: "#9C27B0",
       lightColor: "#F3E5F5",
       icon: AlertCircle,
-      description: "Under review"
+      description: t("Under review")
     },
     {
-      label: "Done",
+      label: t("Done"),
       value: taskDone,
       color: "#4CAF50",
       lightColor: "#E8F5E8",
       icon: CheckCircle,
-      description: "Completed"
+      description: t("Completed")
     },
     {
-      label: "Closed",
+      label: t("Closed"),
       value: taskClosed,
       color: "#F44336",
       lightColor: "#FFEBEE",
       icon: XCircle,
-      description: "Finalized"
+      description: t("Finalized")
     },
     {
-      label: "Canceled",
+      label: t("Canceled"),
       value: taskCanceled,
       color: "#673AB7",
       lightColor: "#EDE7F6",
       icon: Ban,
-      description: "Terminated"
+      description: t("Terminated")
     }
   ]; // Show all statuses even with 0 tasks
 
@@ -136,12 +140,12 @@ const TaskStatusPieChart = ({
       {/* Header with completion rate */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-twhite mb-1">Task Distribution</h3>
-          <p className="text-tdark text-sm">Project progress overview</p>
+          <h3 className="text-xl font-bold text-twhite mb-1">{t("Task Distribution")}</h3>
+          <p className="text-tdark text-sm">{t("Project progress overview")}</p>
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold text-success">{completionRate}%</div>
-          <div className="text-xs text-tdark uppercase tracking-wide">Complete</div>
+          <div className="text-xs text-tdark uppercase tracking-wide">{t("Complete")}</div>
         </div>
       </div>
 
@@ -154,7 +158,7 @@ const TaskStatusPieChart = ({
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
                 <div className="text-2xl font-bold text-twhite">{totalTasks}</div>
-                <div className="text-xs text-tdark uppercase tracking-wide">Total Tasks</div>
+                <div className="text-xs text-tdark uppercase tracking-wide">{t("Total Tasks")}</div>
               </div>
             </div>
           </div>

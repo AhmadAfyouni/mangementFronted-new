@@ -84,7 +84,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         console.error("Error submitting comment:", error);
       }
     } else {
-      alert("Please write a comment or attach a file before sending.");
+      alert(t("Please write a comment or attach a file before sending."));
     }
   };
 

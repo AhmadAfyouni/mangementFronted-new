@@ -83,7 +83,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
     router.push(`/tasks/${taskId}`);
   };
 
-  const parentTask = task.parent_task && allTasks
+  const parentTask = task.parent_task && allTasks && Array.isArray(allTasks)
     ? allTasks.find((t: ReceiveTaskType) => t.id === task.parent_task)
     : null;
 

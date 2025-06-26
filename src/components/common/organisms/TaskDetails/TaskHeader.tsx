@@ -1,7 +1,9 @@
+import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate, getPriorityColor } from "@/services/task.service";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { AlertCircle, Check, Clock, Edit2, X, Layers } from "lucide-react";
+import { AlertCircle, Check, ChevronRight, Clock, Edit2, Layers, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface TaskHeaderProps {
@@ -24,6 +26,16 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
   const { t, currentLanguage } = useLanguage();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(taskName);
+  const {
+    data: parentTask,
+  } = useCustomQuery<ReceiveTaskType>({
+    queryKey: ["parentTask", task.parent_task || ""],
+    url: `/tasks/task/${task.parent_task || ""}`,
+    nestedData: true,
+    enabled: !!task.parent_task
+  });
+
+  const router = useRouter();
 
   const handleSaveName = () => {
     onNameChange(tempName);
@@ -43,11 +55,34 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
     }
   };
 
+  const navigateToParent = () => {
+    if (task.parent_task) {
+      router.push(`/tasks/${task.parent_task}`);
+    }
+  };
+
   // Check if this is a subtask and get parent task info
   const isSubtask = !!task.parent_task;
 
   return (
     <div className="mb-6">
+      {/* Parent task breadcrumb - shown above the main title */}
+      {isSubtask && task.parent_task && (
+        <div className="mb-3">
+          <button
+            onClick={navigateToParent}
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors group"
+          >
+            <Layers className="w-4 h-4" />
+            <span className="text-sm font-medium group-hover:underline">
+              {parentTask?.name || 'Parent Task'}
+            </span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-slate-500 text-sm">{taskName}</span>
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-between items-start">
         <div className="flex-1">
           {isEditingName ? (
@@ -75,36 +110,22 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-2 mb-2">
-              {/* Add subtask icon next to title */}
+              {/* Task title with subtask indicator */}
               <div className="flex items-center gap-3">
                 {isSubtask && (
-                  <div className="flex items-center gap-2">
-                    {/* Hierarchy breadcrumb SVG */}
-                    <div className="flex items-center gap-1">
-                      <svg width="20" height="16" viewBox="0 0 20 16" className="text-slate-500">
-                        <rect x="1" y="6" width="6" height="4" rx="1" fill="currentColor" className="opacity-40" />
-                        <path d="M8 8 L12 8" stroke="currentColor" strokeWidth="1" strokeDasharray="2,1" className="opacity-60" />
-                        <rect x="13" y="6" width="6" height="4" rx="1" fill="currentColor" className="opacity-80" />
-                        <path d="M16 6 L16 2" stroke="currentColor" strokeWidth="1" className="opacity-40" />
-                        <circle cx="16" cy="1" r="1" fill="currentColor" className="opacity-60" />
+                  <div className="p-2 bg-slate-500/20 rounded-lg relative">
+                    <Layers className="w-6 h-6 text-slate-400" />
+                    {/* Small indicator dot */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg width="8" height="8" viewBox="0 0 8 8" className="text-white">
+                        <path d="M2 4 L3.5 5.5 L6 2.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                    </div>
-
-                    <div className="p-2 bg-slate-500/20 rounded-lg relative">
-                      <Layers className="w-6 h-6 text-slate-400" />
-                      {/* Small indicator dot */}
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                        <svg width="8" height="8" viewBox="0 0 8 8" className="text-white">
-                          <path d="M2 4 L3.5 5.5 L6 2.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
                     </div>
                   </div>
                 )}
                 <h1 className={`text-3xl font-bold ${isSubtask ? 'text-slate-200' : 'text-twhite'}`}>
                   {taskName || 'Untitled Task'}
                 </h1>
-
               </div>
               {isEditing && (
                 <button

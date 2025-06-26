@@ -6,11 +6,13 @@ import { JobTitleFormInputs, JobTitleType } from '@/types/JobTitle.type';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/utils/axios/usage';
 import { Resolver } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 export const useJobTitleForm = () => {
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [jobTitleData, setJobTitleData] = useState<JobTitleType | null>(null);
+    const { t } = useTranslation();
 
     // Default values for a job title form
     const defaultValues: JobTitleFormInputs = {
@@ -51,10 +53,10 @@ export const useJobTitleForm = () => {
             setIsLoading(true);
             try {
                 const response = await apiClient.post<{ data: JobTitleType }>('/job-titles', data);
-                setFeedbackMessage("Job title created successfully");
+                setFeedbackMessage(t("Job title created successfully"));
                 return response.data;
             } catch (error) {
-                setFeedbackMessage("Error creating job title");
+                setFeedbackMessage(t("Error creating job title"));
                 throw error;
             } finally {
                 setIsLoading(false);
