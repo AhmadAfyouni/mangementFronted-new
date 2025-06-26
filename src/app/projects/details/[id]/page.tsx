@@ -257,10 +257,9 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
         return (
           <div className="p-6">
-            <div className="w-full h-[600px] overflow-hidden">
+            <div className="w-full h-[600px] overflow-hidden bg-dark">
               <ProjectDetailsHierarchyTree
                 data={dataToUse}
-                width="100%"
                 onPress={(deptId) => {
                   router.push(
                     `/projects/details/project-tasks/${project._id}/${deptId}`

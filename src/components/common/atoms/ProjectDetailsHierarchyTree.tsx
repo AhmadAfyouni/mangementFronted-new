@@ -17,10 +17,6 @@ import "reactflow/dist/style.css";
 
 type ProjectDetailsHierarchyTreeProps = {
   data: DeptTree[];
-  nodeStyles?: (isLightMode: boolean, isManager?: boolean) => string;
-  nodeColors?: { target: string; source: string };
-  height?: number;
-  width?: string;
   lightMode?: boolean;
   onPress: (deptId: string) => void;
 };
@@ -44,7 +40,7 @@ const generateLayout = (data: DeptTree[]) => {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  data.forEach((item, index) => {
+  data.forEach((item) => {
     dagreGraph.setNode(item.id, { label: item.name, width: 200, height: 80 });
 
     const nodeData = {
@@ -110,8 +106,6 @@ const generateLayout = (data: DeptTree[]) => {
 
 const ProjectDetailsHierarchyTree: React.FC<ProjectDetailsHierarchyTreeProps> = ({
   data,
-  nodeStyles,
-  nodeColors = { target: "#3b82f6", source: "#3b82f6" },
   lightMode = false,
   onPress,
 }) => {
