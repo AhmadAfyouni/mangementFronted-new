@@ -26,6 +26,7 @@ export const useTaskForm = () => {
     watch,
     getValues,
     setValue,
+    control
   } = useForm<TaskFormInputs>({
     resolver: yupResolver(addTaskSchema) as any,
     defaultValues: {
@@ -58,6 +59,7 @@ export const useTaskForm = () => {
       watch,
       getValues,
       setValue,
+      control
     },
     selectedEmp,
     setSelectedEmp,

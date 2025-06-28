@@ -15,7 +15,7 @@ import { DeptTree } from "@/types/trees/Department.tree.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
 import { apiClient } from "@/utils/axios/usage";
-import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, CheckCircle, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
+import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -195,21 +195,6 @@ const AddTaskPage: React.FC = () => {
             />
           </CollapsibleCard>
 
-          {/* Time & Budget */}
-          <CollapsibleCard
-            title={t("Time & Budget")}
-            icon={<Clock className="w-5 h-5" />}
-            iconBgColor="bg-yellow-600/20"
-            iconTextColor="text-yellow-400"
-            isOpen={openSections.time}
-            onToggle={() => toggleSection('time')}
-          >
-            <TimeBudgetSection
-              register={register}
-              t={t}
-            />
-          </CollapsibleCard>
-
           {/* Recurring & Routine Settings */}
           <CollapsibleCard
             title={t("Recurring & Routine Settings")}
@@ -271,6 +256,8 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
   isRecurring,
   dateConstraints
 }) => {
+  const recurringEndDateRef = useRef<HTMLInputElement | null>(null);
+  const endDateRef = useRef<HTMLInputElement | null>(null);
   return (
     <div className="space-y-6">
       {/* Is Recurring */}
@@ -346,13 +333,25 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
                 <Calendar className="w-4 h-4 text-orange-400" />
                 {t("Recurring End Date")} {isRecurring && <span className="text-red-400">*</span>}
               </label>
-              <input
-                {...register("recurringEndDate")}
-                type="date"
-                min={dateConstraints?.min}
-                max={dateConstraints?.max}
-                className="w-full px-4 py-3 rounded-lg bg-darker text-twhite border border-gray-600 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors"
-              />
+              <div className="relative">
+                <input
+                  {...register("recurringEndDate")}
+                  ref={e => {
+                    register("recurringEndDate").ref(e);
+                    recurringEndDateRef.current = e;
+                  }}
+                  type="date"
+                  min={dateConstraints?.min}
+                  max={dateConstraints?.max}
+                  className="w-full px-4 py-3 rounded-lg bg-darker text-twhite border border-gray-600 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors cursor-pointer"
+                />
+                <div
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                  onClick={() => recurringEndDateRef.current?.showPicker?.() || recurringEndDateRef.current?.focus()}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                </div>
+              </div>
               {errors.recurringEndDate && (
                 <p className="text-red-400 mt-1.5 text-xs flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
@@ -366,13 +365,20 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
                 <Calendar className="w-4 h-4 text-yellow-400" />
                 {t("End Date")} <span className="text-red-400">*</span>
               </label>
-              <input
-                {...register("end_date")}
-                type="date"
-                min={dateConstraints?.min}
-                max={dateConstraints?.max}
-                className="w-full px-4 py-3 rounded-lg bg-darker text-twhite border border-gray-600 focus:border-yellow-500 focus:ring focus:ring-yellow-500/20 focus:outline-none transition-colors"
-              />
+              <div className="relative">
+                <input
+                  {...register("end_date")}
+                  ref={e => {
+                    register("end_date").ref(e);
+                    endDateRef.current = e;
+                  }}
+                  type="date"
+                  min={dateConstraints?.min}
+                  max={dateConstraints?.max}
+                  className="w-full px-4 py-3 rounded-lg bg-darker text-twhite border border-gray-600 focus:border-yellow-500 focus:ring focus:ring-yellow-500/20 focus:outline-none transition-colors cursor-pointer"
+                />
+
+              </div>
               {errors.end_date && (
                 <p className="text-red-400 mt-1.5 text-xs flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
@@ -398,86 +404,12 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
             {t("Routine Task")}
           </label>
         </div>
-
-        {/* {isRoutineTask && (
-          <div className="p-5 bg-gradient-to-br from-dark to-gray-800/50 rounded-xl border border-indigo-500/30">
-            <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-              <Hash className="w-4 h-4 text-indigo-400" />
-              {t("Routine Task ID")}
-            </label>
-            <input
-              {...register("routineTaskId")}
-              type="text"
-              placeholder={t("Enter routine task ID")}
-              className="w-full px-4 py-3 rounded-lg bg-darker text-twhite border border-gray-600 focus:border-indigo-500 focus:ring focus:ring-indigo-500/20 focus:outline-none transition-colors"
-            />
-          </div>
-        )} */}
       </div>
     </div>
   );
 };
 
 
-interface TimeBudgetSectionProps {
-  register: UseFormRegister<TaskFormInputs>;
-  t: (key: string) => string;
-}
-
-const TimeBudgetSection: React.FC<TimeBudgetSectionProps> = ({
-  register,
-  t,
-}) => {
-  return (
-    <div className="grid grid-cols-1 gap-6">
-      {/* Estimated Hours */}
-      {/* <div>
-        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-blue-400" />
-          {t("Estimated Hours")}
-        </label>
-        <input
-          {...register("estimated_hours")}
-          type="number"
-          step="0.5"
-          placeholder={t("Enter actual hours")}
-          className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors"
-        />
-      </div> */}
-
-
-
-      {/* Progress Calculation Method */}
-      <div>
-        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-purple-400" />
-          {t("Progress Calculation")}
-        </label>
-        <div className="relative">
-          <select
-            {...register("progressCalculationMethod")}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none"
-          >
-            <option className="" value="">
-              {t("Select a calculation method")}
-            </option>
-            <option className="text-tmid" value="time_based">
-              {t("Time Based")}
-            </option>
-            <option className="text-tmid" value="date_based">
-              {t("Date Based")}
-            </option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 
 
@@ -551,6 +483,9 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, isExpectedEndDisabled]);
 
+  const startDateRef = useRef<HTMLInputElement | null>(null);
+  const dueDateRef = useRef<HTMLInputElement | null>(null);
+
   return (
     <div className="space-y-4">
       {/* Project Date Info Display */}
@@ -586,13 +521,20 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             <Calendar className="w-4 h-4 text-green-400" />
             {t("Start Date")} <span className="text-red-400">*</span>
           </label>
-          <input
-            {...register("start_date")}
-            type="date"
-            min={dateConstraints.min}
-            max={dateConstraints.max}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors"
-          />
+          <div className="relative">
+            <input
+              {...register("start_date")}
+              ref={e => {
+                register("start_date").ref(e);
+                startDateRef.current = e;
+              }}
+              type="date"
+              min={dateConstraints.min}
+              max={dateConstraints.max}
+              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors cursor-pointer"
+            />
+
+          </div>
           {errors.start_date && (
             <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
@@ -612,13 +554,20 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             <Calendar className="w-4 h-4 text-red-400" />
             {t("Due Date")} <span className="text-red-400">*</span>
           </label>
-          <input
-            {...register("due_date")}
-            type="date"
-            min={dateConstraints.min}
-            max={dateConstraints.max}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors"
-          />
+          <div className="relative">
+            <input
+              {...register("due_date")}
+              ref={e => {
+                register("due_date").ref(e);
+                dueDateRef.current = e;
+              }}
+              type="date"
+              min={dateConstraints.min}
+              max={dateConstraints.max}
+              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors cursor-pointer"
+            />
+
+          </div>
           {errors.due_date && (
             <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
@@ -641,8 +590,6 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
                 type="text"
                 className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
                 value={Math.round(estimatedHours)}
-                readOnly
-                disabled
               />
             </div>
             <div className="flex-1">
@@ -651,15 +598,42 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
                 type="text"
                 className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
                 value={estimatedWorkingDays !== null ? estimatedWorkingDays : ''}
-                readOnly
-                disabled
               />
             </div>
           </div>
         )}
 
-        {/* Actual End Date */}
+        {/* Progress Calculation Method */}
         <div>
+          <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-purple-400" />
+            {t("Progress Calculation")}
+          </label>
+          <div className="relative">
+            <select
+              {...register("progressCalculationMethod")}
+              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none"
+            >
+              <option className="" value="">
+                {t("Select a calculation method")}
+              </option>
+              <option className="text-tmid" value="time_based">
+                {t("Time Based")}
+              </option>
+              <option className="text-tmid" value="date_based">
+                {t("Date Based")}
+              </option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Actual End Date */}
+        {/* <div>
           <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-emerald-400" />
             {t("Actual End Date")}
@@ -676,7 +650,7 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
               {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
             </p>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

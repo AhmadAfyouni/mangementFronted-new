@@ -22,6 +22,7 @@ export type ProjectType = {
   createdAt: string;
   updatedAt: string;
   status?: ProjectStatus;
+  color: string
 };
 
 export type ProjectDetailsType = {
@@ -39,4 +40,5 @@ export type ProjectDetailsType = {
   taskOnTest: number;
   taskPending: number;
   status?: ProjectStatus;
+  color: string
 };

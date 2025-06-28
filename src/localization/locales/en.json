@@ -511,6 +511,8 @@
     "Select a department (optional)": "Select a department",
     "noProjectStructure": "No Project Structure",
     "noDepartmentsFound": "No departments found for this project",
-    "projectStructure": "Project Structure"
+    "projectStructure": "Project Structure",
+    "Team Members": "Team Members",
+    "Details": "Details"
   }
 }

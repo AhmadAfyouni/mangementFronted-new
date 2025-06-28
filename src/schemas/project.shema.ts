@@ -7,6 +7,7 @@ export const addProjectSchema = (isEditing = false) => {
   return yup.object({
     name: yup.string().required("Project name is required"),
     description: yup.string().required("Description is required"),
+    color: yup.string().required("Color is required"),
     departments: yup.array().of(yup.string()).nullable(),
     members: yup.array().of(yup.string()).nullable(),
     startDate: yup
