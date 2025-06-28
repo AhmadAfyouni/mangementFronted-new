@@ -513,6 +513,14 @@
     "noDepartmentsFound": "No departments found for this project",
     "projectStructure": "Project Structure",
     "Team Members": "Team Members",
-    "Details": "Details"
+    "Details": "Details",
+    "Add New Section": "Add New Section",
+    "Update Section": "Update Section",
+    "Section name cannot be empty": "Section name cannot be empty",
+    "Enter section name...": "Enter section name...",
+    "This section will be created under your department.": "This section will be created under your department.",
+    "Create Section": "Create Section",
+    "Update Section": "Update Section",
+    "Time Spent": "Time Spent"
   }
 }

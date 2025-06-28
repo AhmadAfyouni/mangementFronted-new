@@ -238,7 +238,6 @@ const ListTasks = ({
     const { t } = useLanguage();
     const { organizeTasksByHierarchy } = useHierarchy();
 
-
     useEffect(() => {
         if (tasksData) {
             const categorizedTasks = categorizeTasks(tasksData);
@@ -250,7 +249,6 @@ const ListTasks = ({
     useEffect(() => {
         setCurrentPage(1);
     }, [itemsPerPage]);
-
 
     // Flatten all tasks with their section information
     const getAllTasksWithSections = () => {
@@ -274,6 +272,24 @@ const ListTasks = ({
     const allTasksWithSections = getAllTasksWithSections();
     const organizedTasks = organizeTasksByHierarchy(allTasksWithSections.map(item => item.task));
 
+    // Calculate total time spent across all tasks (including subtasks)
+    const calculateTotalTimeSpent = () => {
+        let totalSeconds = 0;
+
+        const addTaskTime = (task: ExtendedReceiveTaskType) => {
+            totalSeconds += task.totalTimeSpent || 0;
+            // Add subtasks time
+            if (task.subTasks && task.subTasks.length > 0) {
+                task.subTasks.forEach(subTask => addTaskTime(subTask));
+            }
+        };
+
+        organizedTasks.forEach(task => addTaskTime(task));
+        return totalSeconds;
+    };
+
+    const totalTimeSpent = calculateTotalTimeSpent();
+
     // Pagination logic
     const totalItems = organizedTasks.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -287,14 +303,27 @@ const ListTasks = ({
         taskSectionMap.set(task.id, sectionName);
     });
 
-
-
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
     const handleItemsPerPageChange = (items: number) => {
         setItemsPerPage(items);
+    };
+
+    const formatTime = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const formatTotalHours = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
     };
 
     const renderEnhancedTaskRow = (
@@ -320,15 +349,6 @@ const ListTasks = ({
                     {config.label}
                 </span>
             );
-        };
-
-        const formatTime = (totalSeconds: number) => {
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${hours.toString().padStart(2, "0")}:${minutes
-                .toString()
-                .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
         };
 
         return (
@@ -382,7 +402,7 @@ const ListTasks = ({
                             </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ActivityIcon className="w-4 h-4 text-yellow-400" />
-                                {t("Action")}
+                                {t("Actions")}
                             </div>
                         </div>
                     </div>
@@ -406,6 +426,26 @@ const ListTasks = ({
                             </div>
                         )}
                     </div>
+
+                    {/* Total Hours Footer */}
+                    {totalItems > 0 && (
+                        <div className="bg-secondary/30 border-t border-gray-700 px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Clock className="w-5 h-5 text-blue-400" />
+                                    <span className="text-sm font-medium text-gray-300">
+                                        {t("Total Time Spent")}:
+                                    </span>
+                                    <span className="text-lg font-bold text-blue-400">
+                                        {formatTotalHours(totalTimeSpent)}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                    {t("Across")} {totalItems} {t("tasks")}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Pagination */}
                     {totalItems > 0 && (
@@ -506,8 +546,6 @@ const ListTasks = ({
                                                 </span>
                                             </div>
 
-
-
                                             <RouteWrapper
                                                 href={`/tasks/${task.id}`}
 
@@ -540,6 +578,31 @@ const ListTasks = ({
                                     </div>
                                 );
                             })}
+
+                            {/* Mobile Total Hours Footer */}
+                            {totalItems > 0 && (
+                                <div className="bg-secondary/30 border border-gray-700 rounded-lg p-4 mt-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-5 h-5 text-blue-400" />
+                                            <span className="text-sm font-medium text-gray-300">
+                                                {t("Total Time Spent")}:
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-lg font-bold text-blue-400">
+                                                {formatTotalHours(totalTimeSpent)}
+                                            </span>
+                                            <span className="text-sm text-gray-400">
+                                                {t("Across")} {totalItems} {t("tasks")}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-gray-500">
+                                            ({formatTime(totalTimeSpent)})
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Mobile Pagination */}
                             {totalItems > itemsPerPage && (

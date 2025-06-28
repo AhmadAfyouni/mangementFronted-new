@@ -112,7 +112,7 @@ const AddSectionModal: React.FC<{
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">
-                        {t("Section Name")}
+                        {t("Section Name")} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"

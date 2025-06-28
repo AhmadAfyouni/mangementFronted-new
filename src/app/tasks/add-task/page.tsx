@@ -7,6 +7,7 @@ import { useTaskFormState } from "@/hooks/tasks/useTaskFormState";
 import { useTaskQueries } from "@/hooks/tasks/useTaskQueries";
 import { useTaskSubmit } from "@/hooks/tasks/useTaskSubmit";
 import useCustomQuery from "@/hooks/useCustomQuery";
+import useLanguage from "@/hooks/useLanguage";
 import { DepartmentType } from "@/types/DepartmentType.type";
 import { EmployeeType } from "@/types/EmployeeType.type";
 import { ProjectType } from "@/types/Project.type";
@@ -15,7 +16,7 @@ import { DeptTree } from "@/types/trees/Department.tree.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
 import { apiClient } from "@/utils/axios/usage";
-import { AlertCircle, ArrowLeft, BarChart3, Building2, Calendar, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, BarChart3, Building2, Calendar, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -486,6 +487,22 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
   const startDateRef = useRef<HTMLInputElement | null>(null);
   const dueDateRef = useRef<HTMLInputElement | null>(null);
 
+  // Enhanced date picker opening function
+  const openDatePicker = (inputRef: React.RefObject<HTMLInputElement>) => {
+    try {
+      if ('showPicker' in (inputRef.current || {})) {
+        (inputRef.current as any)?.showPicker();
+      } else {
+        inputRef.current?.focus();
+        inputRef.current?.click();
+      }
+    } catch (error) {
+      console.log(error);
+
+      inputRef.current?.focus();
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Project Date Info Display */}
@@ -522,18 +539,28 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             {t("Start Date")} <span className="text-red-400">*</span>
           </label>
           <div className="relative">
-            <input
-              {...register("start_date")}
-              ref={e => {
-                register("start_date").ref(e);
-                startDateRef.current = e;
-              }}
-              type="date"
-              min={dateConstraints.min}
-              max={dateConstraints.max}
-              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors cursor-pointer"
-            />
-
+            <div
+              className="relative cursor-pointer"
+              onClick={() => openDatePicker(startDateRef)}
+            >
+              <input
+                {...register("start_date")}
+                ref={e => {
+                  register("start_date").ref(e);
+                  startDateRef.current = e;
+                }}
+                type="date"
+                min={dateConstraints.min}
+                max={dateConstraints.max}
+                className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDatePicker(startDateRef);
+                }}
+              />
+              {/* Overlay to make entire area clickable */}
+              <div className="absolute inset-0 cursor-pointer" />
+            </div>
           </div>
           {errors.start_date && (
             <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
@@ -555,18 +582,28 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             {t("Due Date")} <span className="text-red-400">*</span>
           </label>
           <div className="relative">
-            <input
-              {...register("due_date")}
-              ref={e => {
-                register("due_date").ref(e);
-                dueDateRef.current = e;
-              }}
-              type="date"
-              min={dateConstraints.min}
-              max={dateConstraints.max}
-              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors cursor-pointer"
-            />
-
+            <div
+              className="relative cursor-pointer"
+              onClick={() => openDatePicker(dueDateRef)}
+            >
+              <input
+                {...register("due_date")}
+                ref={e => {
+                  register("due_date").ref(e);
+                  dueDateRef.current = e;
+                }}
+                type="date"
+                min={dateConstraints.min}
+                max={dateConstraints.max}
+                className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDatePicker(dueDateRef);
+                }}
+              />
+              {/* Overlay to make entire area clickable */}
+              <div className="absolute inset-0 cursor-pointer" />
+            </div>
           </div>
           {errors.due_date && (
             <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
@@ -590,6 +627,7 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
                 type="text"
                 className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
                 value={Math.round(estimatedHours)}
+                readOnly
               />
             </div>
             <div className="flex-1">
@@ -598,6 +636,7 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
                 type="text"
                 className="w-full px-3 py-2 rounded-lg bg-dark text-twhite border border-gray-700"
                 value={estimatedWorkingDays !== null ? estimatedWorkingDays : ''}
+                readOnly
               />
             </div>
           </div>
@@ -612,15 +651,15 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
           <div className="relative">
             <select
               {...register("progressCalculationMethod")}
-              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none"
+              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none cursor-pointer"
             >
-              <option className="" value="">
+              <option value="">
                 {t("Select a calculation method")}
               </option>
-              <option className="text-tmid" value="time_based">
+              <option value="time_based">
                 {t("Time Based")}
               </option>
-              <option className="text-tmid" value="date_based">
+              <option value="date_based">
                 {t("Date Based")}
               </option>
             </select>
@@ -631,31 +670,10 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Actual End Date */}
-        {/* <div>
-          <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
-            {t("Actual End Date")}
-          </label>
-          <input
-            {...register("actual_end_date")}
-            type="date"
-            min={dateConstraints.min}
-            max={dateConstraints.max}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-emerald-500 focus:ring focus:ring-emerald-500/20 focus:outline-none transition-colors"
-          />
-          {dateConstraints.min && (
-            <p className="text-emerald-400 mt-1 text-xs">
-              {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
-            </p>
-          )}
-        </div> */}
       </div>
     </div>
   );
 };
-
 interface AssignmentSectionProps {
   register: UseFormRegister<TaskFormInputs>;
   t: (key: string) => string;
@@ -971,6 +989,8 @@ const TaskPageHeader: React.FC<TaskPageHeaderProps> = ({
   onSubmit,
   isPending,
 }) => {
+  const { getDir } = useLanguage()
+  const isRTL = getDir() == "rtl"
   return (
     <div className="">
       <div className="max-w-7xl mx-auto px-6 py-5">
@@ -980,7 +1000,7 @@ const TaskPageHeader: React.FC<TaskPageHeaderProps> = ({
               onClick={onCancel}
               className="p-2 hover:bg-dark/50 rounded-lg transition-colors text-gray-400 hover:text-twhite"
             >
-              <ArrowLeft className="w-6 h-6" />
+              {isRTL ? <ArrowRight className="w-6 h-6" /> : <ArrowLeft className="w-6 h-6" />}
             </button>
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-purple-600/20">
