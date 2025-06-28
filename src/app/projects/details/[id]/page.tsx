@@ -1,6 +1,7 @@
 "use client";
 
 import ProjectDetailsHierarchyTree from "@/components/common/atoms/ProjectDetailsHierarchyTree";
+import ProjectStatusControls from "@/components/common/atoms/projects/ProjectStatusControls";
 import TaskStatusPieChart from "@/components/common/atoms/tasks/TaskStatusPieChart";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
@@ -12,6 +13,7 @@ import { ProjectDetailsType, ProjectStatus } from "@/types/Project.type";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Briefcase,
   Calendar,
   Clock,
@@ -19,11 +21,65 @@ import {
   Users
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import ProjectStatusControls from "@/components/common/atoms/projects/ProjectStatusControls";
+import { useEffect, useMemo, useState } from "react";
+
+// Function to calculate text color based on background color
+const getTextColor = (backgroundColor: string): string => {
+  // Remove the # if it exists
+  const hex = backgroundColor.replace('#', '');
+
+  // Convert to RGB
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Calculate luminance - using relative luminance formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  // Return black for bright colors, white for dark colors
+  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+};
+
+// Function to create lighter/darker versions of the main color
+const createColorVariants = (baseColor: string) => {
+  // Remove the # if it exists
+  const hex = baseColor.replace('#', '');
+
+  // Convert to RGB
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Create lighter version (20% lighter)
+  const lighter = {
+    r: Math.min(255, r + 51),
+    g: Math.min(255, g + 51),
+    b: Math.min(255, b + 51)
+  };
+
+  // Create darker version (20% darker)
+  const darker = {
+    r: Math.max(0, r - 51),
+    g: Math.max(0, g - 51),
+    b: Math.max(0, b - 51)
+  };
+
+  // Convert back to hex
+  const lighterHex = `#${lighter.r.toString(16).padStart(2, '0')}${lighter.g.toString(16).padStart(2, '0')}${lighter.b.toString(16).padStart(2, '0')}`;
+  const darkerHex = `#${darker.r.toString(16).padStart(2, '0')}${darker.g.toString(16).padStart(2, '0')}${darker.b.toString(16).padStart(2, '0')}`;
+
+  return {
+    base: baseColor,
+    light: lighterHex,
+    dark: darkerHex,
+    text: getTextColor(baseColor)
+  };
+};
 
 const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
-  const { t, currentLanguage } = useLanguage();
+  const { t, currentLanguage, getDir } = useLanguage();
+  const isRTL = getDir() == "rtl";
+
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'info' | 'tasks' | 'structure'>('info');
 
@@ -33,6 +89,15 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   });
 
   const [projectStatus, setProjectStatus] = useState<ProjectStatus | undefined>(undefined);
+
+  // Create color theme based on project color
+  const colorTheme = useMemo(() => {
+    if (project?.color) {
+      return createColorVariants(project.color);
+    }
+    // Default color if no project color is set
+    return createColorVariants('#6D28D9');
+  }, [project?.color]);
 
   useEffect(() => {
     if (project?.status) {
@@ -107,13 +172,21 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-stretch">
               {/* Project Details Card */}
-              <div className="md:col-span-2 bg-dark p-5 rounded-xl border border-gray-700/50 shadow-md flex flex-col">
+              <div
+                className="md:col-span-2 bg-dark p-5 rounded-xl border shadow-md flex flex-col"
+                style={{
+                  borderColor: `${colorTheme.base}50`,
+                  boxShadow: `0 4px 12px ${colorTheme.base}15`
+                }}
+              >
                 <h3 className="text-lg font-semibold text-twhite mb-4 flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-primary" />
+                  <Briefcase className="w-4 h-4" style={{ color: colorTheme.base }} />
                   {t("Details")}
                 </h3>
 
                 <div className="space-y-4 flex-1">
+
+
                   {/* Description */}
                   <div className="flex flex-col">
                     <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
@@ -143,14 +216,14 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                     <div className="flex flex-col">
                       <span className="text-sm text-tdark font-medium mb-1">{t("Departments")}</span>
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-primary" />
+                        <Users className="w-4 h-4" style={{ color: colorTheme.base }} />
                         <p className="text-twhite text-sm font-semibold">{project.departments?.length || 0}</p>
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm text-tdark font-medium mb-1">{t("Team Members")}</span>
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-success" />
+                        <Users className="w-4 h-4" style={{ color: colorTheme.base }} />
                         <p className="text-twhite text-sm font-semibold">{project.members?.length || 0}</p>
                       </div>
                     </div>
@@ -161,7 +234,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                     <div className="flex flex-col">
                       <span className="text-sm text-tdark font-medium mb-1">{t("Total Tasks")}</span>
                       <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-warning" />
+                        <Layers className="w-4 h-4" style={{ color: colorTheme.base }} />
                         <p className="text-twhite text-sm font-semibold">{totalTasks}</p>
                       </div>
                     </div>
@@ -174,17 +247,25 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                     currentStatus={projectStatus}
                     onStatusUpdated={handleStatusUpdate}
                     t={t}
+
                   />
                 </div>
               </div>
 
               {/* Enhanced Pie Chart Card - Now spans 2 columns */}
-              <div className="md:col-span-3">
+              <div
+                className="md:col-span-3 bg-dark p-5 rounded-xl border shadow-md"
+                style={{
+                  borderColor: `${colorTheme.base}50`,
+                  boxShadow: `0 4px 12px ${colorTheme.base}15`
+                }}
+              >
                 <TaskStatusPieChart
                   taskDone={project.taskDone}
                   taskOnGoing={project.taskOnGoing}
                   taskOnTest={project.taskOnTest}
                   taskPending={project.taskPending}
+
                 />
               </div>
             </div>
@@ -193,7 +274,11 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
       case 'tasks':
         return (
-          <div className="p-6">
+          <div
+            className="p-6 border-t-4"
+            style={{ borderColor: colorTheme.base }}
+            dir={getDir()}
+          >
             <HomeTasksReport
               tasksData={project.projectTasks}
               isCentered={false}
@@ -256,15 +341,19 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
           : testData;
 
         return (
-          <div className="p-6">
-            <div className="w-full h-[600px] overflow-hidden bg-dark">
+          <div
+            className="p-6 border-t-4"
+            style={{ borderColor: colorTheme.base }}
+          >
+            <div className="w-full h-[600px] overflow-hidden bg-dark rounded-xl border shadow-md"
+              style={{
+                borderColor: `${colorTheme.base}50`,
+                boxShadow: `0 4px 12px ${colorTheme.base}15`
+              }}
+            >
               <ProjectDetailsHierarchyTree
                 data={dataToUse}
-                onPress={(deptId) => {
-                  router.push(
-                    `/projects/details/project-tasks/${project._id}/${deptId}`
-                  );
-                }}
+                onPress={() => { }}
               />
             </div>
           </div>
@@ -278,22 +367,42 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   return (
     <GridContainer>
       <div className="col-span-full px-4 md:px-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        {/* Header with Color Theme */}
+        <div
+          className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 p-6 rounded-xl"
+          style={{
+            background: `linear-gradient(135deg, ${colorTheme.base}15, ${colorTheme.base}25)`,
+            borderLeft: `4px solid ${colorTheme.base}`,
+            boxShadow: `0 4px 12px ${colorTheme.base}15`
+          }}
+        >
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-full bg-secondary hover:bg-dark transition-colors"
+              className="p-2 rounded-full hover:bg-dark transition-colors"
+              style={{ backgroundColor: `${colorTheme.base}30` }}
             >
-              <ArrowLeft className="w-5 h-5 text-twhite" />
+              {!isRTL ? <ArrowLeft className="w-5 h-5 text-twhite" /> : <ArrowRight className="w-5 h-5 text-twhite" />}
             </button>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-twhite">
-                {project.name}
-              </h1>
-              <p className="text-tdark text-sm md:text-base">
-                {t("ID")}: {project._id.slice(-5).toUpperCase()}
-              </p>
+            <div className="flex items-center gap-3">
+              {/* Color indicator */}
+              <div
+                className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg"
+                style={{
+                  backgroundColor: colorTheme.base,
+                  boxShadow: `0 4px 12px ${colorTheme.base}50`
+                }}
+              >
+                <Briefcase className="w-6 h-6" style={{ color: colorTheme.text }} />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-twhite">
+                  {project.name}
+                </h1>
+                <p className="text-tdark text-sm md:text-base">
+                  {t("ID")}: {project._id.slice(-5).toUpperCase()}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -313,14 +422,17 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
             </div>
 
             <div className="px-4 py-2 rounded-full bg-secondary text-twhite border border-gray-700 text-sm font-medium flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-primary" />
+              <Calendar className="w-4 h-4" style={{ color: colorTheme.base }} />
               {formatDate(project.startDate, currentLanguage as "ar" | "en")} - {formatDate(project.endDate, currentLanguage as "ar" | "en")}
             </div>
           </div>
         </div>
 
         {/* Tabs Container */}
-        <div className="bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50 overflow-hidden">
+        <div
+          className="bg-gradient-to-br from-dark to-secondary rounded-xl shadow-lg border border-gray-700/50 overflow-hidden"
+          style={{ boxShadow: `0 8px 32px ${colorTheme.base}15` }}
+        >
           {/* Tab Navigation */}
           <div className="flex flex-wrap border-b border-gray-700/50 bg-secondary/30">
             {tabs.map((tab) => {
@@ -332,12 +444,25 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 px-6 py-4 font-medium transition-all duration-200 border-b-2 ${isActive
-                    ? 'text-twhite border-primary bg-dark/50'
+                    ? 'text-twhite bg-dark/50'
                     : 'text-tdark border-transparent hover:text-twhite hover:bg-dark/30'
                     }`}
+                  style={{
+                    borderBottomColor: isActive ? colorTheme.base : 'transparent',
+                    borderBottomWidth: isActive ? '2px' : '2px'
+                  }}
                 >
-                  <div className={`p-1.5 rounded-lg ${isActive ? tab.bgColor : 'bg-gray-700/50'}`}>
-                    <Icon className={`w-4 h-4 ${isActive ? tab.iconColor : 'text-tdark'}`} />
+                  <div
+                    className={`p-1.5 rounded-lg ${isActive ? 'bg-opacity-20' : 'bg-gray-700/50'}`}
+                    style={{
+                      backgroundColor: isActive ? colorTheme.base : '',
+                      opacity: isActive ? 0.2 : 1
+                    }}
+                  >
+                    <Icon
+                      className={`w-4 h-4 ${isActive ? 'text-base' : 'text-white'}`}
+                      style={{ color: isActive ? "white" : '' }}
+                    />
                   </div>
                   <span className="text-sm md:text-base">{tab.label}</span>
                 </button>

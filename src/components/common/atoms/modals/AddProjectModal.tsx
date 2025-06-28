@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import { useCreateMutation } from "@/hooks/useCreateMutation";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
@@ -16,35 +15,47 @@ import {
   FileText,
   FolderOpen,
   Loader2,
+  Palette,
   Plus,
   Type,
   X
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import ColorPicker from "../ColorPicker";
 
-const AddProjectModal: React.FC<{
+interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectData?: ProjectType;
-}> = ({ isOpen, onClose, projectData }) => {
+}
 
+interface ProjectFormValues {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  color: string;
+}
 
-  console.log("project data : ", projectData);
-
+const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, projectData }) => {
   const { t } = useTranslation();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({
-    resolver: yupResolver(addProjectSchema(!!projectData)),
+    control,
+  } = useForm<ProjectFormValues>({
+    resolver: yupResolver(addProjectSchema(!!projectData)) as any,
     context: { isEditing: !!projectData },
+    defaultValues: {
+      color: projectData?.color || "#6D28D9", // Default purple color
+    }
   });
   const { getDir } = useLanguage()
-  const isRTL = getDir() == "rtl"
+  const isRTL = getDir() === "rtl"
 
   const { data: departments, isError: isDeptError } = useCustomQuery<
     DeptTree[]
@@ -55,7 +66,6 @@ const AddProjectModal: React.FC<{
 
   const { mutate: addOrUpdateProject, isPending } = useCreateMutation({
     endpoint: projectData ? `/projects/update/${projectData._id}` : "/projects",
-
     onSuccessMessage: projectData
       ? `Project updated successfully!`
       : `Project added successfully!`,
@@ -68,8 +78,8 @@ const AddProjectModal: React.FC<{
   });
 
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
-  const [isDeptsDropdownOpen, setIsDeptsDropdownOpen] = useState(false);
-  const deptDropdownRef = useRef(null);
+  const [isDeptsDropdownOpen, setIsDeptsDropdownOpen] = useState<boolean>(false);
+  const deptDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (projectData && projectData.departments) {
@@ -80,6 +90,7 @@ const AddProjectModal: React.FC<{
           ? projectData.startDate.slice(0, 10)
           : "",
         endDate: projectData.endDate ? projectData.endDate.slice(0, 10) : "",
+        color: projectData.color || "#6D28D9",
       });
 
       if (
@@ -87,14 +98,15 @@ const AddProjectModal: React.FC<{
         projectData.departments &&
         projectData.departments.length > 0
       ) {
+        // @ts-ignore
         setSelectedDepartments(projectData.departments.map((dept) => dept._id));
       }
     }
   }, [projectData, reset]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (deptDropdownRef.current && !deptDropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (deptDropdownRef.current && !deptDropdownRef.current.contains(event.target as Node)) {
         setIsDeptsDropdownOpen(false);
       }
     };
@@ -106,6 +118,14 @@ const AddProjectModal: React.FC<{
   }, []);
 
   if (!isOpen) return null;
+
+  // Handle form submission
+  const onSubmit = (data: ProjectFormValues) => {
+    addOrUpdateProject({
+      ...data,
+      departments: selectedDepartments,
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -165,12 +185,7 @@ const AddProjectModal: React.FC<{
                 {/* Content */}
                 <div className="overflow-y-auto">
                   <form
-                    onSubmit={handleSubmit(async (data) => {
-                      addOrUpdateProject({
-                        ...data,
-                        departments: selectedDepartments,
-                      });
-                    })}
+                    onSubmit={handleSubmit(onSubmit)}
                     className="px-8 py-6"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,6 +234,25 @@ const AddProjectModal: React.FC<{
                             {errors.description.message}
                           </p>
                         )}
+                      </div>
+
+                      {/* Project Color Field */}
+                      <div className="md:col-span-2">
+                        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                          <Palette className="w-4 h-4 text-teal-400" />
+                          {t("Project Color")} <span className="text-red-400">*</span>
+                        </label>
+                        <Controller
+                          name="color"
+                          control={control}
+                          render={({ field }) => (
+                            <ColorPicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              error={errors.color?.message}
+                            />
+                          )}
+                        />
                       </div>
 
                       {/* Start Date Field */}

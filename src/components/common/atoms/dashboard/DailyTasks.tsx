@@ -2,8 +2,9 @@ import { useMokkBar } from "@/components/Providers/Mokkbar";
 import useLanguage from "@/hooks/useLanguage";
 import useTaskTimer from "@/hooks/useTaskTimer";
 import { DailyTask } from "@/types/dashboard.type";
-import { Clock } from "lucide-react";
+import { Clock, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
+import RouteWrapper from "../ui/RouteWrapper";
 
 interface DailyTasksProps {
     dailyTasks: DailyTask[];
@@ -278,6 +279,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
                         {t("Completed")}
                     </span>
                 )}
+
+
+                <RouteWrapper
+                    href={`/tasks/${task.id}`}
+                    className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 border border-gray-600/50 hover:border-blue-500/50"
+                >
+                    <button
+                        className="w-full h-full flex items-center justify-center"
+                        title={t("View Details")}
+                    >
+                        <Eye className="w-4 h-4" />
+                    </button>
+                </RouteWrapper>
             </div>
         </div>
     );

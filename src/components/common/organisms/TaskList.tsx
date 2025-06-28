@@ -5,8 +5,9 @@ import useTaskTimer from "@/hooks/useTaskTimer";
 import { categorizeTasks } from "@/services/task.service";
 import { SectionType } from "@/types/Section.type";
 import { ExtendedReceiveTaskType, ReceiveTaskType } from "@/types/Task.type";
-import { ActivityIcon, Calendar, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CircleCheckBig, Clock, Eye, FileText, FolderOpen, ListChecks, Pause, Play, User } from "lucide-react";
+import { ActivityIcon, Calendar, CheckCircle, CircleCheckBig, Clock, Eye, FileText, FolderOpen, ListChecks, Pause, Play, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { Pagination } from "../atoms/Pagination";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
 
 const EnhancedTaskRowComponent: React.FC<{
@@ -221,134 +222,6 @@ const EnhancedTaskRowComponent: React.FC<{
     );
 };
 
-const Pagination: React.FC<{
-    currentPage: number;
-    totalPages: number;
-    onPageChange: (page: number) => void;
-    itemsPerPage: number;
-    onItemsPerPageChange: (items: number) => void;
-    totalItems: number;
-    t: (key: string) => string;
-}> = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange, totalItems, t }) => {
-    const getVisiblePages = () => {
-        const delta = 2;
-        const range = [];
-        const rangeWithDots = [];
-
-        for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
-            range.push(i);
-        }
-
-        if (currentPage - delta > 2) {
-            rangeWithDots.push(1, '...');
-        } else {
-            rangeWithDots.push(1);
-        }
-
-        rangeWithDots.push(...range);
-
-        if (currentPage + delta < totalPages - 1) {
-            rangeWithDots.push('...', totalPages);
-        } else {
-            if (totalPages > 1) rangeWithDots.push(totalPages);
-        }
-
-        return rangeWithDots;
-    };
-
-    const startItem = (currentPage - 1) * itemsPerPage + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-
-    return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-dark border-t border-gray-700">
-            {/* Items per page selector */}
-            <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-400">{t("Show")}</span>
-                <select
-                    value={itemsPerPage}
-                    onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-                    className="bg-secondary border border-gray-600 text-twhite rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                </select>
-                <span className="text-sm text-gray-400">{t("per page")}</span>
-            </div>
-
-            {/* Page info */}
-            <div className="text-sm text-gray-400">
-                {t("Showing")} {startItem} {t("to")} {endItem} {t("of")} {totalItems} {t("results")}
-            </div>
-
-            {/* Pagination controls */}
-            <div className="flex items-center gap-2">
-                {/* First page */}
-                <button
-                    onClick={() => onPageChange(1)}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title={t("First page")}
-                >
-                    <ChevronsLeft className="w-4 h-4" />
-                </button>
-
-                {/* Previous page */}
-                <button
-                    onClick={() => onPageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title={t("Previous page")}
-                >
-                    <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                {/* Page numbers */}
-                <div className="flex items-center gap-1">
-                    {getVisiblePages().map((page, index) => (
-                        <React.Fragment key={index}>
-                            {page === '...' ? (
-                                <span className="px-3 py-2 text-gray-400">...</span>
-                            ) : (
-                                <button
-                                    onClick={() => onPageChange(page as number)}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                        ? 'bg-blue-500 text-white border border-blue-500'
-                                        : 'border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            )}
-                        </React.Fragment>
-                    ))}
-                </div>
-
-                {/* Next page */}
-                <button
-                    onClick={() => onPageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title={t("Next page")}
-                >
-                    <ChevronRight className="w-4 h-4" />
-                </button>
-
-                {/* Last page */}
-                <button
-                    onClick={() => onPageChange(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-gray-600 text-gray-400 hover:text-twhite hover:bg-secondary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title={t("Last page")}
-                >
-                    <ChevronsRight className="w-4 h-4" />
-                </button>
-            </div>
-        </div>
-    );
-};
-
 const ListTasks = ({
     tasksData,
     sections,
@@ -365,7 +238,6 @@ const ListTasks = ({
     const { t } = useLanguage();
     const { organizeTasksByHierarchy } = useHierarchy();
 
-
     useEffect(() => {
         if (tasksData) {
             const categorizedTasks = categorizeTasks(tasksData);
@@ -377,7 +249,6 @@ const ListTasks = ({
     useEffect(() => {
         setCurrentPage(1);
     }, [itemsPerPage]);
-
 
     // Flatten all tasks with their section information
     const getAllTasksWithSections = () => {
@@ -401,6 +272,24 @@ const ListTasks = ({
     const allTasksWithSections = getAllTasksWithSections();
     const organizedTasks = organizeTasksByHierarchy(allTasksWithSections.map(item => item.task));
 
+    // Calculate total time spent across all tasks (including subtasks)
+    const calculateTotalTimeSpent = () => {
+        let totalSeconds = 0;
+
+        const addTaskTime = (task: ExtendedReceiveTaskType) => {
+            totalSeconds += task.totalTimeSpent || 0;
+            // Add subtasks time
+            if (task.subTasks && task.subTasks.length > 0) {
+                task.subTasks.forEach(subTask => addTaskTime(subTask));
+            }
+        };
+
+        organizedTasks.forEach(task => addTaskTime(task));
+        return totalSeconds;
+    };
+
+    const totalTimeSpent = calculateTotalTimeSpent();
+
     // Pagination logic
     const totalItems = organizedTasks.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -414,14 +303,27 @@ const ListTasks = ({
         taskSectionMap.set(task.id, sectionName);
     });
 
-
-
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
     const handleItemsPerPageChange = (items: number) => {
         setItemsPerPage(items);
+    };
+
+    const formatTime = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const formatTotalHours = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
     };
 
     const renderEnhancedTaskRow = (
@@ -447,15 +349,6 @@ const ListTasks = ({
                     {config.label}
                 </span>
             );
-        };
-
-        const formatTime = (totalSeconds: number) => {
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${hours.toString().padStart(2, "0")}:${minutes
-                .toString()
-                .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
         };
 
         return (
@@ -509,7 +402,7 @@ const ListTasks = ({
                             </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ActivityIcon className="w-4 h-4 text-yellow-400" />
-                                {t("Action")}
+                                {t("Actions")}
                             </div>
                         </div>
                     </div>
@@ -533,6 +426,26 @@ const ListTasks = ({
                             </div>
                         )}
                     </div>
+
+                    {/* Total Hours Footer */}
+                    {totalItems > 0 && (
+                        <div className="bg-secondary/30 border-t border-gray-700 px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Clock className="w-5 h-5 text-blue-400" />
+                                    <span className="text-sm font-medium text-gray-300">
+                                        {t("Total Time Spent")}:
+                                    </span>
+                                    <span className="text-lg font-bold text-blue-400">
+                                        {formatTotalHours(totalTimeSpent)}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                    {t("Across")} {totalItems} {t("tasks")}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Pagination */}
                     {totalItems > 0 && (
@@ -633,8 +546,6 @@ const ListTasks = ({
                                                 </span>
                                             </div>
 
-
-
                                             <RouteWrapper
                                                 href={`/tasks/${task.id}`}
 
@@ -667,6 +578,31 @@ const ListTasks = ({
                                     </div>
                                 );
                             })}
+
+                            {/* Mobile Total Hours Footer */}
+                            {totalItems > 0 && (
+                                <div className="bg-secondary/30 border border-gray-700 rounded-lg p-4 mt-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-5 h-5 text-blue-400" />
+                                            <span className="text-sm font-medium text-gray-300">
+                                                {t("Total Time Spent")}:
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-lg font-bold text-blue-400">
+                                                {formatTotalHours(totalTimeSpent)}
+                                            </span>
+                                            <span className="text-sm text-gray-400">
+                                                {t("Across")} {totalItems} {t("tasks")}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-gray-500">
+                                            ({formatTime(totalTimeSpent)})
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Mobile Pagination */}
                             {totalItems > itemsPerPage && (

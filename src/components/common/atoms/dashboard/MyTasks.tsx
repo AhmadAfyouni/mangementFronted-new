@@ -104,29 +104,28 @@ const MyTasks: React.FC = () => {
 
         return (
             <div className="bg-secondary rounded-xl shadow p-6 h-full">
+                {/* Header with RTL support */}
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-twhite">{t("My Tasks")}</h2>
                     {myTasks && myTasks.length > 5 && (
-                        <div className="mt-6 text-center">
-                            <button className="text-sm text-tmid font-medium transition-colors">
-                                {t("View All")}
-                            </button>
-                        </div>
+                        <button className="text-sm text-tmid font-medium transition-colors hover:text-twhite">
+                            {t("View All")}
+                        </button>
                     )}
                 </div>
 
-                {/* Filter tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto">
+                {/* Filter tabs with RTL support */}
+                <div className="flex gap-2 mb-6 overflow-x-auto ">
                     {filters.map((filter) => (
                         <button
                             key={filter}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === filter
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${activeFilter === filter
                                 ? 'bg-indigo-100 text-indigo-800 shadow-sm'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                             onClick={() => setActiveFilter(filter)}
                         >
-                            {filter === 'all' ? t('all') : filter}
+                            {filter === 'all' ? t('all') : t(filter)}
                         </button>
                     ))}
                 </div>
@@ -136,19 +135,19 @@ const MyTasks: React.FC = () => {
                     renderEmptyState()
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-secondary">
+                        <table className="min-w-full divide-y divide-secondary" dir="rtl">
                             <thead className="bg-dark">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider ltr:rounded-tl-xl  rtl:rounded-tr-xl">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-twhite uppercase tracking-wider rounded-tr-xl">
                                         {t("Task")}
                                     </th>
-                                    <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-twhite uppercase tracking-wider">
                                         {t("Status")}
                                     </th>
-                                    <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-twhite uppercase tracking-wider">
                                         {t("Progress")}
                                     </th>
-                                    <th scope="col" className="px-6 py-3 ltr:text-left rtl:text-right text-xs font-medium text-twhite uppercase tracking-wider ltr:rounded-tr-xl  rtl:rounded-tl-xl">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-twhite uppercase tracking-wider rounded-tl-xl">
                                         {t("Activity")}
                                     </th>
                                 </tr>
@@ -191,7 +190,7 @@ const MyTasks: React.FC = () => {
     }
 };
 
-// Memoized TaskRow component to prevent unnecessary re-renders
+// Memoized TaskRow component with RTL support
 const TaskRow = memo<{
     task: MyTask;
     isLast: boolean;
@@ -209,23 +208,26 @@ const TaskRow = memo<{
     };
 
     return (
-        <tr
-            className={` hover:bg-dark ${isLast ? 'rounded-b-xl  overflow-hidden' : ''}`}
-        >
-            <td className={`px-6 py-4 ${isLast ? 'ltr:rounded-bl-xl rtl:rounded-br-xl' : ''}`}>
+        <tr className={`hover:bg-dark ${isLast ? 'rounded-b-xl overflow-hidden' : ''}`}>
+            {/* Task Name Column - RTL aligned */}
+            <td className={`px-6 py-4 text-right ${isLast ? 'rounded-br-xl' : ''}`}>
                 <div className="flex flex-col text-twhite">
-                    <div className="text-sm font-medium ">{task.name}</div>
-                    <div className="text-xs ">
+                    <div className="text-sm font-medium">{task.name}</div>
+                    <div className="text-xs text-gray-400">
                         {formatDate(task.dueDate)} • {task.project}
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+
+            {/* Status Column - RTL aligned */}
+            <td className="px-6 py-4 whitespace-nowrap text-right">
                 <span className={`${getStatusColor(task.status)} text-xs px-2.5 py-0.5 rounded-full`}>
-                    {task.status}
+                    {t(task.status)}
                 </span>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+
+            {/* Progress Column - RTL aligned */}
+            <td className="px-6 py-4 whitespace-nowrap text-right">
                 <div className="flex flex-col w-full gap-1.5">
                     <div className="flex justify-between items-center">
                         <span className="text-xs text-gray-400">{task.progress}%</span>
@@ -235,21 +237,26 @@ const TaskRow = memo<{
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2.5">
                         <div
-                            className={`h-2.5 rounded-full ${getProgressColor(task.progress)}`}
-                            style={{ width: `${task.progress}%` }}
+                            className={`h-2.5 rounded-full ${getProgressColor(task.progress)} transition-all duration-300`}
+                            style={{
+                                width: `${task.progress}%`,
+                                transformOrigin: 'right' // RTL progress bar origin
+                            }}
                         ></div>
                     </div>
                 </div>
             </td>
-            <td className={`px-6 py-4 whitespace-nowrap ${isLast ? 'ltr:rounded-br-xl rtl:rounded-bl-xl' : ''}`}>
-                <div className="flex gap-4">
-                    <div className="flex items-center  text-twhite">
-                        <MessageSquare size={14} className="mx-1" />
-                        <span className="text-xs">{task.commentsCount || 0}</span>
+
+            {/* Activity Column - RTL aligned */}
+            <td className={`px-6 py-4 whitespace-nowrap text-right ${isLast ? 'rounded-bl-xl' : ''}`}>
+                <div className="flex gap-4 justify-end">
+                    <div className="flex items-center text-twhite">
+                        <span className="text-xs ml-1">{task.commentsCount || 0}</span>
+                        <MessageSquare size={14} />
                     </div>
-                    <div className="flex items-center  text-twhite">
-                        <FileIcon size={14} className="mx-1" />
-                        <span className="text-xs">{task.filesCount || 0}</span>
+                    <div className="flex items-center text-twhite">
+                        <span className="text-xs ml-1">{task.filesCount || 0}</span>
+                        <FileIcon size={14} />
                     </div>
                 </div>
             </td>
