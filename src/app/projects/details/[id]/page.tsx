@@ -1,15 +1,17 @@
 "use client";
 
+import { Pagination } from '@/components/common/atoms/Pagination';
 import ProjectDetailsHierarchyTree from "@/components/common/atoms/ProjectDetailsHierarchyTree";
 import ProjectStatusControls from "@/components/common/atoms/projects/ProjectStatusControls";
 import TaskStatusPieChart from "@/components/common/atoms/tasks/TaskStatusPieChart";
 import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
-import HomeTasksReport from "@/components/common/molcules/HomeTasksReport";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate } from "@/services/task.service";
+import { EmployeeType } from "@/types/EmployeeType.type";
 import { ProjectDetailsType, ProjectStatus } from "@/types/Project.type";
+import { ReceiveTaskType } from "@/types/Task.type";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -22,6 +24,24 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+
+// Types for team and teamStats based on API response
+interface TeamMember {
+  empInfo: EmployeeType;
+  totalTimeSpent: number;
+  taskCount: number;
+  completedTasks: number;
+  ongoingTasks: number;
+  testingTasks: number;
+  pendingTasks: number;
+}
+
+interface TeamStats {
+  totalMembers: number;
+  totalTeamTime: number;
+  averageTimePerMember: number;
+  mostActiveMembers: TeamMember[];
+}
 
 // Function to calculate text color based on background color
 const getTextColor = (backgroundColor: string): string => {
@@ -76,12 +96,63 @@ const createColorVariants = (baseColor: string) => {
   };
 };
 
+// Custom TeamMembersContent for API compatibility
+const TeamMembersContent = ({ team, t, onCountChange }: { team: (TeamMember | EmployeeType)[], t: (key: string) => string, onCountChange?: (count: number) => void }) => {
+  // Only show project-related fields for each team member
+  const normalized: TeamMember[] = (team || []).map((member) =>
+    (member as TeamMember).empInfo ? (member as TeamMember) : null
+  ).filter(Boolean) as TeamMember[];
+
+  // Notify parent of the count
+  useEffect(() => {
+    if (onCountChange) onCountChange(normalized.length);
+  }, [normalized.length, onCountChange]);
+
+  if (normalized.length === 0) {
+    return <div className="text-tdark p-4">{t('noTeamMembersFound')}</div>;
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-700/50 mt-4">
+      <table className="min-w-full divide-y divide-gray-700 bg-dark text-twhite">
+        <thead>
+          <tr>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('NAME')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TOTAL TIME SPENT')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TASK COUNT')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('COMPLETED')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('ONGOING')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TESTING')}</th>
+            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('PENDING')}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-700">
+          {normalized.map((member, idx) => (
+            <tr key={idx} className="hover:bg-secondary/30 transition-colors">
+              <td className="px-6 py-4 whitespace-nowrap font-semibold">{member.empInfo.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.totalTimeSpent}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.taskCount}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.completedTasks}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.ongoingTasks}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.testingTasks}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{member.pendingTasks}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
   const { t, currentLanguage, getDir } = useLanguage();
   const isRTL = getDir() == "rtl";
 
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'info' | 'tasks' | 'structure'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'tasks' | 'structure' | 'team'>('info');
+  const [teamCount, setTeamCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const { data: project, isLoading } = useCustomQuery<ProjectDetailsType>({
     queryKey: ["project-details", id],
@@ -107,6 +178,26 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
   const handleStatusUpdate = (newStatus: ProjectStatus) => {
     setProjectStatus(newStatus);
+  };
+
+  // Helper to get general status
+  const getGeneralStatus = (task: ReceiveTaskType, t: (key: string) => string) => {
+    if (task.is_over_due) return t('Overdue');
+    if (['DONE', 'CLOSED', 'CANCELED'].includes(task.status)) return t('Completed');
+    return t('Current');
+  };
+
+  // Helper to get specific status label
+  const getSpecificStatus = (task: ReceiveTaskType, t: (key: string) => string) => {
+    const map: Record<string, string> = {
+      'PENDING': t('Pending'),
+      'ONGOING': t('Ongoing'),
+      'ON_TEST': t('On Test'),
+      'DONE': t('Done'),
+      'CLOSED': t('Closed'),
+      'CANCELED': t('Canceled'),
+    };
+    return map[task.status] || task.status;
   };
 
   if (isLoading) {
@@ -162,6 +253,13 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
       icon: Users,
       iconColor: 'text-success',
       bgColor: 'bg-success/20'
+    },
+    {
+      id: 'team' as const,
+      label: t("Team Members"),
+      icon: Users,
+      iconColor: 'text-info',
+      bgColor: 'bg-info/20'
     }
   ];
 
@@ -185,8 +283,6 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 </h3>
 
                 <div className="space-y-4 flex-1">
-
-
                   {/* Description */}
                   <div className="flex flex-col">
                     <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
@@ -224,7 +320,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                       <span className="text-sm text-tdark font-medium mb-1">{t("Team Members")}</span>
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" style={{ color: colorTheme.base }} />
-                        <p className="text-twhite text-sm font-semibold">{project.members?.length || 0}</p>
+                        <p className="text-twhite text-sm font-semibold">{teamCount}</p>
                       </div>
                     </div>
                   </div>
@@ -247,7 +343,6 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                     currentStatus={projectStatus}
                     onStatusUpdated={handleStatusUpdate}
                     t={t}
-
                   />
                 </div>
               </div>
@@ -265,7 +360,6 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                   taskOnGoing={project.taskOnGoing}
                   taskOnTest={project.taskOnTest}
                   taskPending={project.taskPending}
-
                 />
               </div>
             </div>
@@ -273,16 +367,47 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
         );
 
       case 'tasks':
+        const allTasks = project.projectTasks || [];
+        const totalItems = allTasks.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedTasks = allTasks.slice(startIndex, endIndex);
         return (
-          <div
-            className="p-6 border-t-4"
-            style={{ borderColor: colorTheme.base }}
-            dir={getDir()}
-          >
-            <HomeTasksReport
-              tasksData={project.projectTasks}
-              isCentered={false}
-            />
+          <div className="p-6 border-t-4" style={{ borderColor: colorTheme.base }}>
+            <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-700/50 bg-dark">
+              <table className="min-w-full divide-y divide-gray-700 bg-dark text-twhite">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Task Name')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('General Status')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Specific Status')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Assignee')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Due Date')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {paginatedTasks.map((task, idx) => (
+                    <tr key={task.id || idx} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap font-semibold">{task.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getGeneralStatus(task, t)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getSpecificStatus(task, t)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task.assignee?.name || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task.due_date ? new Date(task.due_date).toLocaleDateString(currentLanguage) : '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+                onItemsPerPageChange={(items: number) => { setItemsPerPage(items); setCurrentPage(1); }}
+                totalItems={totalItems}
+                t={t}
+              />
+            </div>
           </div>
         );
 
@@ -356,6 +481,46 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 onPress={() => { }}
               />
             </div>
+          </div>
+        );
+
+      case 'team':
+        // Use TeamStats type for stats
+        const stats: TeamStats | undefined = project.teamStats;
+        return (
+          <div className="p-4 border-t-4" style={{ borderColor: colorTheme.base }}>
+            <div className="mb-4 bg-dark rounded-lg p-4 border border-gray-700/50 shadow-md">
+              <h3 className="text-base font-semibold text-twhite mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5 text-info" />
+                {t('teamMembersStats')}
+              </h3>
+              {stats ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-twhite text-sm">
+                  <div className="flex flex-col">
+                    <span className="text-tdark font-semibold">{t('totalMembers')}</span>
+                    <span>{teamCount}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-tdark font-semibold">{t('totalTeamTime')}</span>
+                    <span>{stats.totalTeamTime}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-tdark font-semibold">{t('averageTimePerMember')}</span>
+                    <span>{stats.averageTimePerMember}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-tdark font-semibold">{t('mostActiveMembers')}</span>
+                    <span>{stats.mostActiveMembers.length} {t('members')}</span>
+                    {stats.mostActiveMembers.length > 0 && (
+                      <span>{t('first')}: {stats.mostActiveMembers[0].empInfo.name}</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-tdark">{t('noTeamStatsAvailable')}</div>
+              )}
+            </div>
+            <TeamMembersContent team={project.team || project.members || []} t={t} onCountChange={setTeamCount} />
           </div>
         );
 

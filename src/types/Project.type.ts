@@ -40,5 +40,12 @@ export type ProjectDetailsType = {
   taskOnTest: number;
   taskPending: number;
   status?: ProjectStatus;
-  color: string
+  color: string;
+  team?: EmployeeType[];
+  teamStats?: {
+    totalMembers: number;
+    totalTeamTime: number;
+    averageTimePerMember: number;
+    mostActiveMembers: any[];
+  };
 };
