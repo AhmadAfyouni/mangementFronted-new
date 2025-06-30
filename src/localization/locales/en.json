@@ -521,6 +521,25 @@
     "This section will be created under your department.": "This section will be created under your department.",
     "Create Section": "Create Section",
     "Update Section": "Update Section",
-    "Time Spent": "Time Spent"
+    "Time Spent": "Time Spent",
+    "teamMembersStats": "Team Members Stats",
+    "totalMembers": "Total Members",
+    "totalTeamTime": "Total Team Time",
+    "averageTimePerMember": "Average Time Per Member",
+    "mostActiveMembers": "Most Active Members",
+    "members": "members",
+    "first": "First",
+    "noTeamStatsAvailable": "No team stats available.",
+    "NAME": "Name",
+    "TOTAL TIME SPENT": "Total Time Spent",
+    "TASK COUNT": "Task Count",
+    "COMPLETED": "Completed",
+    "ONGOING": "Ongoing",
+    "TESTING": "Testing",
+    "PENDING": "Pending",
+    "General Status": "General Status",
+    "Specific Status": "Specific Status",
+    "Assignee": "Assignee",
+    "Current": "Current"
   }
 }
