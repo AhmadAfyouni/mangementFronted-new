@@ -2,9 +2,8 @@ import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate, getPriorityColor } from "@/services/task.service";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { AlertCircle, Check, ChevronRight, Clock, Edit2, Layers, X } from "lucide-react";
+import { AlertCircle, ChevronRight, Clock, Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface TaskHeaderProps {
   task: ReceiveTaskType;
@@ -24,8 +23,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
   onEditToggle
 }) => {
   const { t, currentLanguage } = useLanguage();
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [tempName, setTempName] = useState(taskName);
   const {
     data: parentTask,
   } = useCustomQuery<ReceiveTaskType>({
@@ -36,24 +33,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
   });
 
   const router = useRouter();
-
-  const handleSaveName = () => {
-    onNameChange(tempName);
-    setIsEditingName(false);
-  };
-
-  const handleCancelEdit = () => {
-    setTempName(taskName);
-    setIsEditingName(false);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveName();
-    } else if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
-  };
 
   const navigateToParent = () => {
     if (task.parent_task) {
@@ -85,58 +64,35 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
 
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          {isEditingName ? (
-            <div className="flex items-center gap-2 mb-2">
-              <input
-                type="text"
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                onKeyDown={handleKeyPress}
-                className="text-3xl font-bold bg-transparent border-b-2 border-blue-500 text-twhite outline-none px-2"
-                autoFocus
-              />
-              <button
-                onClick={handleSaveName}
-                className="p-2 text-green-400 hover:bg-green-400/20 rounded-lg transition-colors"
-              >
-                <Check className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                className="p-2 text-red-400 hover:bg-red-400/20 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 mb-2">
-              {/* Task title with subtask indicator */}
-              <div className="flex items-center gap-3">
-                {isSubtask && (
-                  <div className="p-2 bg-slate-500/20 rounded-lg relative">
-                    <Layers className="w-6 h-6 text-slate-400" />
-                    {/* Small indicator dot */}
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                      <svg width="8" height="8" viewBox="0 0 8 8" className="text-white">
-                        <path d="M2 4 L3.5 5.5 L6 2.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
+          <div className="flex items-center gap-2 mb-2">
+            {/* Task title with subtask indicator */}
+            <div className="flex items-center gap-3">
+              {isSubtask && (
+                <div className="p-2 bg-slate-500/20 rounded-lg relative">
+                  <Layers className="w-6 h-6 text-slate-400" />
+                  {/* Small indicator dot */}
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg width="8" height="8" viewBox="0 0 8 8" className="text-white">
+                      <path d="M2 4 L3.5 5.5 L6 2.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </div>
-                )}
+                </div>
+              )}
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={taskName}
+                  onChange={e => onNameChange(e.target.value)}
+                  className="text-3xl font-bold bg-transparent border-b-2 border-blue-500 text-twhite outline-none px-2"
+                  autoFocus
+                />
+              ) : (
                 <h1 className={`text-3xl font-bold ${isSubtask ? 'text-slate-200' : 'text-twhite'}`}>
                   {taskName || 'Untitled Task'}
                 </h1>
-              </div>
-              {isEditing && (
-                <button
-                  onClick={() => setIsEditingName(true)}
-                  className="p-2 text-gray-400 hover:text-twhite hover:bg-gray-700/50 rounded-lg transition-all"
-                >
-                  <Edit2 className="w-5 h-5" />
-                </button>
               )}
             </div>
-          )}
+          </div>
           <div className="flex items-center gap-4 text-gray-400">
             {task.priority && (
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)}`}>

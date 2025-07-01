@@ -540,6 +540,8 @@
     "General Status": "General Status",
     "Specific Status": "Specific Status",
     "Assignee": "Assignee",
-    "Current": "Current"
+    "Current": "Current",
+    "Assigned To": "Assigned To",
+    "Actual Hours": "Actual Hours"
   }
 }

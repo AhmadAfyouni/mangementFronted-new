@@ -373,6 +373,16 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedTasks = allTasks.slice(startIndex, endIndex);
+        // Helper for priority badge
+        const getPriorityBadge = (priority: string) => {
+          const map: Record<string, { color: string; label: string }> = {
+            'HIGH': { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: t('High') },
+            'MEDIUM': { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', label: t('Medium') },
+            'LOW': { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: t('Low') },
+          };
+          const config = map[priority] || { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: priority };
+          return <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${config.color}`}>{config.label}</span>;
+        };
         return (
           <div className="p-6 border-t-4" style={{ borderColor: colorTheme.base }}>
             <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-700/50 bg-dark">
@@ -380,20 +390,35 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 <thead>
                   <tr>
                     <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Task Name')}</th>
-                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('General Status')}</th>
-                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Specific Status')}</th>
-                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Assignee')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Assigned To')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Department')}</th>
                     <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Due Date')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Estimated Hours')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Actual Hours')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Priority')}</th>
+                    <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {paginatedTasks.map((task, idx) => (
                     <tr key={task.id || idx} className="hover:bg-secondary/30 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap font-semibold">{task.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getGeneralStatus(task, t)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getSpecificStatus(task, t)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{task.assignee?.name || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task.department?.name || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{task.due_date ? new Date(task.due_date).toLocaleDateString(currentLanguage) : '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task.estimated_hours ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task.actual_hours ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getPriorityBadge(task.priority)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-block text-xs font-semibold">
+                            {getGeneralStatus(task, t)}
+                          </span>
+                          <span className="inline-block text-xs text-gray-400">
+                            {getSpecificStatus(task, t)}
+                          </span>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -942,6 +942,15 @@
     "On Test": "قيد الاختبار",
     "Done": "منجزة",
     "Closed": "مغلقة",
-    "Canceled": "ملغاة"
+    "Canceled": "ملغاة",
+    "Assigned To": "مُسند إلى",
+    "Department": "القسم",
+    "Estimated Hours": "الساعات المقدرة",
+    "Actual Hours": "الساعات الفعلية",
+    "Priority": "الأولوية",
+    "Status": "الحالة",
+    "High": "عالية",
+    "Medium": "متوسطة",
+    "Low": "منخفضة"
   }
 }
