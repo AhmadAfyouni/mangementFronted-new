@@ -239,7 +239,6 @@ const AddSubTaskModal: React.FC<{
               section_id: data.section_id || undefined,
               // Update with only the fields in CreateSubTaskDto
               start_date: toISODate(data.start_date),
-              actual_end_date: toISODate(data.actual_end_date),
               expected_end_date: toISODate(data.expected_end_date),
               estimated_hours: toNumber(data.estimated_hours),
               recurringEndDate: toISODate(data.recurringEndDate),
@@ -353,22 +352,6 @@ const AddSubTaskModal: React.FC<{
                   />
                   {errors.due_date && (
                     <p className="text-red-500 mt-1 text-sm">{errors.due_date.message}</p>
-                  )}
-                </div>
-
-                {/* Actual End Date Field */}
-                <div>
-                  <label className="block text-tmid text-sm font-medium">
-                    {t("Actual End Date")}
-                  </label>
-                  <input
-                    type="date"
-                    {...register("actual_end_date")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.actual_end_date ? "border border-red-500" : ""
-                      }`}
-                  />
-                  {errors.actual_end_date && (
-                    <p className="text-red-500 mt-1 text-sm">{errors.actual_end_date.message}</p>
                   )}
                 </div>
 

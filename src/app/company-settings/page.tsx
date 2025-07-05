@@ -239,10 +239,6 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                     <Calendar className="w-5 h-5 text-blue-400" />
                     {t("Working Hours Timeline")} <span className="text-sm text-gray-400 font-normal">(6 AM - 12 AM)</span>
                 </h3>
-                <div className="text-sm text-gray-400">
-                    {isEditing ? t("Drag to adjust working hours") :
-                        companySettings ? t("Displaying saved company schedule") : t("Loading schedule...")}
-                </div>
             </div>
 
             {/* Time Scale Header */}
@@ -322,7 +318,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                                         <Clock className="w-3 h-3" />
                                         <span>{formatTimeDisplay(dayHours.startTime || '')} - {formatTimeDisplay(dayHours.endTime || '')}</span>
                                     </div>
-                                    {dayHours.breakTimeMinutes && (
+                                    {dayHours.breakTimeMinutes && dayHours.breakTimeMinutes > 0 && (
                                         <div className="flex items-center gap-1">
                                             <Coffee className="w-3 h-3" />
                                             <span>{dayHours.breakTimeMinutes}m break</span>
@@ -345,11 +341,11 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                                         }}
                                     >
                                         {/* Break Time Indicator */}
-                                        {dayHours.breakTimeMinutes && (
+                                        {dayHours.breakTimeMinutes ? dayHours.breakTimeMinutes > 0 && (
                                             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                                 <div className="w-1 h-4 bg-orange-400 rounded-full opacity-80" />
                                             </div>
-                                        )}
+                                        ) : ""}
                                     </div>
 
                                     {/* Start Time Handle */}

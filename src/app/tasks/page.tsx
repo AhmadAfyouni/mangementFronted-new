@@ -8,8 +8,7 @@ import RouteWrapper from "@/components/common/atoms/ui/RouteWrapper";
 import TaskList from "@/components/common/organisms/TaskList";
 import TasksContent from "@/components/common/organisms/TasksContent";
 import {
-  usePermissions,
-  useRolePermissions,
+  useRolePermissions
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
@@ -19,7 +18,7 @@ import { ReceiveTaskType } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
 import { Building2, ChevronDown, FolderOpen, Plus, Users } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Enhanced Toggle Component
 const TaskToggle: React.FC<{
@@ -64,7 +63,7 @@ const EnhancedSelect: React.FC<{
   placeholder: string;
   icon?: React.ReactNode;
   className?: string;
-}> = ({ options, value, onChange, icon, className = "" }) => {
+}> = ({ options, value, onChange, placeholder, icon, className = "" }) => {
   return (
     <div className={`relative group ${className}`}>
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
@@ -82,6 +81,12 @@ const EnhancedSelect: React.FC<{
           cursor-pointer
         `}
       >
+        {/* Placeholder option */}
+        {(!value || value === "") && (
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
+        )}
         {options.map((option) => (
           <option key={option.value} value={option.value} className="bg-secondary text-twhite">
             {option.label}
@@ -111,39 +116,21 @@ const AddTaskButton: React.FC<{ t: (key: string) => string }> = ({ t }) => {
 
 const TasksView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("list");
-  const [myProj, setMyProj] = useState(false);
-  const [myDept, setMyDept] = useState(false);
-  const [selectedProj, setSelectedProj] = useState<string | null>(null);
-  const [isTasksByMe, setIsTasksByMe] = useState<boolean>(false);
+  const [mainView, setMainView] = useState("my-tasks");
+  const [selectedDept, setSelectedDept] = useState("");
+  const [selectedProj, setSelectedProj] = useState("");
+  const [isTasksByMe, setIsTasksByMe] = useState(true); // true = My Tasks, false = For Me Tasks
 
   const { t } = useLanguage();
   const isAdmin = useRolePermissions("admin");
   const isPrimary = useRolePermissions("primary_user");
-  const [selectedOption, setSelectedOption] = useState("");
-
-  // Construct query with both existing options and new toggle
-  const getQueryString = () => {
-    const queryParts = [];
-
-    // Add existing selectedOption if any
-    if (selectedOption) {
-      queryParts.push(selectedOption);
-    }
-
-    // Add toggle parameter
-    if (isTasksByMe) {
-      queryParts.push("tasks-by-me=true");
-    }
-
-    return queryParts.join("&");
-  };
 
   const { data: tasksData, isLoading: isTasksLoading } = useCustomQuery<{
     info: ReceiveTaskType[];
     tree: TaskTree[];
   }>({
-    queryKey: ["tasks", selectedOption, isTasksByMe + ""],
-    url: `/tasks/tree?${getQueryString()}`,
+    queryKey: ["tasks", selectedProj, isTasksByMe + ""],
+    url: `/tasks/tree?tasks-by-me=${isTasksByMe}&project=${selectedProj}`,
   });
 
   const { data: projects } = useCustomQuery<ProjectType[]>({
@@ -166,19 +153,6 @@ const TasksView: React.FC = () => {
     url: `/sections`
   });
 
-  useEffect(() => {
-    console.log("Selected Option:", selectedOption);
-    console.log("Tasks By Me:", isTasksByMe);
-    console.log("Query String:", getQueryString());
-  }, [selectedOption, isTasksByMe]);
-
-  const canViewTasks = usePermissions(["task_search_and_view"]);
-  const showMainSelect = canViewTasks || isPrimary || isAdmin;
-
-  const handleToggle = (tasksByMe: boolean) => {
-    setIsTasksByMe(tasksByMe);
-  };
-
   // Prepare dropdown options
   const departmentOptions = deptTree?.tree?.map(dept => ({
     value: dept.id,
@@ -191,10 +165,15 @@ const TasksView: React.FC = () => {
   })) || [];
 
   const mainSelectOptions = [
-    ...(canViewTasks ? [{ value: "", label: t("My Tasks") }] : []),
-    ...(canViewTasks && (isPrimary || isAdmin) ? [{ value: "get-my-dept-tasks", label: t("Department Tasks") }] : []),
-    ...(canViewTasks ? [{ value: "my-project-tasks", label: t("Project Tasks") }] : []),
+    { value: "my-tasks", label: t("My Tasks") },
+    { value: "department-tasks", label: t("Department Tasks") },
+    { value: "project-tasks", label: t("Project Tasks") },
   ];
+
+  // Filtered Department Options for Project Tasks
+  const filteredDepartmentOptions = mainView === "project-tasks" && selectedProj
+    ? (deptTree?.tree || []).map(dept => ({ value: dept.id, label: dept.name }))
+    : departmentOptions;
 
   return (
     <GridContainer>
@@ -209,59 +188,64 @@ const TasksView: React.FC = () => {
           {t("Tasks")}
         </h1>
 
-        <div className="flex justify-center items-center gap-4 flex-wrap">
-          {/* Task Toggle - Only show when "My Tasks" is selected */}
-          {canViewTasks && selectedOption === "" && !myProj && !myDept && (
+        <div className="flex justify-center   items-center gap-4 flex-wrap">
+
+
+          {/* Conditional Rendering */}
+          {mainView === "my-tasks" && (
             <TaskToggle
               isTasksByMe={isTasksByMe}
-              onToggle={handleToggle}
+              onToggle={setIsTasksByMe}
               t={t}
             />
           )}
 
-          {/* Departments Dropdown */}
-          {(myDept || myProj) && (
+          {mainView === "project-tasks" && (
+            <>
+              <EnhancedSelect
+                options={projectOptions}
+                value={selectedProj}
+                onChange={setSelectedProj}
+                placeholder={t("Select Project")}
+                icon={<FolderOpen className="h-4 w-4" />}
+                className="min-w-[200px]"
+              />
+              <EnhancedSelect
+                options={filteredDepartmentOptions}
+                value={selectedDept}
+                onChange={setSelectedDept}
+                placeholder={t("Select Department")}
+                icon={<Building2 className="h-4 w-4" />}
+                className="min-w-[200px]"
+              />
+            </>
+          )}
+
+
+          {mainView === "department-tasks" && (
             <EnhancedSelect
               options={departmentOptions}
-              onChange={(value) => {
-                const deptOption = `departmentId=${value}`;
-                const projOption = selectedProj ? `&projectId=${selectedProj}` : "";
-                setSelectedOption(deptOption + projOption);
-              }}
-              placeholder={t("Select a department")}
+              value={selectedDept}
+              onChange={setSelectedDept}
+              placeholder={t("Select Department")}
               icon={<Building2 className="h-4 w-4" />}
               className="min-w-[200px]"
             />
           )}
 
-          {/* Project Dropdown */}
-          {myProj && (
-            <EnhancedSelect
-              options={projectOptions}
-              value={selectedProj || ""}
-              onChange={setSelectedProj}
-              placeholder={t("Select a project")}
-              icon={<FolderOpen className="h-4 w-4" />}
-              className="min-w-[200px]"
-            />
-          )}
-
-          {/* Main Dropdown */}
-          {showMainSelect && (
-            <EnhancedSelect
-              options={mainSelectOptions}
-              value={selectedOption}
-              onChange={(value) => {
-                setMyProj(value === "my-project-tasks");
-                setMyDept(value === "get-my-dept-tasks");
-                setSelectedOption(value); // Always update selectedOption
-                setSelectedProj(null);
-              }}
-              placeholder={t("Select view")}
-              icon={<Users className="h-4 w-4" />}
-              className="min-w-[180px]"
-            />
-          )}
+          {/* Main Menu */}
+          <EnhancedSelect
+            options={mainSelectOptions}
+            value={mainView}
+            onChange={(value) => {
+              setMainView(value);
+              setSelectedDept("");
+              setSelectedProj("");
+            }}
+            placeholder={t("Select View")}
+            icon={<Users className="h-4 w-4" />}
+            className="min-w-[180px]"
+          />
 
           {/* Add Task Button */}
           {(isAdmin || isPrimary) && <AddTaskButton t={t} />}
