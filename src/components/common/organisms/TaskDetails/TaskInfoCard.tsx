@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useRef } from "react";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 interface TaskInfoCardProps {
   task: ReceiveTaskType;
@@ -106,6 +107,9 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   };
 
   const taskTypeInfo = getTaskTypeInfo();
+
+  const showPriority = useTasksGuard(["enablePriority"]);
+  const showDueDate = useTasksGuard(["enableDueDate"]);
 
   return (
     <div className="space-y-4">
@@ -241,36 +245,38 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
             </div>
 
             {/* Priority */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">{t("Priority")}</span>
-              <div className="relative">
-                <button
-                  onClick={() => isEditing && setPriorityMenuOpen(!isPriorityMenuOpen)}
-                  disabled={!isEditing}
-                  className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-all ${getPriorityColor(selectedPriority || task.priority)} ${!isEditing ? 'cursor-default opacity-60' : 'hover:scale-105'}`}
-                >
-                  {t(selectedPriority || task.priority)}
-                  {isEditing && <ChevronDown className={`w-3 h-3 transition-transform ${isPriorityMenuOpen ? 'rotate-180' : ''}`} />}
-                </button>
+            {showPriority && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">{t("Priority")}</span>
+                <div className="relative">
+                  <button
+                    onClick={() => isEditing && setPriorityMenuOpen(!isPriorityMenuOpen)}
+                    disabled={!isEditing}
+                    className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-all ${getPriorityColor(selectedPriority || task.priority)} ${!isEditing ? 'cursor-default opacity-60' : 'hover:scale-105'}`}
+                  >
+                    {t(selectedPriority || task.priority)}
+                    {isEditing && <ChevronDown className={`w-3 h-3 transition-transform ${isPriorityMenuOpen ? 'rotate-180' : ''}`} />}
+                  </button>
 
-                {isEditing && isPriorityMenuOpen && (
-                  <div className={`absolute top-full mt-1 ${isRTL ? 'left-0' : 'right-0'} bg-dark rounded-lg shadow-2xl border border-gray-700 p-1 z-50 min-w-[120px]`}>
-                    {priorityOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          onPriorityChange(option);
-                          setPriorityMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-white transition-all text-xs"
-                      >
-                        {t(option)}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {isEditing && isPriorityMenuOpen && (
+                    <div className={`absolute top-full mt-1 ${isRTL ? 'left-0' : 'right-0'} bg-dark rounded-lg shadow-2xl border border-gray-700 p-1 z-50 min-w-[120px]`}>
+                      {priorityOptions.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => {
+                            onPriorityChange(option);
+                            setPriorityMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-white transition-all text-xs"
+                        >
+                          {t(option)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Task ID */}
             <div className="flex items-center justify-between">
@@ -301,27 +307,29 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
             </div>
 
             {/* Due Date */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">{t("Due")}</span>
-              <button
-                onClick={() => isEditing && dueDateRef.current?.showPicker()}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all ${task.is_over_due
-                  ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                  : 'bg-green-500/20 text-green-400 border-green-500/30'
-                  } ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'}`}
-              >
-                {formatDateSafely(due_date)}
-                {isEditing && <Edit2 className="w-2 h-2 opacity-60" />}
-              </button>
-              <input
-                ref={dueDateRef}
-                type="date"
-                value={due_date}
-                onChange={(e) => onDueDateChange(e.target.value)}
-                className="absolute opacity-0 pointer-events-none"
-                disabled={!isEditing}
-              />
-            </div>
+            {showDueDate && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">{t("Due")}</span>
+                <button
+                  onClick={() => isEditing && dueDateRef.current?.showPicker()}
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all ${task.is_over_due
+                    ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                    : 'bg-green-500/20 text-green-400 border-green-500/30'
+                    } ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'}`}
+                >
+                  {formatDateSafely(due_date)}
+                  {isEditing && <Edit2 className="w-2 h-2 opacity-60" />}
+                </button>
+                <input
+                  ref={dueDateRef}
+                  type="date"
+                  value={due_date}
+                  onChange={(e) => onDueDateChange(e.target.value)}
+                  className="absolute opacity-0 pointer-events-none"
+                  disabled={!isEditing}
+                />
+              </div>
+            )}
 
             {/* Expected End */}
             <div className="flex items-center justify-between">

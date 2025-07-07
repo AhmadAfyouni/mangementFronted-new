@@ -34,7 +34,6 @@ interface DayWorkingHours {
 
 interface TaskFieldSettings {
     enableEstimatedTime?: boolean;
-    enableActualTime?: boolean;
     enablePriority?: boolean;
     enableDueDate?: boolean;
     enableFiles?: boolean;
@@ -42,7 +41,6 @@ interface TaskFieldSettings {
     enableSubTasks?: boolean;
     enableTimeTracking?: boolean;
     enableRecurring?: boolean;
-    enableDependencies?: boolean;
 }
 
 interface WorkSettings {
@@ -79,7 +77,8 @@ interface WorkingHoursTimelineProps {
     onWorkDayToggle: (day: WorkDay) => void;
     isEditing: boolean;
     t: (key: string) => string;
-    companySettings?: CompanySettings; // Added this line
+    companySettings?: CompanySettings;
+    workingHoursErrors: Record<WorkDay, string>;
 }
 
 const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
@@ -88,7 +87,8 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
     onWorkDayToggle,
     isEditing,
     t,
-    companySettings
+    companySettings,
+    workingHoursErrors,
 }) => {
     const [dragInfo, setDragInfo] = useState<{
         day: WorkDay;
@@ -387,6 +387,13 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                             )}
                         </div>
 
+                        {/* Error message for invalid time range */}
+                        {isEditing && dayHours.isWorkingDay && workingHoursErrors[dayHours.day] && (
+                            <div className="mt-1 text-xs text-red-400 font-medium">
+                                {workingHoursErrors[dayHours.day]}
+                            </div>
+                        )}
+
                         {/* Advanced Settings Panel (when editing) */}
                         {isEditing && dayHours.isWorkingDay && (
                             <div className="mt-2 p-4 bg-dark rounded-xl border border-gray-700/50 shadow-lg">
@@ -494,7 +501,6 @@ const CompanySettings = () => {
         },
         taskFieldSettings: {
             enableEstimatedTime: true,
-            enableActualTime: true,
             enablePriority: true,
             enableDueDate: true,
             enableFiles: true,
@@ -502,7 +508,6 @@ const CompanySettings = () => {
             enableSubTasks: true,
             enableTimeTracking: true,
             enableRecurring: true,
-            enableDependencies: true
         },
         progressCalculationMethod: ProgressCalculationMethod.TIME_BASED,
         allowTaskDuplication: true,
@@ -600,18 +605,51 @@ const CompanySettings = () => {
         }
     };
 
+    // --- 1. Add state for validation errors ---
+    const [workingHoursErrors, setWorkingHoursErrors] = useState<Record<WorkDay, string>>({
+        [WorkDay.SUNDAY]: "",
+        [WorkDay.MONDAY]: "",
+        [WorkDay.TUESDAY]: "",
+        [WorkDay.WEDNESDAY]: "",
+        [WorkDay.THURSDAY]: "",
+        [WorkDay.FRIDAY]: "",
+        [WorkDay.SATURDAY]: "",
+    });
+
+    // --- 2. Helper to compare times ---
+    const isValidTimeRange = (start?: string, end?: string) => {
+        if (!start || !end) return true;
+        const [sh, sm] = start.split(":").map(Number);
+        const [eh, em] = end.split(":").map(Number);
+        const startMinutes = sh * 60 + sm;
+        const endMinutes = eh * 60 + em;
+        return startMinutes < endMinutes;
+    };
+
     const handleDayWorkingHoursChange = (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean | undefined) => {
-        setFormData(prev => ({
-            ...prev,
-            workSettings: {
-                ...prev.workSettings,
-                dayWorkingHours: prev.workSettings.dayWorkingHours?.map(dwh =>
-                    dwh.day === day
-                        ? { ...dwh, [field]: value }
-                        : dwh
-                ) || []
+        setFormData(prev => {
+            const updated = {
+                ...prev,
+                workSettings: {
+                    ...prev.workSettings,
+                    dayWorkingHours: prev.workSettings.dayWorkingHours?.map(dwh =>
+                        dwh.day === day
+                            ? { ...dwh, [field]: value }
+                            : dwh
+                    ) || []
+                }
+            };
+            // Validation: check if startTime < endTime for this day
+            const changedDay = updated.workSettings.dayWorkingHours?.find(dwh => dwh.day === day);
+            let errorMsg = "";
+            if (changedDay?.isWorkingDay && changedDay.startTime && changedDay.endTime) {
+                if (!isValidTimeRange(changedDay.startTime, changedDay.endTime)) {
+                    errorMsg = "Start time must be before end time.";
+                }
             }
-        }));
+            setWorkingHoursErrors(prevErrs => ({ ...prevErrs, [day]: errorMsg }));
+            return updated;
+        });
     };
 
     const handleWorkSettingsChange = (field: keyof WorkSettings, value: string | number | string[] | undefined) => {
@@ -667,6 +705,7 @@ const CompanySettings = () => {
     };
 
     const handleSave = () => {
+        if (Object.values(workingHoursErrors).some(Boolean)) return; // Prevent save if errors exist
         // Filter out non-working days from dayWorkingHours before sending
         const dataToSend = {
             ...formData,
@@ -742,7 +781,7 @@ const CompanySettings = () => {
                                     <>
                                         <button
                                             onClick={handleSave}
-                                            disabled={isUpdating || isCreating}
+                                            disabled={isUpdating || isCreating || Object.values(workingHoursErrors).some(Boolean)}
                                             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             <Save className="w-4 h-4" />
@@ -803,7 +842,8 @@ const CompanySettings = () => {
                                 onWorkDayToggle={handleWorkDayToggle}
                                 isEditing={isEditing}
                                 t={t}
-                                companySettings={companySettings} // Added this line
+                                companySettings={companySettings}
+                                workingHoursErrors={workingHoursErrors}
                             />
 
                             {/* Additional Work Settings */}
@@ -904,23 +944,25 @@ const CompanySettings = () => {
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {Object.entries(formData.taskFieldSettings).map(([field, enabled]) => (
-                                        <div key={field} className="flex items-center justify-between p-4 bg-main rounded-lg">
-                                            <span className="text-twhite font-medium">
-                                                {t(field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))}
-                                            </span>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={enabled || false}
-                                                    onChange={(e) => handleTaskFieldChange(field as keyof TaskFieldSettings, e.target.checked)}
-                                                    disabled={!isEditing}
-                                                    className="sr-only peer"
-                                                />
-                                                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50"></div>
-                                            </label>
-                                        </div>
-                                    ))}
+                                    {Object.entries(formData.taskFieldSettings)
+                                        .filter(([field]) => field !== 'enableActualTime' && field !== 'enableDependencies' && field !== '_id')
+                                        .map(([field, enabled]) => (
+                                            <div key={field} className="flex items-center justify-between p-4 bg-main rounded-lg">
+                                                <span className="text-twhite font-medium">
+                                                    {t(field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()))}
+                                                </span>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={enabled || false}
+                                                        onChange={(e) => handleTaskFieldChange(field as keyof TaskFieldSettings, e.target.checked)}
+                                                        disabled={!isEditing}
+                                                        className="sr-only peer"
+                                                    />
+                                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 disabled:opacity-50"></div>
+                                                </label>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
 

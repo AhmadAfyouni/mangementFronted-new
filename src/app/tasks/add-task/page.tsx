@@ -19,6 +19,7 @@ import { apiClient } from "@/utils/axios/usage";
 import { AlertCircle, ArrowLeft, ArrowRight, BarChart3, Building2, Calendar, Clock, FileText, FolderOpen, GitBranch, Layers, Loader2, Paperclip, Plus, Repeat, RotateCcw, Type, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 // Define interfaces for API responses
 interface SectionType {
@@ -124,6 +125,9 @@ const AddTaskPage: React.FC = () => {
     }));
   };
 
+  const showFiles = useTasksGuard(["enableFiles"]);
+  const showRecurring = useTasksGuard(["enableRecurring"]);
+
   return (
     <div className="min-h-screen bg-main">
       {/* Header */}
@@ -205,13 +209,15 @@ const AddTaskPage: React.FC = () => {
             isOpen={openSections.recurring}
             onToggle={() => toggleSection('recurring')}
           >
-            <RecurringRoutineSection
-              register={register}
-              errors={errors}
-              t={t}
-              isRecurring={isRecurring}
-              dateConstraints={dateConstraints}
-            />
+            {showRecurring && (
+              <RecurringRoutineSection
+                register={register}
+                errors={errors}
+                t={t}
+                isRecurring={isRecurring}
+                dateConstraints={dateConstraints}
+              />
+            )}
           </CollapsibleCard>
 
           {/* File Attachments */}
@@ -223,13 +229,15 @@ const AddTaskPage: React.FC = () => {
             isOpen={openSections.attachments}
             onToggle={() => toggleSection('attachments')}
           >
-            <FileUploadSection
-              register={register}
-              errors={errors}
-              isLightMode={false}
-              t={t}
-              setValue={setValue}
-            />
+            {showFiles && (
+              <FileUploadSection
+                register={register}
+                errors={errors}
+                isLightMode={false}
+                t={t}
+                setValue={setValue}
+              />
+            )}
           </CollapsibleCard>
 
         </form>
@@ -503,6 +511,9 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
     }
   };
 
+  const showEstimatedTime = useTasksGuard(["enableEstimatedTime"]);
+  const showDueDate = useTasksGuard(["enableDueDate"]);
+
   return (
     <div className="space-y-4">
       {/* Project Date Info Display */}
@@ -576,50 +587,52 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
         </div>
 
         {/* Due Date */}
-        <div>
-          <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-red-400" />
-            {t("Due Date")} <span className="text-red-400">*</span>
-          </label>
-          <div className="relative">
-            <div
-              className="relative cursor-pointer"
-              onClick={() => openDatePicker(dueDateRef)}
-            >
-              <input
-                {...register("due_date")}
-                ref={e => {
-                  register("due_date").ref(e);
-                  dueDateRef.current = e;
-                }}
-                type="date"
-                min={dateConstraints.min}
-                max={dateConstraints.max}
-                className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDatePicker(dueDateRef);
-                }}
-              />
-              {/* Overlay to make entire area clickable */}
-              <div className="absolute inset-0 cursor-pointer" />
+        {showDueDate && (
+          <div>
+            <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-red-400" />
+              {t("Due Date")} <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
+              <div
+                className="relative cursor-pointer"
+                onClick={() => openDatePicker(dueDateRef)}
+              >
+                <input
+                  {...register("due_date")}
+                  ref={e => {
+                    register("due_date").ref(e);
+                    dueDateRef.current = e;
+                  }}
+                  type="date"
+                  min={dateConstraints.min}
+                  max={dateConstraints.max}
+                  className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-red-500 focus:ring focus:ring-red-500/20 focus:outline-none transition-colors cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDatePicker(dueDateRef);
+                  }}
+                />
+                {/* Overlay to make entire area clickable */}
+                <div className="absolute inset-0 cursor-pointer" />
+              </div>
             </div>
+            {errors.due_date && (
+              <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {errors.due_date.message}
+              </p>
+            )}
+            {dateConstraints.min && (
+              <p className="text-red-400 mt-1 text-xs">
+                {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
+              </p>
+            )}
           </div>
-          {errors.due_date && (
-            <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5" />
-              {errors.due_date.message}
-            </p>
-          )}
-          {dateConstraints.min && (
-            <p className="text-red-400 mt-1 text-xs">
-              {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
-            </p>
-          )}
-        </div>
+        )}
 
         {/* Estimated Working Hours and Days */}
-        {isExpectedEndDisabled && estimatedHours !== null && (
+        {showEstimatedTime && isExpectedEndDisabled && estimatedHours !== null && (
           <div className="flex gap-4 mt-2">
             <div className="flex-1">
               <label className="text-xs font-medium text-gray-400 mb-1 block">{t("Estimated Working Hours")}</label>
@@ -859,6 +872,7 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
   errors,
   t,
 }) => {
+  const showPriority = useTasksGuard(["enablePriority"]);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Task Name */}
@@ -889,34 +903,36 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
       </div>
 
       {/* Priority */}
-      <div className="md:col-span-1">
-        <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-purple-400" />
-          {t("Priority")} <span className="text-red-400">*</span>
-        </label>
-        <div className="relative">
-          <select
-            {...register("priority")}
-            className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-orange-500 focus:ring focus:ring-orange-500/20 focus:outline-none transition-colors appearance-none"
-          >
-            <option value="">{t("Select Priority")}</option>
-            <option value="LOW">{t("Low")}</option>
-            <option value="MEDIUM">{t("Medium")}</option>
-            <option value="HIGH">{t("High")}</option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
+      {showPriority && (
+        <div className="md:col-span-1">
+          <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-purple-400" />
+            {t("Priority")} <span className="text-red-400">*</span>
+          </label>
+          <div className="relative">
+            <select
+              {...register("priority")}
+              className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-orange-500 focus:ring focus:ring-orange-500/20 focus:outline-none transition-colors appearance-none"
+            >
+              <option value="">{t("Select Priority")}</option>
+              <option value="LOW">{t("Low")}</option>
+              <option value="MEDIUM">{t("Medium")}</option>
+              <option value="HIGH">{t("High")}</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
           </div>
+          {errors.priority && (
+            <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              {errors.priority.message}
+            </p>
+          )}
         </div>
-        {errors.priority && (
-          <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" />
-            {errors.priority.message}
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Description */}
       <div className="md:col-span-2">
@@ -974,6 +990,8 @@ const BasicInformationSection: React.FC<BasicInformationSectionProps> = ({
     </div>
   );
 };
+
+
 
 
 interface TaskPageHeaderProps {

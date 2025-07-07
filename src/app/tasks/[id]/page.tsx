@@ -25,6 +25,7 @@ import { TaskSidebar } from "@/components/common/organisms/TaskDetails/TaskSideb
 import { TaskTimeTracking } from "@/components/common/organisms/TaskDetails/TaskTimeTracking";
 import { AxiosError } from "axios";
 import TimeTrackingModal from "@/components/common/atoms/tasks/TimeTrackingModal";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 export default function TaskDetailsPage() {
   const params = useParams();
@@ -242,6 +243,10 @@ export default function TaskDetailsPage() {
     }
   };
 
+  const showComments = useTasksGuard(["enableComments"]);
+  const showSubTasks = useTasksGuard(["enableSubTasks"]);
+  const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
+
   if (isTaskLoading || !task) {
     return (
       <GridContainer>
@@ -344,57 +349,63 @@ export default function TaskDetailsPage() {
           <div className="col-span-12 lg:col-span-4 space-y-4">
 
             {/* Time Tracking - Compact */}
-            <div className="bg-secondary rounded-lg p-4 border border-gray-700">
-              <TaskTimeTracking
-                displayTime={displayTime}
-                isTaskRunning={isRunning}
-                isMakingAPICall={isLoading}
-                selectedStatus={selectedStatus}
-                onStart={handleStart}
-                onPause={handlePause}
-                timeLogs={task.timeLogs}
-                totalTimeSpent={task.totalTimeSpent}
-                isLightMode={isLightMode}
-                isSubtask={!!task.parent_task}
-              />
-            </div>
+            {showTimeTracking && (
+              <div className="bg-secondary rounded-lg p-4 border border-gray-700">
+                <TaskTimeTracking
+                  displayTime={displayTime}
+                  isTaskRunning={isRunning}
+                  isMakingAPICall={isLoading}
+                  selectedStatus={selectedStatus}
+                  onStart={handleStart}
+                  onPause={handlePause}
+                  timeLogs={task.timeLogs}
+                  totalTimeSpent={task.totalTimeSpent}
+                  isLightMode={isLightMode}
+                  isSubtask={!!task.parent_task}
+                />
+              </div>
+            )}
 
             {/* Sidebar Content */}
-            <TaskSidebar
-              task={task}
-              allTasks={allTasks}
-              onAddSubtask={() => setIsModalOpen(true)}
-            />
+            {showSubTasks && (
+              <TaskSidebar
+                task={task}
+                allTasks={allTasks}
+                onAddSubtask={() => setIsModalOpen(true)}
+              />
+            )}
           </div>
         </div>
       </div>
 
       {/* Comments Section - Full Width Below All Cards */}
-      <div className="max-w-7xl mx-auto mt-6">
-        <TaskComments
-          comments={comments}
-          comment={comment}
-          setComment={setComment}
-          attachedFile={attachedFile}
-          setAttachedFile={setAttachedFile}
-          fileInputRef={fileInputRef}
-          handleFileChange={handleFileChange}
-          handleSendComment={handleSendComment}
-          handleViewFile={handleViewFileWithErrorHandling}
-          isSubmitting={isSubmitting}
-          isLoadingFile={isLoadingFile}
-          editingComment={editingComment}
-          editText={editText}
-          setEditText={setEditText}
-          startEditComment={startEditComment}
-          cancelEditComment={cancelEditComment}
-          saveCommentEdit={saveCommentEdit}
-          deleteComment={deleteComment}
-        />
-      </div>
+      {showComments && (
+        <div className="max-w-7xl mx-auto mt-6">
+          <TaskComments
+            comments={comments}
+            comment={comment}
+            setComment={setComment}
+            attachedFile={attachedFile}
+            setAttachedFile={setAttachedFile}
+            fileInputRef={fileInputRef}
+            handleFileChange={handleFileChange}
+            handleSendComment={handleSendComment}
+            handleViewFile={handleViewFileWithErrorHandling}
+            isSubmitting={isSubmitting}
+            isLoadingFile={isLoadingFile}
+            editingComment={editingComment}
+            editText={editText}
+            setEditText={setEditText}
+            startEditComment={startEditComment}
+            cancelEditComment={cancelEditComment}
+            saveCommentEdit={saveCommentEdit}
+            deleteComment={deleteComment}
+          />
+        </div>
+      )}
 
       {/* Modals */}
-      {isModalOpen && (
+      {isModalOpen && showSubTasks && (
         <>
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -408,17 +419,19 @@ export default function TaskDetailsPage() {
         </>
       )}
 
-      <TimeTrackingModal
-        isOpen={isTimeTrackingOpen}
-        onClose={() => {
-          setIsTimeTrackingOpen(false);
-          if (task && selectedStatus === "DONE") {
-            setSelectedStatus(task.status);
-          }
-        }}
-        onSubmit={handleTimeSubmit}
-        recordedTime={task.totalTimeSpent || 0}
-      />
+      {showTimeTracking && (
+        <TimeTrackingModal
+          isOpen={isTimeTrackingOpen}
+          onClose={() => {
+            setIsTimeTrackingOpen(false);
+            if (task && selectedStatus === "DONE") {
+              setSelectedStatus(task.status);
+            }
+          }}
+          onSubmit={handleTimeSubmit}
+          recordedTime={task.totalTimeSpent || 0}
+        />
+      )}
     </div>
   );
 }

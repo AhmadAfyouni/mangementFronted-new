@@ -4,6 +4,7 @@ import useLanguage from '@/hooks/useLanguage';
 import { constructFileUrl, getFilenameFromUrl } from '@/utils/url';
 import { AlertCircle, ExternalLink, FolderOpen, Paperclip, XCircle } from "lucide-react";
 import { useState } from "react";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 interface TaskFilesProps {
   taskId: string;
@@ -20,6 +21,9 @@ export const TaskFiles: React.FC<TaskFilesProps> = ({
 }) => {
   const { t } = useLanguage();
   const [loadingError, setLoadingError] = useState<boolean>(false);
+  const showFiles = useTasksGuard(["enableFiles"]);
+
+  if (!showFiles) return null;
 
   const handleFileView = (file: string) => {
     if (!onViewFile) return;

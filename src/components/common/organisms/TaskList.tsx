@@ -9,6 +9,7 @@ import { ActivityIcon, Calendar, CheckCircle, CircleCheckBig, Clock, Eye, FileTe
 import React, { useEffect, useState } from "react";
 import { Pagination } from "../atoms/Pagination";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 const EnhancedTaskRowComponent: React.FC<{
     task: ExtendedReceiveTaskType;
@@ -46,9 +47,11 @@ const EnhancedTaskRowComponent: React.FC<{
         return diffDays <= 3 && diffDays > 0;
     };
 
+    const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
+
     return (
         <div
-            className={`grid grid-cols-6 px-6 py-2 cursor-pointer group border-l-4 ${getPriorityBorderColor(task.priority)} hover:bg-secondary/50 transition-all duration-300 ${task.parent_task ? 'bg-slate-500/5 hover:bg-slate-500/10' : 'bg-dark'
+            className={`grid ${showTimeTracking ? " grid-cols-6 " : " grid-cols-5 "} px-6 py-2 cursor-pointer group border-l-4 ${getPriorityBorderColor(task.priority)} hover:bg-secondary/50 transition-all duration-300 ${task.parent_task ? 'bg-slate-500/5 hover:bg-slate-500/10' : 'bg-dark'
                 } border-b border-1 border-main`}
             style={{ paddingLeft: level > 0 ? `${24 + (level * 20)}px` : '24px' }}
         >
@@ -98,22 +101,24 @@ const EnhancedTaskRowComponent: React.FC<{
             </div>
 
             {/* Time Tracking */}
-            <div className="flex flex-col justify-center">
-                <div className="flex items-center gap-2 mb-1">
-                    <Clock className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm font-medium text-gray-300">
-                        {formatTime(task?.totalTimeSpent || 0)}
-                    </span>
-                </div>
-                {isRunning && (
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-green-400 font-medium">
-                            {formatTime(elapsedTime)} {t("running")}
+            {showTimeTracking && (
+                <div className="flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-1">
+                        <Clock className="w-4 h-4 text-blue-400" />
+                        <span className="text-sm font-medium text-gray-300">
+                            {formatTime(task?.totalTimeSpent || 0)}
                         </span>
                     </div>
-                )}
-            </div>
+                    {isRunning && (
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-xs text-green-400 font-medium">
+                                {formatTime(elapsedTime)} {t("running")}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Actions & Timer Controls */}
             <div className="flex items-center gap-5">
@@ -133,7 +138,7 @@ const EnhancedTaskRowComponent: React.FC<{
                 </div>
                 <div className="flex items-center gap-2">
                     {/* Timer Controls */}
-                    {task?.status !== "DONE" && (
+                    {showTimeTracking && task?.status !== "DONE" && (
                         <div className="flex gap-2">
                             {!isRunning ? (
                                 <button
@@ -199,18 +204,14 @@ const EnhancedTaskRowComponent: React.FC<{
                                         }
                                     }}
                                 >
-                                    {isLoading ? (
-                                        <div className="w-3 h-3 animate-spin rounded-full border border-red-300 border-t-red-400"></div>
-                                    ) : (
-                                        <Pause className="w-3 h-3" />
-                                    )}
-                                    {isLoading ? t("Pausing...") : t("Pause")}
+                                    <Pause className="w-3 h-3" />
+                                    {t("Pause")}
                                 </button>
                             )}
                         </div>
                     )}
 
-                    {task?.status === "DONE" && (
+                    {showTimeTracking && task?.status === "DONE" && (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/20 shadow-sm shadow-green-500/10 transition-all duration-300 hover:bg-green-500/30">
                             <CheckCircle className="w-3 h-3" />
                             {t("Completed")}
@@ -289,6 +290,7 @@ const ListTasks = ({
     };
 
     const totalTimeSpent = calculateTotalTimeSpent();
+    const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
 
     // Pagination logic
     const totalItems = organizedTasks.length;
@@ -379,7 +381,7 @@ const ListTasks = ({
                 <div className="hidden md:block bg-main rounded-xl shadow-lg shadow-black/20 border border-gray-700/50 overflow-hidden">
                     {/* Table Header */}
                     <div className="bg-secondary/50 border-b border-gray-700">
-                        <div className="grid grid-cols-6 px-6 py-4">
+                        <div className={`grid ${showTimeTracking ? " grid-cols-6 " : " grid-cols-5 "}  px-6 py-4`}>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ListChecks className="w-4 h-4 text-blue-400" />
                                 {t("Task ID")}
@@ -396,10 +398,10 @@ const ListTasks = ({
                                 <CircleCheckBig className="w-4 h-4 text-green-400" />
                                 {t("Status")}
                             </div>
-                            <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                            {showTimeTracking && <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <Clock className="w-4 h-4 text-orange-400" />
                                 {t("Time Spent")}
-                            </div>
+                            </div>}
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ActivityIcon className="w-4 h-4 text-yellow-400" />
                                 {t("Actions")}

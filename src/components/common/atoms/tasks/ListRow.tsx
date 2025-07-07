@@ -22,6 +22,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 import PageSpinner from "../ui/PageSpinner";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
@@ -48,6 +49,7 @@ const ListRow: React.FC<{
     startTimer,
     isLoading,
   } = useTaskTimer(task.id, task.timeLogs);
+  const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
 
   console.log("is loading : ", isLoading);
 
@@ -142,117 +144,93 @@ const ListRow: React.FC<{
       {/* Actions */}
       <div className="flex items-center justify-between py-4 px-6">
         <div className="flex items-center space-x-3">
-          <div className="bg-secondary/30 px-3 py-1.5 rounded-lg  shadow shadow-black/20 hover:bg-secondary/40 transition-all duration-300">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <span className="text-sm font-medium text-gray-300">
-                  {formatTime(task?.totalTimeSpent || 0)}
-                </span>
-              </div>
-              {isRunning && (
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot"></div>
-                  <span className="text-xs text-green-400">
-                    {formatTime(elapsedTime)} {t("running")}
+          {showTimeTracking && (
+            <div className="bg-secondary/30 px-3 py-1.5 rounded-lg  shadow shadow-black/20 hover:bg-secondary/40 transition-all duration-300">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium text-gray-300">
+                    {formatTime(task?.totalTimeSpent || 0)}
                   </span>
                 </div>
-              )}
+                {isRunning && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot"></div>
+                    <span className="text-xs text-green-400">
+                      {formatTime(elapsedTime)} {t("running")}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-
-          {
-            // Only show timer controls if task is not in DONE status
-            task?.status !== "DONE" && (
-              <div className="flex space-x-1">
-                {!isRunning ? (
-                  <button
-                    disabled={isLoading
-                      // || task?.status !== "ONGOING"
-                    }
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
-                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
-                      : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
-                      }`}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (task?.status === "ONGOING") {
-                        try {
-                          const result = await startTimer();
-                          if (!result.success) {
-                            setSnackbarConfig({
-                              message: t("Failed to start the timer. Please try again."),
-                              open: true,
-                              severity: "error",
-                            });
-                          }
-                        } catch (error) {
-                          console.error("Error starting timer:", error);
+          )}
+          {showTimeTracking && task?.status !== "DONE" && (
+            <div className="flex space-x-1">
+              {!isRunning ? (
+                <button
+                  disabled={isLoading}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
+                    ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:shadow-md hover:shadow-blue-500/10"
+                    : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
+                    }`}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (task?.status === "ONGOING") {
+                      try {
+                        const result = await startTimer();
+                        if (!result.success) {
                           setSnackbarConfig({
                             message: t("Failed to start the timer. Please try again."),
                             open: true,
                             severity: "error",
                           });
                         }
-                      } else {
-                        setSnackbarConfig({
-                          message: t("Task Status must be ONGOING"),
-                          open: true,
-                          severity: "warning",
-                        });
-                      }
-                    }}
-                  >
-                    <Image
-                      src={PlayIcon}
-                      alt="play icon"
-                      width={15}
-                      height={15}
-                    />
-                    <span className="text-sm font-medium">{t("Start")}</span>
-                  </button>
-                ) : (
-                  <button
-                    // disabled={isLoading}
-                    className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10 flex items-center gap-1.5 transition-all duration-300"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        const result = await pauseTimer();
-                        if (!result.success) {
-                          setSnackbarConfig({
-                            message: t("Failed to pause the timer. Please try again."),
-                            open: true,
-                            severity: "error",
-                          });
-                        }
                       } catch (error) {
-                        console.error("Error pausing timer:", error);
+                        console.error("Error starting timer:", error);
                         setSnackbarConfig({
-                          message: t("Failed to pause the timer. Please try again."),
+                          message: t("Failed to start the timer. Please try again."),
                           open: true,
                           severity: "error",
                         });
                       }
-                    }}
-                  >
-                    {isLoading ? (
-                      <PageSpinner size="small" />
-                    ) : (
-                      <>
-                        <Image
-                          src={PauseIcon}
-                          alt="pause icon"
-                          width={15}
-                          height={15}
-                        />
-                        <span className="text-sm font-medium">{t("Pause")}</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            )}
+                    } else {
+                      setSnackbarConfig({
+                        message: t("Task Status must be ONGOING"),
+                        open: true,
+                        severity: "warning",
+                      });
+                    }
+                  }}
+                >
+                  <PlayIcon className="w-4 h-4" />
+                  {t("Start")}
+                </button>
+              ) : (
+                <button
+                  disabled={isLoading}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300 ${!isLoading
+                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:shadow-md hover:shadow-red-500/10"
+                    : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
+                    }`}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await pauseTimer();
+                    } catch (error) {
+                      setSnackbarConfig({
+                        message: t("Failed to pause the timer. Please try again."),
+                        open: true,
+                        severity: "error",
+                      });
+                    }
+                  }}
+                >
+                  <PauseIcon className="w-4 h-4" />
+                  {t("Pause")}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {task?.status === "DONE" && (
