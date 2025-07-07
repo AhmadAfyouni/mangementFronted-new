@@ -8,6 +8,7 @@ import {
   TasksIcon,
 } from "@/assets";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
 import useTaskTimer from "@/hooks/useTaskTimer";
@@ -21,8 +22,6 @@ import { Clock, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
-import PageSpinner from "../ui/PageSpinner";
-import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
@@ -217,6 +216,7 @@ const ListRow: React.FC<{
                     try {
                       await pauseTimer();
                     } catch (error) {
+                      console.error(error);
                       setSnackbarConfig({
                         message: t("Failed to pause the timer. Please try again."),
                         open: true,
