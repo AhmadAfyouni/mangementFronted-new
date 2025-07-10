@@ -230,20 +230,55 @@ const CreateTask: React.FC<CreateTaskProps> = ({
               </p>
             )}
           </div>
+
+          {/* Planned Time Field */}
           <div>
             <label className="block text-tdark text-sm font-medium">
-              {t("Due Date")} <span className="text-red-400">*</span>
+              {t("Planned Time")} <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              {...register("estimated_hours")}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.estimated_hours ? "border-red-500" : "border-gray-300"
+                }`}
+              placeholder={t("Enter planned time (hours)")}
+            />
+            {errors.estimated_hours && (
+              <p className="text-red-500 mt-1 text-sm">{errors.estimated_hours.message}</p>
+            )}
+          </div>
+
+          {/* Planned Start Date Field */}
+          <div>
+            <label className="block text-tdark text-sm font-medium">
+              {t("Planned Start Date")} <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="date"
+              {...register("start_date")}
+              className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.start_date ? "border-red-500" : "border-gray-300"
+                }`}
+              placeholder={t("Enter planned start date")}
+            />
+            {errors.start_date && (
+              <p className="text-red-500 mt-1 text-sm">{errors.start_date.message}</p>
+            )}
+          </div>
+
+          {/* Planned End Date Field (was Due Date) */}
+          <div>
+            <label className="block text-tdark text-sm font-medium">
+              {t("Planned End Date")} <span className="text-red-400">*</span>
             </label>
             <input
               type="date"
               {...register("due_date")}
               className={`w-full px-4 py-2 mt-1 rounded-lg border ${errors.due_date ? "border-red-500" : "border-gray-300"
                 }`}
+              placeholder={t("Enter planned end date")}
             />
             {errors.due_date && (
-              <p className="text-red-500 mt-1 text-sm">
-                {errors.due_date.message}
-              </p>
+              <p className="text-red-500 mt-1 text-sm">{errors.due_date.message}</p>
             )}
           </div>
 

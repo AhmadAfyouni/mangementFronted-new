@@ -124,7 +124,7 @@ const NewHeader = ({
   }>({
     queryKey: ["tasks"],
     url: `/tasks/tree`,
-    refetchInterval: 2000
+    // refetchInterval: 2000
   });
 
   // Find the first running task (has a timeLog with start and no end)

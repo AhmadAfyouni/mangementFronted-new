@@ -392,7 +392,7 @@ const ListTasks = ({
                             </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <Calendar className="w-4 h-4 text-purple-400" />
-                                {t("Due Date")}
+                                {t("Planned End Date")}
                             </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <CircleCheckBig className="w-4 h-4 text-green-400" />
@@ -400,7 +400,7 @@ const ListTasks = ({
                             </div>
                             {showTimeTracking && <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <Clock className="w-4 h-4 text-orange-400" />
-                                {t("Time Spent")}
+                                {t("Actual Time")}
                             </div>}
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ActivityIcon className="w-4 h-4 text-yellow-400" />
@@ -436,7 +436,7 @@ const ListTasks = ({
                                 <div className="flex items-center gap-3">
                                     <Clock className="w-5 h-5 text-blue-400" />
                                     <span className="text-sm font-medium text-gray-300">
-                                        {t("Total Time Spent")}:
+                                        {t("Total Actual Time")}:
                                     </span>
                                     <span className="text-lg font-bold text-blue-400">
                                         {formatTotalHours(totalTimeSpent)}
@@ -523,7 +523,7 @@ const ListTasks = ({
                                                 <div>
                                                     <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                                                         <Calendar className="w-4 h-4" />
-                                                        <span>{t("Due Date")}</span>
+                                                        <span>{t("Planned End Date")}</span>
                                                     </div>
                                                     <span className={`text-sm ${taskItem.is_over_due ? "text-red-500" : "text-gray-300"}`}>
                                                         {new Date(taskItem.due_date).toLocaleDateString()}
@@ -588,7 +588,7 @@ const ListTasks = ({
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-5 h-5 text-blue-400" />
                                             <span className="text-sm font-medium text-gray-300">
-                                                {t("Total Time Spent")}:
+                                                {t("Total Actual Time")}:
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between">

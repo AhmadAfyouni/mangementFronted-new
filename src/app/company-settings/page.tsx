@@ -9,7 +9,7 @@ import { useCreateMutation } from "@/hooks/useCreateMutation";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
 
 // Enums matching backend
-enum WorkDay {
+export enum WorkDay {
     SUNDAY = 'Sunday',
     MONDAY = 'Monday',
     TUESDAY = 'Tuesday',
@@ -19,12 +19,12 @@ enum WorkDay {
     SATURDAY = 'Saturday'
 }
 
-enum ProgressCalculationMethod {
+export enum ProgressCalculationMethod {
     TIME_BASED = 'time_based',
     DATE_BASED = 'date_based'
 }
 
-interface DayWorkingHours {
+export interface DayWorkingHours {
     day: WorkDay;
     isWorkingDay: boolean;
     startTime?: string;
@@ -32,7 +32,7 @@ interface DayWorkingHours {
     breakTimeMinutes?: number | undefined;
 }
 
-interface TaskFieldSettings {
+export interface TaskFieldSettings {
     enableEstimatedTime?: boolean;
     enablePriority?: boolean;
     enableDueDate?: boolean;
@@ -43,7 +43,7 @@ interface TaskFieldSettings {
     enableRecurring?: boolean;
 }
 
-interface WorkSettings {
+export interface WorkSettings {
     dayWorkingHours?: DayWorkingHours[];
     holidays?: string[];
     timezone?: string;
@@ -51,7 +51,7 @@ interface WorkSettings {
     defaultBreakTimeMinutes?: number | undefined;
 }
 
-interface CompanySettings {
+export interface CompanySettings {
     _id?: string;
     workSettings: WorkSettings;
     taskFieldSettings: TaskFieldSettings;
@@ -68,10 +68,11 @@ interface CompanySettings {
     allowedFileTypes?: string[];
     isActive?: boolean;
     lastUpdated?: Date;
+    isFirstTime?: boolean
 }
 
 // Working Hours Timeline Component
-interface WorkingHoursTimelineProps {
+export interface WorkingHoursTimelineProps {
     dayWorkingHours: DayWorkingHours[];
     onDayWorkingHoursChange: (day: WorkDay, field: keyof DayWorkingHours, value: string | number | boolean | undefined) => void;
     onWorkDayToggle: (day: WorkDay) => void;
@@ -81,7 +82,7 @@ interface WorkingHoursTimelineProps {
     workingHoursErrors: Record<WorkDay, string>;
 }
 
-const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
+export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
     dayWorkingHours,
     onDayWorkingHoursChange,
     onWorkDayToggle,
@@ -484,6 +485,7 @@ const CompanySettings = () => {
     const [activeTab, setActiveTab] = useState("work");
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<CompanySettings>({
+
         workSettings: {
             dayWorkingHours: [
                 { day: WorkDay.SUNDAY, isWorkingDay: true, startTime: "09:00", endTime: "17:00", breakTimeMinutes: 60 },
@@ -521,7 +523,12 @@ const CompanySettings = () => {
         maxFileUploadSize: 10,
         allowedFileTypes: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.png', '.jpg', '.jpeg'],
         isActive: true
-    });
+    },
+
+
+    )
+
+        ;
 
     const { t, currentLanguage } = useLanguage();
     const isAdmin = useRolePermissions("admin");
