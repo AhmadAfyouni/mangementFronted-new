@@ -52,14 +52,12 @@ const Content = ({ children }: { children: ReactNode }) => {
         pathname !== "/auth"
       ) {
         router.replace("/company-settings/onboarding");
-      }
-      // If user is authenticated, onboarding is complete, and currently on onboarding, redirect to home
-      else if (
+      } else if (
         isAuthenticated &&
         companySettings.isFirstTime === false &&
         pathname === "/company-settings/onboarding"
       ) {
-        router.replace("/company-settings/onboarding");
+        router.replace("/home");
       }
     }
   }, [isAuthenticated, companySettings, isCompanySettingsLoading, pathname, router]);
