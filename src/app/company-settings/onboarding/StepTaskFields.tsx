@@ -1,19 +1,16 @@
 "use client";
-import React from "react";
-import { TaskFieldSettings } from "../page";
+import { TaskFieldSettings } from "@/types/CompanySettings.type";
 import {
+  Calendar,
+  CheckSquare,
   Clock,
   Flag,
-  Calendar,
-  Paperclip,
   MessageSquare,
-  CheckSquare,
-  Timer,
+  Paperclip,
   RotateCcw,
-  ChevronLeft,
-  ChevronRight,
-  Zap,
-  Target
+  Target,
+  Timer,
+  Zap
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -109,7 +106,7 @@ const categoryInfo = {
   }
 };
 
-export default function StepTaskFields({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }: StepTaskFieldsProps) {
+export default function StepTaskFields({ data, onChange, onNext, onBack }: StepTaskFieldsProps) {
   const { t } = useTranslation();
   const handleFieldChange = (key: keyof TaskFieldSettings, value: boolean) => {
     onChange({ taskFieldSettings: { ...data.taskFieldSettings, [key]: value } });
@@ -130,8 +127,6 @@ export default function StepTaskFields({ data, onChange, onNext, onBack, isFirst
     const enabledCount = categoryFields.filter(f => data.taskFieldSettings[f.key]).length;
     return { total: categoryFields.length, enabled: enabledCount };
   };
-
-  const totalEnabled = fields.filter(f => data.taskFieldSettings[f.key]).length;
 
   return (
     <div className="space-y-6 p-4">
@@ -199,7 +194,7 @@ export default function StepTaskFields({ data, onChange, onNext, onBack, isFirst
                       <input
                         type="checkbox"
                         checked={!!data.taskFieldSettings[key]}
-                        onChange={(e) => handleFieldChange(key, e.target.checked)}
+                        onChange={(e) => handleFieldChange(key as keyof TaskFieldSettings, e.target.checked)}
                         className="sr-only"
                       />
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${data.taskFieldSettings[key] ? `border-${colorClass} bg-${colorClass} shadow-sm` : 'border-main group-hover:border-primary'}`}>

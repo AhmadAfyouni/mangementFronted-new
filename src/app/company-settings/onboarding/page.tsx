@@ -19,30 +19,10 @@ import StepNotificationSettings from "./StepNotificationSettings";
 import StepFileManagement from "./StepFileManagement";
 import StepGeneralSettings from "./StepGeneralSettings";
 import type { CompanyProfile } from "@/types/CompanyProfile.type";
-import { CompanySettings } from "../page";
 import useLanguage from "@/hooks/useLanguage";
 import { LangIcon } from "@/assets";
 import Image from "next/image";
-
-// Step prop types
-interface StepProfileProps {
-  data: CompanyProfile;
-  onChange: (changes: Partial<CompanyProfile>) => void;
-  onNext: () => void;
-  onBack: () => void;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-  onFinish: () => Promise<void>;
-}
-interface StepSettingsProps {
-  data: CompanySettings;
-  onChange: (changes: Partial<CompanySettings>) => void;
-  onNext: () => void;
-  onBack: () => void;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-  onFinish: () => Promise<void>;
-}
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 type StepConfig = {
   id: number;
@@ -156,7 +136,7 @@ export default function CompanySettingsOnboarding() {
   ];
 
   const router = useRouter();
-  const { data: companySettings } = useCustomQuery<CompanySettings>({
+  const { data: companySettings } = useCustomQuery<CompanySettingsType>({
     queryKey: ["company-settings"],
     url: "/company-settings",
     nestedData: true,
@@ -167,13 +147,13 @@ export default function CompanySettingsOnboarding() {
     nestedData: true,
   });
 
-  const { mutateAsync: upsertCompanySettings, isPending: isSettingsPending } = useCreateMutation({
+  const { mutateAsync: upsertCompanySettings, } = useCreateMutation({
     endpoint: "/company-settings",
     onSuccessMessage: "Company settings saved!",
     invalidateQueryKeys: ["company-settings"],
     requestType: "put",
   });
-  const { mutateAsync: upsertCompanyProfile, isPending: isProfilePending } = useCreateMutation({
+  const { mutateAsync: upsertCompanyProfile } = useCreateMutation({
     endpoint: "/company-profile",
     onSuccessMessage: "Company profile saved!",
     invalidateQueryKeys: ["company-profile"],
@@ -181,8 +161,8 @@ export default function CompanySettingsOnboarding() {
   });
 
   const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState<{ companyProfile: CompanyProfile; companySettings: CompanySettings } | null>(null);
-  const [isFinishing, setIsFinishing] = useState(false);
+  const [formData, setFormData] = useState<{ companyProfile: CompanyProfile; companySettings: CompanySettingsType } | null>(null);
+
 
   useEffect(() => {
     if (companySettings && companyProfile) {
@@ -215,7 +195,7 @@ export default function CompanySettingsOnboarding() {
   const handleProfileChange = (changes: Partial<CompanyProfile>) => {
     setFormData((prev) => prev ? { ...prev, companyProfile: { ...prev.companyProfile, ...changes } } : prev);
   };
-  const handleSettingsChange = (changes: Partial<CompanySettings>) => {
+  const handleSettingsChange = (changes: Partial<CompanySettingsType>) => {
     setFormData((prev) => prev ? { ...prev, companySettings: { ...prev.companySettings, ...changes } } : prev);
   };
 
@@ -224,13 +204,14 @@ export default function CompanySettingsOnboarding() {
 
   const handleFinish = async () => {
     if (!formData) return;
-    setIsFinishing(true);
     try {
       await upsertCompanyProfile(formData.companyProfile);
       await upsertCompanySettings({ ...formData.companySettings, isFirstTime: false });
       router.replace("/home");
+    } catch (e) {
+      console.log(e);
     } finally {
-      setIsFinishing(false);
+
     }
   };
 

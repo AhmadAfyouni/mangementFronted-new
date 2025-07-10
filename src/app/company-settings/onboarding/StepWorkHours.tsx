@@ -1,19 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { WorkingHoursTimeline, WorkDay, DayWorkingHours, CompanySettings } from "@/app/company-settings/page";
 import useLanguage from "@/hooks/useLanguage";
+import { CompanySettingsType, WorkDay, DayWorkingHours } from "@/types/CompanySettings.type";
+import { WorkingHoursTimeline } from "./WorkingHoursTimeline";
 
 interface StepWorkHoursProps {
-  data: CompanySettings;
-  onChange: (changes: Partial<CompanySettings>) => void;
+  data: CompanySettingsType;
+  onChange: (changes: Partial<CompanySettingsType>) => void;
   onNext: () => void;
   onBack: () => void;
   isFirstStep: boolean;
   isLastStep: boolean;
   onFinish: () => void;
 }
-
-const defaultT = (s: string) => s;
 
 const allWorkDays = Object.values(WorkDay);
 

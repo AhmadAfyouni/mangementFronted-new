@@ -1,10 +1,9 @@
 "use client";
-import React from "react";
-import { FileText, X } from "lucide-react";
 import FileUploadWithProgress from "@/components/common/atoms/ui/FileUploadWithProgress";
-import useLanguage from "@/hooks/useLanguage";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
 import { getFilenameFromUrl } from "@/utils/url/fileUrls";
+import { FileText, X } from "lucide-react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 // Helper for normalizing image/file URLs (copied from company-profile/page.tsx)
@@ -25,10 +24,6 @@ interface LicensesCertifications {
   documentUrl?: string;
 }
 
-interface CompanyProfile {
-  taxNumber: string;
-  licensesCertifications?: LicensesCertifications[];
-}
 
 interface StepCompanyLegalProps {
   data: any;

@@ -1,53 +1,11 @@
 "use client";
-import React from "react";
-import { Upload, FileText, Building2, X } from "lucide-react";
-import Image from "next/image";
 import FileUploadWithProgress from "@/components/common/atoms/ui/FileUploadWithProgress";
-import useLanguage from "@/hooks/useLanguage";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import useLanguage from "@/hooks/useLanguage";
 import { getFilenameFromUrl } from "@/utils/url/fileUrls";
-import { useTranslation } from "react-i18next";
-
-// NOTE: All user-facing text is now wrapped in t(). Add missing keys to en.json and ar.json for full localization.
-
-// CompanyProfile type copied from company-profile/page.tsx for type safety
-interface SocialMediaLinks {
-  facebook?: string;
-  twitter?: string;
-  linkedin?: string;
-  instagram?: string;
-  website?: string;
-}
-
-interface LicensesCertifications {
-  name: string;
-  number: string;
-  issuingAuthority?: string;
-  issueDate?: string;
-  expiryDate?: string;
-  documentUrl?: string;
-}
-
-interface CompanyProfile {
-  _id?: string;
-  companyName: string;
-  companyLogo?: string;
-  commercialRegistrationNumber: string;
-  establishmentDate: string;
-  businessType: string;
-  companyDescription: string;
-  officialEmail: string;
-  phoneNumber: string;
-  companyAddress: string;
-  locationMapUrl?: string;
-  socialMediaLinks?: SocialMediaLinks;
-  taxNumber: string;
-  licensesCertifications?: LicensesCertifications[];
-  termsAndConditionsFiles?: string[];
-  ceoName: string;
-  organizationalStructureFile?: string;
-  isSetupCompleted?: boolean;
-}
+import { Building2, FileText, Upload, X } from "lucide-react";
+import Image from "next/image";
+import React from "react";
 
 // Helper for normalizing image/file URLs (copied from company-profile/page.tsx)
 const normalizeImageUrl = (url?: string): string => {

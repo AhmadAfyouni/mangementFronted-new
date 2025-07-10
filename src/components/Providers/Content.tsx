@@ -11,8 +11,8 @@ import NewHeader from "../common/atoms/NewHeader";
 import Sidebar from "../common/molcules/Sidebar/Sidebar";
 import PullToRefreshWrapper from "../common/molcules/ui/PullToRefreshWrapper";
 import useCustomQuery from "@/hooks/useCustomQuery";
-import { CompanySettings } from "@/app/company-settings/page";
 import { RootState } from "@/state/store";
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 const Content = ({ children }: { children: ReactNode }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -26,7 +26,7 @@ const Content = ({ children }: { children: ReactNode }) => {
   useCustomTheme();
 
   // Fetch company settings for onboarding check
-  const { data: companySettings, isLoading: isCompanySettingsLoading } = useCustomQuery<CompanySettings>({
+  const { data: companySettings, isLoading: isCompanySettingsLoading } = useCustomQuery<CompanySettingsType>({
     queryKey: ["company-settings"],
     url: "/company-settings",
     nestedData: true,

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 // NOTE: All user-facing text is now wrapped in t(). Add missing keys to en.json and ar.json for full localization.
 
-const StepCompanySocial = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
+const StepCompanySocial = ({ data, onChange, onNext, onBack }: any) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-6">

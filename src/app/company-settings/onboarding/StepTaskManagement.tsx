@@ -1,14 +1,13 @@
 import React from "react";
 import { Settings } from "lucide-react";
-import type { CompanySettings } from "../page";
-import { ProgressCalculationMethod } from "../page";
 import { useTranslation } from "react-i18next";
+import { CompanySettingsType, ProgressCalculationMethod } from "@/types/CompanySettings.type";
 
 // NOTE: All user-facing text is now wrapped in t(). Add missing keys to en.json and ar.json for full localization.
 
 interface StepTaskManagementProps {
-    data: CompanySettings;
-    onChange: (changes: Partial<CompanySettings>) => void;
+    data: CompanySettingsType;
+    onChange: (changes: Partial<CompanySettingsType>) => void;
     onNext: () => void;
     onBack: () => void;
     isFirstStep: boolean;
@@ -16,9 +15,9 @@ interface StepTaskManagementProps {
     onFinish: () => void;
 }
 
-const StepTaskManagement: React.FC<StepTaskManagementProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
+const StepTaskManagement: React.FC<StepTaskManagementProps> = ({ data, onChange, onNext, onBack, isLastStep, onFinish }) => {
     const { t } = useTranslation();
-    const handleChange = (field: keyof CompanySettings, value: any) => {
+    const handleChange = (field: keyof CompanySettingsType, value: any) => {
         onChange({ [field]: value });
     };
     return (

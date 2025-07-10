@@ -1,13 +1,11 @@
 import React from "react";
 import { Settings } from "lucide-react";
-import type { CompanySettings } from "../page";
 import { useTranslation } from "react-i18next";
-
-// NOTE: All user-facing text is now wrapped in t(). Add missing keys to en.json and ar.json for full localization.
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 interface StepGeneralSettingsProps {
-    data: CompanySettings;
-    onChange: (changes: Partial<CompanySettings>) => void;
+    data: CompanySettingsType;
+    onChange: (changes: Partial<CompanySettingsType>) => void;
     onNext: () => void;
     onBack: () => void;
     isFirstStep: boolean;
@@ -15,9 +13,9 @@ interface StepGeneralSettingsProps {
     onFinish: () => void;
 }
 
-const StepGeneralSettings: React.FC<StepGeneralSettingsProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
+const StepGeneralSettings: React.FC<StepGeneralSettingsProps> = ({ data, onChange, onNext, onBack, isLastStep, onFinish }) => {
     const { t } = useTranslation();
-    const handleChange = (field: keyof CompanySettings, value: boolean) => {
+    const handleChange = (field: keyof CompanySettingsType, value: boolean) => {
         onChange({ [field]: value });
     };
     return (

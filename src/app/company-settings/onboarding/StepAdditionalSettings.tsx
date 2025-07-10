@@ -1,10 +1,10 @@
 import React from "react";
 import { Settings } from "lucide-react";
-import type { CompanySettings } from "../page";
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 interface StepAdditionalSettingsProps {
-    data: CompanySettings;
-    onChange: (changes: Partial<CompanySettings>) => void;
+    data: CompanySettingsType;
+    onChange: (changes: Partial<CompanySettingsType>) => void;
     onNext: () => void;
     onBack: () => void;
     isFirstStep: boolean;
@@ -13,7 +13,7 @@ interface StepAdditionalSettingsProps {
 }
 
 const StepAdditionalSettings: React.FC<StepAdditionalSettingsProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
-    const handleWorkSettingsChange = (field: keyof CompanySettings["workSettings"], value: any) => {
+    const handleWorkSettingsChange = (field: keyof CompanySettingsType["workSettings"], value: any) => {
         onChange({ workSettings: { ...data.workSettings, [field]: value } });
     };
     return (

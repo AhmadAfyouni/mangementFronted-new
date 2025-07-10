@@ -1,10 +1,10 @@
 import React from "react";
 import { Bell } from "lucide-react";
-import type { CompanySettings } from "../page";
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 interface StepNotificationSettingsProps {
-    data: CompanySettings;
-    onChange: (changes: Partial<CompanySettings>) => void;
+    data: CompanySettingsType;
+    onChange: (changes: Partial<CompanySettingsType>) => void;
     onNext: () => void;
     onBack: () => void;
     isFirstStep: boolean;
@@ -13,7 +13,7 @@ interface StepNotificationSettingsProps {
 }
 
 const StepNotificationSettings: React.FC<StepNotificationSettingsProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
-    const handleChange = (field: keyof CompanySettings, value: boolean) => {
+    const handleChange = (field: keyof CompanySettingsType, value: boolean) => {
         onChange({ [field]: value });
     };
     return (

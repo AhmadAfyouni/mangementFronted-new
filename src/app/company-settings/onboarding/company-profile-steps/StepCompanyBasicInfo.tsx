@@ -10,10 +10,6 @@ interface StepCompanyBasicInfoProps {
   data: CompanyProfile;
   onChange: (changes: Partial<CompanyProfile>) => void;
   onNext: () => void;
-  onBack: () => void;
-  isFirstStep: boolean;
-  isLastStep: boolean;
-  onFinish: () => void;
 }
 
 const businessTypes = [
@@ -22,7 +18,7 @@ const businessTypes = [
   'Agriculture', 'Entertainment', 'Non-profit', 'Government', 'E-commerce'
 ];
 
-const StepCompanyBasicInfo: React.FC<StepCompanyBasicInfoProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
+const StepCompanyBasicInfo: React.FC<StepCompanyBasicInfoProps> = ({ data, onChange, onNext }) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-6">

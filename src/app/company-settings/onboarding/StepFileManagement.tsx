@@ -1,13 +1,13 @@
 import React from "react";
 import { FileText } from "lucide-react";
-import type { CompanySettings } from "../page";
 import { useTranslation } from "react-i18next";
+import { CompanySettingsType } from "@/types/CompanySettings.type";
 
 // NOTE: All user-facing text is now wrapped in t(). Add missing keys to en.json and ar.json for full localization.
 
 interface StepFileManagementProps {
-    data: CompanySettings;
-    onChange: (changes: Partial<CompanySettings>) => void;
+    data: CompanySettingsType;
+    onChange: (changes: Partial<CompanySettingsType>) => void;
     onNext: () => void;
     onBack: () => void;
     isFirstStep: boolean;
@@ -17,9 +17,9 @@ interface StepFileManagementProps {
 
 const fileTypes = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.png', '.jpg', '.jpeg', '.gif', '.txt', '.zip', '.rar'];
 
-const StepFileManagement: React.FC<StepFileManagementProps> = ({ data, onChange, onNext, onBack, isFirstStep, isLastStep, onFinish }) => {
+const StepFileManagement: React.FC<StepFileManagementProps> = ({ data, onChange, onNext, onBack, isLastStep, onFinish }) => {
     const { t } = useTranslation();
-    const handleChange = (field: keyof CompanySettings, value: any) => {
+    const handleChange = (field: keyof CompanySettingsType, value: any) => {
         onChange({ [field]: value });
     };
     return (
