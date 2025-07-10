@@ -25,35 +25,39 @@ const Content = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   useCustomTheme();
 
-  // Fetch company settings for onboarding check
+  // Get authentication state from Redux
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+
+  // Only fetch company settings if NOT on /auth
+  const shouldFetchCompanySettings = pathname !== "/auth";
   const { data: companySettings, isLoading: isCompanySettingsLoading } = useCustomQuery<CompanySettingsType>({
     queryKey: ["company-settings"],
     url: "/company-settings",
     nestedData: true,
+    enabled: shouldFetchCompanySettings, // Only fetch if not on /auth
   });
 
-  // Get authentication state from Redux
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
-
+  // Redirect to /auth if not authenticated
   useEffect(() => {
-    if (!accessTokenCookie || !refreshTokenCookie) {
+    if ((!accessTokenCookie || !refreshTokenCookie) && pathname !== "/auth") {
       dispatch(logout());
+      router.replace("/auth");
     }
-  }, [accessTokenCookie, dispatch, refreshTokenCookie]);
+  }, [accessTokenCookie, dispatch, refreshTokenCookie, router, pathname]);
 
   // Onboarding redirect logic
   useEffect(() => {
-    if (!isCompanySettingsLoading && companySettings) {
-      // If user is authenticated and company needs onboarding, but not already on onboarding, redirect to onboarding
+    if (!isCompanySettingsLoading && companySettings && isAuthenticated) {
+      // If company needs onboarding, but not already on onboarding or auth, redirect to onboarding
       if (
-        isAuthenticated &&
         companySettings.isFirstTime === true &&
         pathname !== "/company-settings/onboarding" &&
         pathname !== "/auth"
       ) {
         router.replace("/company-settings/onboarding");
-      } else if (
-        isAuthenticated &&
+      }
+      // If onboarding is complete and currently on onboarding, redirect to home
+      else if (
         companySettings.isFirstTime === false &&
         pathname === "/company-settings/onboarding"
       ) {
@@ -66,9 +70,8 @@ const Content = ({ children }: { children: ReactNode }) => {
     <div className="min-h-[100dvh] w-full bg-main">
       <div className="flex h-full w-full">
         {
-          // isAuthenticated &&
           pathname !== "/company-settings/onboarding" &&
-          pathname != "/auth" && (
+          pathname !== "/auth" && (
             <>
               <PullToRefreshWrapper>
                 <NewHeader setIsExpanded={setIsSidebarExpanded} />
