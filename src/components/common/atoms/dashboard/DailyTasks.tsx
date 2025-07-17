@@ -5,6 +5,7 @@ import { DailyTask } from "@/types/dashboard.type";
 import { Clock, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
 import RouteWrapper from "../ui/RouteWrapper";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 interface DailyTasksProps {
     dailyTasks: DailyTask[];
@@ -28,6 +29,9 @@ const formatTime = (totalSeconds: number) => {
 const DailyTasks: React.FC<DailyTasksProps> = ({ dailyTasks, isLoading }) => {
     const { t } = useLanguage();
     const [scrollProgress, setScrollProgress] = useState(0);
+    const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
+
+
 
     // Filter tasks to show only non-completed tasks
     const filteredDailyTasks = useMemo(() => {
@@ -158,6 +162,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
         pauseTimer,
         isLoading,
     } = useTaskTimer(task.id, task.timeLogs || []);
+    const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
 
     // Custom color for task item based on priority
     const getColorClass = () => {
@@ -227,7 +232,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
         <div className={`flex items-center bg-main rounded-lg py-2 sm:py-3 px-2 sm:px-3 transition-colors ${isRunning ? "ring-1 ring-primary ring-opacity-50" : ""
             } ${getColorClass()}`}>
             {/* Task details */}
-            <div className="flex-1 px-1 sm:px-2 min-w-0">
+            {<div className="flex-1 px-1 sm:px-2 min-w-0">
                 <h3 className="text-xs sm:text-sm font-medium text-twhite truncate">{task.name}</h3>
                 {/* Compact time tracking section */}
                 <div className="flex items-center gap-1 sm:gap-2 mt-1">
@@ -246,39 +251,40 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
                         </div>
                     )}
                 </div>
-            </div>
+            </div>}
 
             {/* Compact action buttons */}
             <div className="flex items-center ml-1 sm:ml-2">
-                {task?.status !== "DONE" && (
-                    <div className="flex">
-                        {!isRunning ? (
-                            <button
-                                disabled={isLoading}
-                                className={`px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all duration-300 ${!isLoading
-                                    ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                                    : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
-                                    }`}
-                                onClick={handleStartTask}
-                            >
-                                {t("Start")}
-                            </button>
-                        ) : (
-                            <button
-                                className="px-2 sm:px-3 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300"
-                                onClick={handlePauseTask}
-                            >
-                                {isLoading ? "..." : t("Pause")}
-                            </button>
-                        )}
-                    </div>
-                )}
-
-                {task?.status === "DONE" && (
-                    <span className="px-2 sm:px-3 py-1 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/20">
-                        {t("Completed")}
-                    </span>
-                )}
+                {showTimeTracking && <>
+                    {task?.status !== "DONE" && (
+                        <div className="flex">
+                            {!isRunning ? (
+                                <button
+                                    disabled={isLoading}
+                                    className={`px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all duration-300 ${!isLoading
+                                        ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                                        : "bg-gray-700/40 text-gray-500 cursor-not-allowed"
+                                        }`}
+                                    onClick={handleStartTask}
+                                >
+                                    {t("Start")}
+                                </button>
+                            ) : (
+                                <button
+                                    className="px-2 sm:px-3 py-1 rounded text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300"
+                                    onClick={handlePauseTask}
+                                >
+                                    {isLoading ? "..." : t("Pause")}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    {task?.status === "DONE" && (
+                        <span className="px-2 sm:px-3 py-1 rounded text-xs bg-green-500/20 text-green-400 border border-green-500/20">
+                            {t("Completed")}
+                        </span>
+                    )}
+                </>}
 
 
                 <RouteWrapper
@@ -293,7 +299,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
                     </button>
                 </RouteWrapper>
             </div>
-        </div>
+        </div >
     );
 };
 

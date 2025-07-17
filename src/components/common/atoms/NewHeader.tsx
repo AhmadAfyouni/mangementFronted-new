@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Notification from "./ui/Notification";
 import RouteWrapper from "./ui/RouteWrapper";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 const NewHeader = ({
   setIsExpanded,
@@ -75,6 +76,8 @@ const NewHeader = ({
   const toggleMobileSearch = () => setIsMobileSearchOpen(!isMobileSearchOpen);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
+
 
   // Initialize search input with current value from Redux store
   useEffect(() => {
@@ -192,7 +195,7 @@ const NewHeader = ({
                 </div>
 
                 {/* Pause button */}
-                <button
+                {showTimeTracking && <button
                   className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/50 hover:border-green-500/50"
                   onClick={timerProps.pauseTimer}
                   disabled={timerProps.isLoading}
@@ -203,7 +206,7 @@ const NewHeader = ({
                     <rect x="6" y="4" width="4" height="16" rx="2" fill="white" />
                     <rect x="14" y="4" width="4" height="16" rx="2" fill="white" />
                   </svg>
-                </button>
+                </button>}
 
                 <RouteWrapper
                   href={`/tasks/${runningTask.id}`}
@@ -389,7 +392,7 @@ const NewHeader = ({
             </ul>
           </div>
         )}
-      </div>
+      </div >
 
       {/* Mobile Search Overlay - removed, as search is replaced by running task box */}
     </>

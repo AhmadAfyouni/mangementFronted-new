@@ -50,7 +50,7 @@ const Content = ({ children }: { children: ReactNode }) => {
     if (!isCompanySettingsLoading && companySettings && isAuthenticated) {
       // If company needs onboarding, but not already on onboarding or auth, redirect to onboarding
       if (
-        companySettings.isFirstTime === true &&
+        companySettings.isFirstTime == true &&
         pathname !== "/company-settings/onboarding" &&
         pathname !== "/auth"
       ) {
@@ -58,7 +58,7 @@ const Content = ({ children }: { children: ReactNode }) => {
       }
       // If onboarding is complete and currently on onboarding, redirect to home
       else if (
-        companySettings.isFirstTime === false &&
+        companySettings.isFirstTime == false &&
         pathname === "/company-settings/onboarding"
       ) {
         router.replace("/home");
