@@ -130,7 +130,7 @@ const TasksView: React.FC = () => {
     tree: TaskTree[];
   }>({
     queryKey: ["tasks", selectedProj, isTasksByMe + ""],
-    url: `/tasks/tree?tasks-by-me=${isTasksByMe}&projectId=${selectedProj}`,
+    url: `/tasks/tree?tasks-by-me=${isTasksByMe}${selectedProj ? `&projectId=${selectedProj}&departmentId=${selectedDept}` : selectedDept ? `&departmentId=${selectedDept}` : ""}`,
   });
 
   const { data: projects } = useCustomQuery<ProjectType[]>({

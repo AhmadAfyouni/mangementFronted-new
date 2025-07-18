@@ -247,7 +247,6 @@ const AddTaskPage: React.FC = () => {
 };
 
 export default AddTaskPage;
-
 // Update the interface
 interface RecurringRoutineSectionProps {
   register: UseFormRegister<TaskFormInputs>;
@@ -256,8 +255,6 @@ interface RecurringRoutineSectionProps {
   isRecurring: boolean | undefined;
   dateConstraints?: { min: string | undefined; max: string | undefined };
 }
-
-
 const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
   register,
   errors,
@@ -417,11 +414,6 @@ const RecurringRoutineSection: React.FC<RecurringRoutineSectionProps> = ({
     </div>
   );
 };
-
-
-
-
-
 interface DatesTimelineSectionProps {
   register: UseFormRegister<TaskFormInputs>;
   errors: FieldErrors<TaskFormInputs>;
@@ -431,8 +423,6 @@ interface DatesTimelineSectionProps {
   watch: ReturnType<typeof useTaskForm>["formMethods"]["watch"];
   setValue: ReturnType<typeof useTaskForm>["formMethods"]["setValue"];
 }
-
-
 const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
   register,
   errors,
@@ -704,7 +694,6 @@ interface AssignmentSectionProps {
   isDepartmentDisabled: boolean;
   isProjectDisabled: boolean;
 }
-
 const AssignmentSection: React.FC<AssignmentSectionProps> = ({
   register,
   t,
@@ -719,8 +708,6 @@ const AssignmentSection: React.FC<AssignmentSectionProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-
       {/* Project */}
       <div>
         <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
