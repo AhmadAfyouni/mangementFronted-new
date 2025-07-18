@@ -270,11 +270,12 @@ const AddEmployeeCollapsible: React.FC = () => {
             iconBgColor="bg-blue-600/20"
             iconTextColor="text-blue-400"
           >
+            {/* Defensive: always pass defined objects/arrays to prevent TypeError */}
             <EmploymentInfoSection
               register={register}
               errors={errors}
-              departments={departments}
-              jobs={jobs as unknown as ApiJobTitle[]}
+              departments={departments ? departments : { info: [], tree: [] }}
+              jobs={jobs ? (jobs as unknown as ApiJobTitle[]) : []}
               selectedDept={getValues("department_id")}
               setValue={setValue as unknown as UseFormSetValue<EmployeeFormInputs>}
               employeeData={employeeData}

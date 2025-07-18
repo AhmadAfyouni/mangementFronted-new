@@ -65,6 +65,10 @@ const EmploymentInfoSection = ({
 }) => {
   const { t } = useTranslation();
 
+  // Defensive: always use safe arrays
+  const safeDepartments = departments && Array.isArray(departments.tree) ? departments.tree : [];
+  const safeJobs = Array.isArray(jobs) ? jobs : [];
+
   // Local state to track selected department for immediate UI updates
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>(
     employeeData?.department_id || getValues("department_id") || selectedDept || ""
@@ -83,12 +87,12 @@ const EmploymentInfoSection = ({
 
   // Use useMemo to prevent filteredJobs from being recalculated on every render
   const filteredJobs = useMemo(() => {
-    return jobs?.filter((job: ApiJobTitle) => {
+    return safeJobs.filter((job: ApiJobTitle) => {
       // Handle both _id and id formats for department matching
       const jobDeptId = job.department?._id || job.department?.id;
       return jobDeptId === currentDepartmentId;
-    }) || [];
-  }, [jobs, currentDepartmentId]);
+    });
+  }, [safeJobs, currentDepartmentId]);
 
   // Effect to sync local state with form state on initial load
   useEffect(() => {
@@ -97,6 +101,22 @@ const EmploymentInfoSection = ({
       setSelectedDepartmentId(formDeptId);
     }
   }, [employeeData, getValues, selectedDepartmentId]);
+
+  // Effect to initialize department and job title when editing an employee
+  useEffect(() => {
+    if (employeeData) {
+      // Initialize department if not already set
+      if (employeeData.department_id && !getValues("department_id")) {
+        setValue("department_id", employeeData.department_id);
+        setSelectedDepartmentId(employeeData.department_id);
+      }
+
+      // Initialize job title if not already set
+      if (employeeData.job_id && !getValues("job_id")) {
+        setValue("job_id", employeeData.job_id);
+      }
+    }
+  }, [employeeData, setValue, getValues]);
 
   // Effect to clear job selection if current job is not in filtered jobs
   useEffect(() => {
@@ -200,19 +220,16 @@ const EmploymentInfoSection = ({
         </label>
         <div className="relative">
           <select
-            disabled={!!employeeData}
             {...register("department_id")}
             className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors appearance-none"
             onChange={handleDepartmentChange}
           >
             <option value="">{t("Select a department")}</option>
-            {departments &&
-              departments.tree &&
-              departments.tree.map((dept: ApiDepartment) => (
-                <option key={dept._id || dept.id} value={dept._id || dept.id}>
-                  {dept.name}
-                </option>
-              ))}
+            {safeDepartments.map((dept: ApiDepartment) => (
+              <option key={dept._id || dept.id} value={dept._id || dept.id}>
+                {dept.name}
+              </option>
+            ))}
           </select>
           {errors.department_id && (
             <div className="absolute right-3 top-3.5 text-red-500">
@@ -236,7 +253,7 @@ const EmploymentInfoSection = ({
         </label>
         <div className="relative">
           <select
-            disabled={!!employeeData || !currentDepartmentId}
+            disabled={!currentDepartmentId}
             {...register("job_id")}
             className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-blue-500 focus:ring focus:ring-blue-500/20 focus:outline-none transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
           >

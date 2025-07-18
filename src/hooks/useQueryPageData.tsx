@@ -47,6 +47,34 @@ function useQueryData<T extends FieldValues>(
             }
           }
 
+          // Process employee data to map department and job objects to IDs
+          if (parsedData && typeof parsedData === 'object' && 'department' in parsedData && 'job' in parsedData) {
+            console.log('Processing employee data for department and job mapping');
+            const employeeData = parsedData as any;
+
+            // Map department object to department_id
+            if (employeeData.department && typeof employeeData.department === 'object' && employeeData.department.id) {
+              employeeData.department_id = employeeData.department.id;
+              console.log('Mapped department.id to department_id:', employeeData.department_id);
+            }
+
+            // Map job object to job_id
+            if (employeeData.job && typeof employeeData.job === 'object' && employeeData.job.id) {
+              employeeData.job_id = employeeData.job.id;
+              console.log('Mapped job.id to job_id:', employeeData.job_id);
+            }
+
+            // Also map employment_date if it's in ISO format
+            if (employeeData.employment_date && typeof employeeData.employment_date === 'string') {
+              // Convert ISO date to YYYY-MM-DD format for date input
+              const date = new Date(employeeData.employment_date);
+              if (!isNaN(date.getTime())) {
+                employeeData.employment_date = date.toISOString().split('T')[0];
+                console.log('Converted employment_date to YYYY-MM-DD format:', employeeData.employment_date);
+              }
+            }
+          }
+
           setQueryData(parsedData);
           reset(parsedData); // Update form with parsed data
         } catch (error) {
