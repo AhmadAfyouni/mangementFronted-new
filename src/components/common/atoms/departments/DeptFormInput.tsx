@@ -111,6 +111,7 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
             className={`${baseInputStyles} ${className}`}
             disabled={disabled}
             onChange={onChange}
+            value={value}
           >
             <option value="">{placeholder}</option>
             {
@@ -120,7 +121,6 @@ const DeptFormInput: React.FC<DeptFormInputProps> = ({
                 <option
                   key={idx}
                   value={typeof option === "string" ? option : option.value}
-                  selected={typeof option == "string" ? value == option : value == option.value}
                 >
                   {typeof option === "string" ? option : option.label}
                 </option>

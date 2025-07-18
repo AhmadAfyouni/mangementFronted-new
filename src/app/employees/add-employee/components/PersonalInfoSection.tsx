@@ -8,7 +8,7 @@ const PersonalInfoSection = ({
   register,
   errors,
   employeeData,
-  getValues
+
 }: {
   register: UseFormRegister<EmployeeFormInputs>;
   errors: FieldErrors<EmployeeFormInputs>;
@@ -265,7 +265,6 @@ const PersonalInfoSection = ({
         <div className="relative">
           <select
             {...register("marital_status")}
-            value={getValues("marital_status") || ""}
             className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-purple-500 focus:ring focus:ring-purple-500/20 focus:outline-none transition-colors appearance-none"
           >
             <option value="">{t("Select a marital status")}</option>

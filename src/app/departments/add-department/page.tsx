@@ -20,7 +20,7 @@ import {
 } from "@/services/department.service";
 import { ArrowLeft, Briefcase, Building2, FileText, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 const AddDept = () => {
@@ -28,8 +28,7 @@ const AddDept = () => {
   const router = useRouter();
   const { isLightMode } = useCustomTheme();
 
-  // Track if this is the first render
-  const initialRenderRef = React.useRef(true);
+
 
   const {
     appendDevelopmentProgram,
@@ -47,6 +46,7 @@ const AddDept = () => {
     requiredReportsFields,
     setValue,
     reset,
+    watch,
   } = useAddDeptForm();
 
   const {
@@ -90,29 +90,8 @@ const AddDept = () => {
       },
     });
 
-  // Handle initialization after the component mounts and data is loaded
-  useEffect(() => {
-    if (departmentData && initialRenderRef.current) {
-      // This ensures we only run this once
-      initialRenderRef.current = false;
-
-      // Initialize parent department correctly
-      if (departmentData.parent_department) {
-        const parentId = typeof departmentData.parent_department === 'object'
-          ? (departmentData.parent_department as { id: string })?.id
-          : departmentData.parent_department as string;
-
-        console.log('Setting parent_department_id to:', parentId);
-        setValue('parent_department_id', parentId);
-      }
-
-      // Initialize category correctly
-      if (departmentData.category) {
-        console.log('Setting category to:', departmentData.category);
-        setValue('category', departmentData.category);
-      }
-    }
-  }, [departmentData, setValue]);
+  // The form initialization is handled in useAddDeptLogic hook
+  // No need for duplicate initialization here
 
   // Handle back button click
   const handleBack = () => {
@@ -186,7 +165,8 @@ const AddDept = () => {
               <DeptFormInput
                 label={t("Department Name")}
                 placeholder={t("Enter department name")}
-                value={departmentData && departmentData.name}
+                registerName="name"
+                value={watch("name")}
                 onChange={(e) => setValue("name", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
                 isRequired={true}
@@ -198,8 +178,12 @@ const AddDept = () => {
                   type="select"
                   label={t("Category")}
                   placeholder={t("Select Category")}
-                  selectOptions={requiredCategoryOptions}
-                  value={departmentData && departmentData.category}
+                  registerName="category"
+                  selectOptions={requiredCategoryOptions.map(cat => ({
+                    value: cat,
+                    label: cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                  }))}
+                  value={watch("category")}
                   onChange={(e) => setValue("category", e.target.value)}
                   className="bg-dark border border-dark/40 rounded-lg"
                   isLightMode={isLightMode}
@@ -234,11 +218,12 @@ const AddDept = () => {
                 type="select"
                 label={t("Parent Department")}
                 placeholder={t("Select Parent Department")}
-                selectOptions={departments?.tree.map((dept) => ({
-                  id: dept.id,
-                  name: dept.name,
-                }))}
-                value={departmentData?.parent_department_id}
+                registerName="parent_department_id"
+                selectOptions={departments?.tree?.map((dept) => ({
+                  value: dept.id,
+                  label: dept.name,
+                })) || []}
+                value={watch("parent_department_id") || departmentData?.parent_department_id}
                 onChange={(e) => setValue("parent_department_id", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
                 isLightMode={isLightMode}
@@ -257,9 +242,10 @@ const AddDept = () => {
               <DeptFormInput
                 label={t("Goal")}
                 placeholder={t("Enter department goal")}
+                registerName="goal"
                 isTextArea={true}
                 rows={3}
-                value={departmentData && departmentData.goal}
+                value={watch("goal")}
                 onChange={(e) => setValue("goal", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
                 isRequired={true}
@@ -268,9 +254,10 @@ const AddDept = () => {
               <DeptFormInput
                 label={t("Main Tasks")}
                 placeholder={t("Enter main tasks")}
+                registerName="mainTasks"
                 isTextArea={true}
                 rows={4}
-                value={departmentData && departmentData.mainTasks}
+                value={watch("mainTasks")}
                 onChange={(e) => setValue("mainTasks", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
                 isRequired={true}
@@ -279,9 +266,10 @@ const AddDept = () => {
               <DeptFormInput
                 label={t("Description")}
                 placeholder={t("Enter description")}
+                registerName="description"
                 isTextArea={true}
                 rows={3}
-                value={departmentData && departmentData.description}
+                value={watch("description")}
                 onChange={(e) => setValue("description", e.target.value)}
                 className="bg-dark border border-dark/40 rounded-lg"
               />

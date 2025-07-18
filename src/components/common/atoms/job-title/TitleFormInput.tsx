@@ -22,7 +22,6 @@ const TitleFormInput = ({
   placeholder,
   type = "text",
   options = [],
-  value,
   onChange,
   errors,
   register,
@@ -37,22 +36,12 @@ const TitleFormInput = ({
       </label>
       {type === "textarea" ? (
         <textarea
-          {...register(name, {
-            setValueAs: (value) => {
-              console.log("value : ", value);
-              return Array.isArray(value)
-                ? value
-                : value && value.toString().length > 0
-                  ? value.split(",")
-                  : [];
-            },
-          })}
+          {...register(name)}
           className={`w-full px-4 py-2 mt-1 rounded-lg outline-none border-none focus:ring-2 focus:ring-accent border 
             ${isLightMode ? "bg-dark placeholder:text-tdark" : "bg-secondary"} 
             ${errors[name] ? "border-red-500" : "border-border"}`}
           placeholder={placeholder}
           rows={3}
-          defaultValue={(value as string[])?.join(",") || ""}
         />
       ) : type === "select" ? (
         <select

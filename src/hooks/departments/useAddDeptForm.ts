@@ -16,6 +16,7 @@ export const useAddDeptForm = () => {
     setValue,
     handleSubmit,
     reset,
+    watch,
   } = useForm<DepartmentFormInputs>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: yupResolver(addDeptSchema) as any,
@@ -54,6 +55,7 @@ export const useAddDeptForm = () => {
     errors,
     setValue,
     handleSubmit,
+    watch,
     numericOwnersFields,
     appendNumericOwner,
     removeNumericOwner,
