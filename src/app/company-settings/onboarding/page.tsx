@@ -165,9 +165,20 @@ export default function CompanySettingsOnboarding() {
 
 
   useEffect(() => {
-    if (companySettings && companyProfile) {
+    if (companySettings) {
       setFormData({
-        companyProfile: { ...companyProfile },
+        companyProfile: companyProfile || {
+          companyName: '',
+          commercialRegistrationNumber: '',
+          establishmentDate: '',
+          businessType: 'Technology' as any,
+          companyDescription: '',
+          officialEmail: '',
+          phoneNumber: '',
+          companyAddress: '',
+          taxNumber: '',
+          ceoName: '',
+        },
         companySettings: { ...companySettings },
       });
     }
