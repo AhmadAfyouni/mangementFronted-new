@@ -29,7 +29,6 @@ const formatTime = (totalSeconds: number) => {
 const DailyTasks: React.FC<DailyTasksProps> = ({ dailyTasks, isLoading }) => {
     const { t } = useLanguage();
     const [scrollProgress, setScrollProgress] = useState(0);
-    const showTimeTracking = useTasksGuard(["enableTimeTracking"]);
 
 
 
