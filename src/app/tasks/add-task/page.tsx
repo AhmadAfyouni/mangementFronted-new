@@ -506,7 +506,6 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
       }
     } catch (error) {
       console.log(error);
-
       inputRef.current?.focus();
     }
   };

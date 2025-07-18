@@ -4,7 +4,7 @@ import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { useEffect, useRef, useState } from "react";
 
-// Notification icon component
+// Clean notification icon component
 export const NotificationIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +33,7 @@ export interface NotificationType {
 
 interface NotificationProps {
   isLightMode: boolean;
-  onToggleOtherDropdowns?: () => void; // Optional callback to close other dropdowns
+  onToggleOtherDropdowns?: () => void;
 }
 
 const Notification = ({
@@ -43,13 +43,9 @@ const Notification = ({
   const { t } = useLanguage();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const notificationModalRef = useRef<HTMLDivElement>(null);
-  const [clickedNotificationId, setClickedNotificationId] = useState<
-    string | null
-  >(null);
+  const [clickedNotificationId, setClickedNotificationId] = useState<string | null>(null);
 
-  const { data: notifications = [], isLoading } = useCustomQuery<
-    NotificationType[]
-  >({
+  const { data: notifications = [], isLoading } = useCustomQuery<NotificationType[]>({
     queryKey: ["notifications"],
     url: `/notifications/get-my-notifications`,
   });
@@ -63,15 +59,12 @@ const Notification = ({
     requestType: "get",
   });
 
-  // Separate mutation for marking all notifications as read
   const { mutate: markAllAsReadMutation, isPending: isMarkingAllAsRead } = useCreateMutation({
     endpoint: `/notifications/mark-all-read`,
     onSuccessMessage: "All notifications marked as read!",
     invalidateQueryKeys: ["notifications"],
     requestType: "get",
   });
-
-  console.log("notifications : ", notifications);
 
   // Count unread notifications
   const unreadCount = Array.isArray(notifications)
@@ -99,35 +92,28 @@ const Notification = ({
     };
   }, [isNotificationModalOpen]);
 
-  // Function to handle notification bell click
   const handleNotificationClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsNotificationModalOpen(!isNotificationModalOpen);
 
     if (!isNotificationModalOpen && onToggleOtherDropdowns) {
-      // Close other dropdowns if opening notifications
       onToggleOtherDropdowns();
     }
   };
 
-  // Function to mark a notification as read
   const markAsRead = (id: string) => {
     setClickedNotificationId(id);
-    // Use setTimeout to ensure state is updated before the mutation is called
     setTimeout(() => {
       markAsReadMutation({});
     }, 0);
   };
 
-  // Function to mark all notifications as read
   const markAllAsRead = () => {
     if (unreadCount === 0 || isMarkingAllAsRead) return;
-
-    // Try the dedicated endpoint first
     markAllAsReadMutation({});
   };
 
-  // Format date for display
+  // Clean date formatting
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString();
@@ -136,13 +122,13 @@ const Notification = ({
   return (
     <div className="relative group">
       <div
-        className="p-2 bg-blue-100 rounded-full cursor-pointer transform transition-all duration-200 
-        hover:bg-blue-200 hover:shadow-lg active:scale-95"
+        className="p-2 bg-blue-100 rounded-full cursor-pointer transition-all duration-200 
+        hover:bg-blue-200 hover:shadow-md active:scale-95"
         onClick={handleNotificationClick}
       >
         <NotificationIcon />
 
-        {/* Notification counter */}
+        {/* Clean notification counter */}
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-blue-100 group-hover:border-blue-200">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -150,20 +136,15 @@ const Notification = ({
         )}
       </div>
 
-      {/* Notification Modal */}
+      {/* Clean notification modal */}
       {isNotificationModalOpen && (
         <div
           ref={notificationModalRef}
-          className={`
-            absolute right-0 top-full mt-2
-            w-80 md:w-96 bg-secondary 
-            shadow-lg rounded-lg overflow-hidden
-            animate-in fade-in slide-in-from-top-2 duration-200
-            z-50
-          `}
+          className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-secondary shadow-xl rounded-lg overflow-hidden z-50"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-3 flex justify-between items-center border-b border-slate-600/30">
+          {/* Clean header */}
+          <div className="p-4 flex justify-between items-center border-b border-slate-600/30">
             <h3 className="text-twhite font-semibold">
               {t("Notifications")}
               {unreadCount > 0 && (
@@ -176,9 +157,9 @@ const Notification = ({
               <button
                 onClick={markAllAsRead}
                 disabled={isMarkingAllAsRead}
-                className={`text-xs transition-colors duration-200 ${isMarkingAllAsRead
+                className={`text-xs transition-colors duration-200 px-2 py-1 rounded ${isMarkingAllAsRead
                   ? "text-gray-500 cursor-not-allowed"
-                  : "text-blue-400 hover:text-blue-300"
+                  : "text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
                   }`}
               >
                 {isMarkingAllAsRead ? t("Marking...") : t("Mark all as read")}
@@ -186,53 +167,54 @@ const Notification = ({
             )}
           </div>
 
+          {/* Clean content area */}
           <div className="max-h-80 overflow-y-auto">
             {isLoading ? (
               <div className="p-4 text-center text-gray-400">
                 {t("Loading notifications...")}
               </div>
             ) : !Array.isArray(notifications) || notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-400">
+              <div className="p-6 text-center text-gray-400">
+                <div className="mb-2 opacity-50">
+                  <NotificationIcon />
+                </div>
                 {t("No notifications")}
               </div>
             ) : (
-              <ul className="text-twhite divide-y divide-slate-600/30">
+              <ul className="text-twhite">
                 {notifications.map((notification: NotificationType) => (
                   <li
                     key={notification._id}
                     className={`
-                    p-3 cursor-pointer transition-colors duration-200
-                    ${!notification.isRead ? "bg-slate-700/20" : ""}
-                    ${isLightMode
-                        ? "hover:bg-slate-700/20 hover:text-tblackAF"
-                        : "hover:bg-tblack"
+                      p-4 cursor-pointer transition-colors duration-200 border-b border-slate-600/20 last:border-b-0
+                      ${!notification.isRead ? "bg-slate-700/20" : ""}
+                      ${isLightMode
+                        ? "hover:bg-slate-100"
+                        : "hover:bg-slate-700/30"
                       }
-                    ${clickedNotificationId === notification._id && isPending
-                        ? "opacity-50"
-                        : ""
-                      }
-                  `}
+                      ${clickedNotificationId === notification._id && isPending ? "opacity-50" : ""}
+                    `}
                     onClick={() => {
                       if (!notification.isRead && !isPending) {
                         markAsRead(notification._id);
                       }
                     }}
                   >
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-3">
+                      {/* Clean unread indicator */}
                       <div
-                        className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead
-                          ? "bg-red-500"
-                          : "bg-transparent"
+                        className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${!notification.isRead ? "bg-red-500" : "bg-transparent"
                           }`}
                       ></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm">
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm mb-1">
                           {notification.title}
                         </h4>
-                        <p className="text-sm text-tmid mt-0.5">
+                        <p className="text-sm text-tmid mb-2 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-tbright mt-1">
+                        <p className="text-xs text-tbright">
                           {formatDate(notification.notificationPushDateTime)}
                         </p>
                       </div>
@@ -242,6 +224,15 @@ const Notification = ({
               </ul>
             )}
           </div>
+
+          {/* Clean footer */}
+          {notifications.length > 0 && (
+            <div className="p-3 border-t border-slate-600/20 text-center">
+              <p className="text-xs text-tbright">
+                {notifications.length} notification(s) total
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
