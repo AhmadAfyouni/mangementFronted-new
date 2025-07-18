@@ -255,9 +255,10 @@ const ListTasks = ({
     const getAllTasksWithSections = () => {
         const allTasks: Array<{ task: ReceiveTaskType; sectionName: string }> = [];
 
-        if (sections && tasks) {
+        if (sections && tasksData) {
             sections.forEach((section) => {
-                const sectionTasks = tasks[section._id] || [];
+                // Find tasks whose section name matches the section's name
+                const sectionTasks = tasksData.filter(task => task.section && task.section.name === section.name);
                 sectionTasks.forEach((task) => {
                     allTasks.push({
                         task,

@@ -33,11 +33,15 @@ const TasksContent = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (tasksData) {
-      const categorizedTasks = categorizeTasks(tasksData);
-      setTasks(categorizedTasks);
+    if (tasksData && sections) {
+      // Group tasks by section name instead of section id
+      const grouped: { [key: string]: ReceiveTaskType[] } = {};
+      sections.forEach(section => {
+        grouped[section._id] = tasksData.filter(task => task.section && task.section.name === section.name);
+      });
+      setTasks(grouped);
     }
-  }, [tasksData]);
+  }, [tasksData, sections]);
 
   if (!tasksData || tasksData.length === 0) {
     return (
