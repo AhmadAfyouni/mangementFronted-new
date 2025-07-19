@@ -1,15 +1,14 @@
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 import useHierarchy from "@/hooks/useHierarchy";
 import useLanguage from "@/hooks/useLanguage";
 import useTaskTimer from "@/hooks/useTaskTimer";
-import { categorizeTasks } from "@/services/task.service";
 import { SectionType } from "@/types/Section.type";
 import { ExtendedReceiveTaskType, ReceiveTaskType } from "@/types/Task.type";
 import { ActivityIcon, Calendar, CheckCircle, CircleCheckBig, Clock, Eye, FileText, FolderOpen, Hourglass, ListChecks, Pause, Play, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Pagination } from "../atoms/Pagination";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
-import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 
 const EnhancedTaskRowComponent: React.FC<{
@@ -247,21 +246,13 @@ const ListTasks = ({
     tasksData: ReceiveTaskType[] | undefined;
     sections: SectionType[] | undefined;
 }) => {
-    const [tasks, setTasks] = useState<{
-        [key: string]: ReceiveTaskType[];
-    }>({});
+
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const { t } = useLanguage();
     const { organizeTasksByHierarchy } = useHierarchy();
 
-    useEffect(() => {
-        if (tasksData) {
-            const categorizedTasks = categorizeTasks(tasksData);
-            setTasks(categorizedTasks);
-        }
-    }, [tasksData]);
 
     // Reset to first page when items per page changes
     useEffect(() => {

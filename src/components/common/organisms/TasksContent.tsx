@@ -2,17 +2,17 @@
 
 import TaskColumn from "@/components/common/organisms/TaskColumn";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
-import { categorizeTasks, onDragEnd } from "@/services/task.service";
+import useCustomTheme from "@/hooks/useCustomTheme";
+import { onDragEnd } from "@/services/task.service";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import { useTranslation } from "react-i18next";
-import PageSpinner from "../atoms/ui/PageSpinner";
 import AddSectionModal from "../atoms/modals/AddSectionModal";
-import { Plus } from "lucide-react";
-import useCustomTheme from "@/hooks/useCustomTheme";
+import PageSpinner from "../atoms/ui/PageSpinner";
 
 const TasksContent = ({
   tasksData,

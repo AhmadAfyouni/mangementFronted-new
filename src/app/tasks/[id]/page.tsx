@@ -14,7 +14,6 @@ import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { apiClient } from "@/utils/axios/usage";
 
 // Import the refactored components
