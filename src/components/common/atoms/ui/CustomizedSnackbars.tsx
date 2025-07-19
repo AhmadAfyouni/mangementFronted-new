@@ -1,6 +1,5 @@
 import * as React from "react";
-import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import toast from "react-hot-toast";
 import { CustomizedSnackbarsProps } from "@/types/Snackbar.type";
 
 const CustomizedSnackbars: React.FC<CustomizedSnackbarsProps> = ({
@@ -9,28 +8,25 @@ const CustomizedSnackbars: React.FC<CustomizedSnackbarsProps> = ({
   severity,
   onClose,
 }) => {
-  const handleClose = (
-    event?: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    onClose();
-  };
+  React.useEffect(() => {
+    if (open) {
+      const toastId = toast[severity === 'error' ? 'error' : severity === 'warning' ? 'error' : severity === 'info' ? 'success' : 'success'](message, {
+        duration: 2000,
+      });
 
-  return (
-    <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
-      <Alert
-        onClose={handleClose}
-        severity={severity}
-        variant="filled"
-        sx={{ width: "100%" }}
-      >
-        {message}
-      </Alert>
-    </Snackbar>
-  );
+      // Set up a timeout to call onClose after the toast duration
+      const timeoutId = setTimeout(() => {
+        onClose();
+      }, 2000);
+
+      return () => {
+        toast.dismiss(toastId);
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [open, message, severity, onClose]);
+
+  return null;
 };
 
 export default CustomizedSnackbars;

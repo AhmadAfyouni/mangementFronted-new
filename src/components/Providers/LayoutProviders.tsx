@@ -1,5 +1,6 @@
 // LayoutProviders.tsx
 import { ReactNode } from "react";
+import { Toaster } from "react-hot-toast";
 import Content from "./Content";
 import I18nProvider from "./I18nProvider";
 import { QueryProvider } from "./QueryProvider";
@@ -15,6 +16,7 @@ const LayoutProviders = ({ children }: { children: ReactNode }) => {
           <LoadingProvider>
             <MokkBarProvider>
               <Content>{children}</Content>
+              <Toaster />
             </MokkBarProvider>
           </LoadingProvider>
         </I18nProvider>

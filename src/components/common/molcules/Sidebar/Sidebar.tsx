@@ -103,7 +103,7 @@ const Sidebar = ({
               : `top-[50px] bottom-0 left-0`
             }
             ${!isMobile &&
-            (isExpanded ? "w-[240px] mx-5" : "w-[92px] transform origin-left")
+            (isExpanded ? "w-[240px] " : "w-[92px] transform origin-left")
             }
             z-[var(--z-index-sidebar)]
           `}

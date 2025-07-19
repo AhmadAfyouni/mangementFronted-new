@@ -10,6 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import PendingLogic from "@/components/common/atoms/ui/PendingLogic";
+import FormLabel from "@/components/common/atoms/ui/FormLabel";
 import { Loader2, X } from "lucide-react";
 
 // Interface for file upload state
@@ -261,9 +262,9 @@ const AddSubTaskModal: React.FC<{
             <div className="space-y-4">
               {/* Task Name Field */}
               <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("Task Name")} <span className="text-red-400">*</span>
-                </label>
+                <FormLabel required>
+                  {t("Task Name")}
+                </FormLabel>
                 <input
                   type="text"
                   {...register("name")}
@@ -278,9 +279,9 @@ const AddSubTaskModal: React.FC<{
 
               {/* Description Field */}
               <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("Description")} <span className="text-red-400">*</span>
-                </label>
+                <FormLabel required>
+                  {t("Description")}
+                </FormLabel>
                 <textarea
                   {...register("description")}
                   className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.description ? "border border-red-500" : ""
@@ -295,9 +296,9 @@ const AddSubTaskModal: React.FC<{
 
               {/* Priority Field */}
               <div>
-                <label className="block text-tmid text-sm font-medium">
-                  {t("Priority")} <span className="text-red-400">*</span>
-                </label>
+                <FormLabel required>
+                  {t("Priority")}
+                </FormLabel>
                 <select
                   {...register("priority")}
                   className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.priority ? "border border-red-500" : ""
@@ -325,9 +326,9 @@ const AddSubTaskModal: React.FC<{
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Start Date Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
-                    {t("Start Date")} <span className="text-red-400">*</span>
-                  </label>
+                  <FormLabel required>
+                    {t("Start Date")}
+                  </FormLabel>
                   <input
                     type="date"
                     {...register("start_date")}
@@ -341,9 +342,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* Due Date Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
-                    {t("Due Date")} <span className="text-red-400">*</span>
-                  </label>
+                  <FormLabel required>
+                    {t("Due Date")}
+                  </FormLabel>
                   <input
                     type="date"
                     {...register("due_date")}
@@ -357,9 +358,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* Expected End Date Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
+                  <FormLabel required>
                     {t("Expected End Date")}
-                  </label>
+                  </FormLabel>
                   <input
                     type="date"
                     {...register("expected_end_date")}
@@ -373,9 +374,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* Estimated Hours Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
+                  <FormLabel>
                     {t("Estimated Hours")}
-                  </label>
+                  </FormLabel>
                   <input
                     type="number"
                     {...register("estimated_hours")}
@@ -389,9 +390,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* Recurring End Date Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
+                  <FormLabel required>
                     {t("Recurring End Date")}
-                  </label>
+                  </FormLabel>
                   <input
                     type="date"
                     {...register("recurringEndDate")}
@@ -405,9 +406,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* Progress Calculation Method Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
+                  <FormLabel>
                     {t("Progress Calculation Method")}
-                  </label>
+                  </FormLabel>
                   <select
                     {...register("progressCalculationMethod")}
                     className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.progressCalculationMethod ? "border border-red-500" : ""
@@ -428,9 +429,9 @@ const AddSubTaskModal: React.FC<{
 
                 {/* End Date Field */}
                 <div>
-                  <label className="block text-tmid text-sm font-medium">
+                  <FormLabel required>
                     {t("End Date")}
-                  </label>
+                  </FormLabel>
                   <input
                     type="date"
                     {...register("end_date")}
@@ -451,9 +452,9 @@ const AddSubTaskModal: React.FC<{
             <div className="space-y-4">
               {/* File Input */}
               <div>
-                <label className="block text-tmid text-sm font-medium">
+                <FormLabel>
                   {t("Add Files")}
-                </label>
+                </FormLabel>
                 <div className="relative">
                   <input
                     type="file"
@@ -477,9 +478,9 @@ const AddSubTaskModal: React.FC<{
 
               {/* File List */}
               <div>
-                <label className="block text-tmid text-sm font-medium">
+                <FormLabel>
                   {t("Files")}
-                </label>
+                </FormLabel>
                 <div className="flex flex-wrap">
                   {uploadingFiles.map((file) => (
                     <div key={file.id} className="flex items-center space-x-2 mb-2">
@@ -502,9 +503,9 @@ const AddSubTaskModal: React.FC<{
             <h3 className="font-semibold text-twhite mb-3">{t("Section")}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-tmid text-sm font-medium">
+                <FormLabel>
                   {t("Select Section")}
-                </label>
+                </FormLabel>
                 <select
                   {...register("section_id")}
                   className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.section_id ? "border border-red-500" : ""
@@ -529,9 +530,9 @@ const AddSubTaskModal: React.FC<{
             <h3 className="font-semibold text-twhite mb-3">{t("Employee")}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-tmid text-sm font-medium">
+                <FormLabel required>
                   {t("Select Employee")}
-                </label>
+                </FormLabel>
                 <select
                   {...register("emp")}
                   className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.emp ? "border border-red-500" : ""

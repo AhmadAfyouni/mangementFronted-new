@@ -35,6 +35,10 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
     endpoint: section ? `/sections/${section._id}` : "/sections/invalid",
   });
 
+
+  console.log(section?.name == "Recently Assigned");
+
+
   return (
     <Droppable droppableId={columnId}>
       {(provided) => (
@@ -59,7 +63,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
                 {taskCount}
               </div>
               {/* Section Actions Menu */}
-              {section && (
+              {section && section?.name != "Recently Assigned" && (
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen((prev) => !prev)}

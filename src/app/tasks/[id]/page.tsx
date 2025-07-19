@@ -14,6 +14,8 @@ import { ReceiveTaskType } from "@/types/Task.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { apiClient } from "@/utils/axios/usage";
 
 // Import the refactored components
 import { TaskComments } from "@/components/common/organisms/TaskDetails/TaskComments";
@@ -179,7 +181,7 @@ export default function TaskDetailsPage() {
   });
 
   const {
-    comments,
+    comments: rawComments,
     comment,
     attachedFile,
     setComment,
@@ -198,6 +200,93 @@ export default function TaskDetailsPage() {
     saveCommentEdit,
     deleteComment,
   } = useComments(taskId, true);
+
+  // Process comments to organize them into nested structure
+  const processComments = (comments: any[]) => {
+    const mainComments: any[] = [];
+    const replyComments: any[] = [];
+
+    comments.forEach(comment => {
+      // Check if this is a reply by looking for the special prefix
+      const replyMatch = comment.content.match(/^\[REPLY_TO:([^:]+):([^\]]+)\]\s*(.*)/);
+
+      if (replyMatch) {
+        // This is a reply
+        const [, parentId, parentAuthorName, actualContent] = replyMatch;
+        replyComments.push({
+          ...comment,
+          content: actualContent,
+          parentId,
+          parentAuthorName,
+          isReply: true
+        });
+      } else {
+        // This is a main comment
+        mainComments.push({
+          ...comment,
+          replies: [],
+          isReply: false
+        });
+      }
+    });
+
+    // Attach replies to their parent comments
+    replyComments.forEach(reply => {
+      const parentComment = mainComments.find(c => c.id === reply.parentId);
+      if (parentComment) {
+        parentComment.replies.push(reply);
+      }
+    });
+
+    return mainComments;
+  };
+
+  const comments = processComments(rawComments);
+
+  // Reply functionality state
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+
+  // Handle sending reply
+  const handleSendReply = async (parentId: string) => {
+    if (!replyText.trim()) return;
+
+    try {
+      // Find the parent comment to get its author name
+      const parentComment = comments.find(c => c.id === parentId);
+      const parentAuthorName = parentComment?.author.name || "Unknown";
+
+      // Create reply content with special prefix to identify it as a reply
+      const replyContent = `[REPLY_TO:${parentId}:${parentAuthorName}] ${replyText}`;
+
+      // Send reply to backend
+      await apiClient.post(`/comment`, {
+        content: replyContent,
+        taskId: taskId,
+      });
+
+      // Clear reply state
+      setReplyingTo(null);
+      setReplyText("");
+
+      // Invalidate comments query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["comments", taskId] });
+
+      // Show success message
+      setSnackbarConfig({
+        message: t("Reply sent successfully"),
+        open: true,
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Error sending reply:", error);
+      setSnackbarConfig({
+        message: t("Failed to send reply"),
+        open: true,
+        severity: "error",
+      });
+    }
+  };
 
   const handleViewFileWithErrorHandling = (fileUrl: string) => {
     try {
@@ -400,6 +489,11 @@ export default function TaskDetailsPage() {
             cancelEditComment={cancelEditComment}
             saveCommentEdit={saveCommentEdit}
             deleteComment={deleteComment}
+            replyingTo={replyingTo}
+            setReplyingTo={setReplyingTo}
+            replyText={replyText}
+            setReplyText={setReplyText}
+            handleSendReply={handleSendReply}
           />
         </div>
       )}

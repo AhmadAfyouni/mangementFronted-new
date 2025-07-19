@@ -209,7 +209,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold text-twhite flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-blue-400" />
-                        {t("Working Hours Timeline")} <span className="text-sm text-gray-400 font-normal">(6 AM - 12 AM)</span>
+                        {t("Working Hours Timeline")}
                     </h3>
                     <div className="text-sm text-gray-400">
                         {t("Loading schedule...")}
@@ -228,7 +228,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-twhite flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-blue-400" />
-                    {t("Working Hours Timeline")} <span className="text-sm text-gray-400 font-normal">(6 AM - 12 AM)</span>
+                    {t("Working Hours Timeline")}
                 </h3>
             </div>
 

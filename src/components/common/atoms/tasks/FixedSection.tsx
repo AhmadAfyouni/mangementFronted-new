@@ -2,6 +2,7 @@
 import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { TaskFormInputs } from "@/types/Task.type";
+import FormLabel from "@/components/common/atoms/ui/FormLabel";
 
 interface FixedSectionProps {
   register: UseFormRegister<TaskFormInputs>;
@@ -19,9 +20,9 @@ export const FixedSection: React.FC<FixedSectionProps> = ({
   return (
     <>
       <div>
-        <label className="block text-tmid text-sm font-medium">
+        <FormLabel>
           {t("Task Name")}
-        </label>
+        </FormLabel>
         <input
           type="text"
           {...register("name")}
@@ -79,9 +80,9 @@ export const FixedSection: React.FC<FixedSectionProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-tmid text-sm font-medium">
+          <FormLabel>
             {t("Start Date")}
-          </label>
+          </FormLabel>
           <input
             type="date"
             {...register("start_date")}
@@ -95,9 +96,9 @@ export const FixedSection: React.FC<FixedSectionProps> = ({
         </div>
 
         <div>
-          <label className="block text-tmid text-sm font-medium">
+          <FormLabel>
             {t("Due Date")}
-          </label>
+          </FormLabel>
           <input
             type="date"
             {...register("due_date")}

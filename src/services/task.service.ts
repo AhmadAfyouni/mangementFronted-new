@@ -164,7 +164,7 @@ export const isDueSoon = (dueDate: string) => {
   const now = new Date();
   const timeDiff = due.getTime() - now.getTime();
   const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
-  return daysDiff <= 3 && daysDiff >= 0;
+  return daysDiff <= 1 && daysDiff >= 0;
 };
 
 export const getPriorityColor = (priority: string) => {

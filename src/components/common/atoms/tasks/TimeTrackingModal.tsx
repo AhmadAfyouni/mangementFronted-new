@@ -46,12 +46,12 @@ const TimeTrackingModal: React.FC<TimeTrackingModalProps> = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center"
+                className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-[1001] flex items-center justify-center"
                 onClick={onClose}
             >
                 {/* Modal */}
                 <div
-                    className="bg-secondary rounded-xl shadow-lg p-6 w-full max-w-md z-50"
+                    className="bg-secondary rounded-xl shadow-lg p-6 w-full max-w-md z-[1002]"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <h2 className="text-xl font-bold text-twhite mb-4">{t("Track Actual Time")}</h2>

@@ -5,11 +5,12 @@ import useTaskTimer from "@/hooks/useTaskTimer";
 import { categorizeTasks } from "@/services/task.service";
 import { SectionType } from "@/types/Section.type";
 import { ExtendedReceiveTaskType, ReceiveTaskType } from "@/types/Task.type";
-import { ActivityIcon, Calendar, CheckCircle, CircleCheckBig, Clock, Eye, FileText, FolderOpen, ListChecks, Pause, Play, User } from "lucide-react";
+import { ActivityIcon, Calendar, CheckCircle, CircleCheckBig, Clock, Eye, FileText, FolderOpen, Hourglass, ListChecks, Pause, Play, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Pagination } from "../atoms/Pagination";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
 import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
+
 
 const EnhancedTaskRowComponent: React.FC<{
     task: ExtendedReceiveTaskType;
@@ -51,7 +52,7 @@ const EnhancedTaskRowComponent: React.FC<{
 
     return (
         <div
-            className={`grid ${showTimeTracking ? " grid-cols-6 " : " grid-cols-5 "} px-6 py-2 cursor-pointer group border-l-4 ${getPriorityBorderColor(task.priority)} hover:bg-secondary/50 transition-all duration-300 ${task.parent_task ? 'bg-slate-500/5 hover:bg-slate-500/10' : 'bg-dark'
+            className={`grid ${showTimeTracking ? " grid-cols-8 " : " grid-cols-7    "} px-6 py-2 cursor-pointer group border-l-4 ${getPriorityBorderColor(task.priority)} hover:bg-secondary/50 transition-all duration-300 ${task.parent_task ? 'bg-slate-500/5 hover:bg-slate-500/10' : 'bg-dark'
                 } border-b border-1 border-main`}
             style={{ paddingLeft: level > 0 ? `${24 + (level * 20)}px` : '24px' }}
         >
@@ -63,24 +64,31 @@ const EnhancedTaskRowComponent: React.FC<{
             </div>
 
             {/* Task Name & Assignee */}
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                     {level > 0 && (
-                        <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full font-medium">
+                        <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-full font-medium flex-shrink-0">
                             {t("Subtask")}
                         </span>
                     )}
-                    <span className={`text-sm font-medium truncate group-hover:text-blue-300 transition-colors duration-300 ${task.parent_task ? 'text-slate-200' : 'text-twhite'
+                    <span className={`text-sm font-medium break-words group-hover:text-blue-300 transition-colors duration-300 ${task.parent_task ? 'text-slate-200' : 'text-twhite'
                         }`}>
                         {task.name}
                     </span>
                 </div>
                 {task.assignee && (
                     <div className="flex items-center gap-1">
-                        <User className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs text-gray-400">{task.assignee.name}</span>
+                        <User className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                        <span className="text-xs text-gray-400 truncate">{task.assignee.name}</span>
                     </div>
                 )}
+            </div>
+
+            {/* Department */}
+            <div className="flex items-center">
+                <span className="text-sm text-gray-400">
+                    {task.department?.name || task.section?.name || t("No Department")}
+                </span>
             </div>
 
             {/* Due Date */}
@@ -95,10 +103,13 @@ const EnhancedTaskRowComponent: React.FC<{
                 </span>
             </div>
 
-            {/* Status */}
+            {/* Estimated Hours */}
             <div className="flex items-center">
-                {getStatusBadge(task.status)}
+                <span className="text-sm text-gray-400">
+                    {task.estimated_hours ? `${task.estimated_hours}h` : "-"}
+                </span>
             </div>
+
 
             {/* Time Tracking */}
             {showTimeTracking && (
@@ -119,6 +130,12 @@ const EnhancedTaskRowComponent: React.FC<{
                     )}
                 </div>
             )}
+
+
+            {/* Status */}
+            <div className="flex items-center">
+                {getStatusBadge(task.status)}
+            </div>
 
             {/* Actions & Timer Controls */}
             <div className="flex items-center gap-5">
@@ -382,7 +399,7 @@ const ListTasks = ({
                 <div className="hidden md:block bg-main rounded-xl shadow-lg shadow-black/20 border border-gray-700/50 overflow-hidden">
                     {/* Table Header */}
                     <div className="bg-secondary/50 border-b border-gray-700">
-                        <div className={`grid ${showTimeTracking ? " grid-cols-6 " : " grid-cols-5 "}  px-6 py-4`}>
+                        <div className={`grid ${showTimeTracking ? " grid-cols-8 " : " grid-cols-7 "}  px-6 py-4`}>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ListChecks className="w-4 h-4 text-blue-400" />
                                 {t("Task ID")}
@@ -391,18 +408,27 @@ const ListTasks = ({
                                 <FileText className="w-4 h-4 text-gray-400" />
                                 {t("Task Name")}
                             </div>
+
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
-                                <Calendar className="w-4 h-4 text-purple-400" />
-                                {t("Planned End Date")}
+                                <FolderOpen className="w-4 h-4 text-purple-400" />
+                                {t("Department")}
                             </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
-                                <CircleCheckBig className="w-4 h-4 text-green-400" />
-                                {t("Status")}
+                                <Calendar className="w-4 h-4 text-purple-400" />
+                                {t("End Date")}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                                <Hourglass className="w-4 h-4 text-purple-400" />
+                                {t("Estimated Hours")}
                             </div>
                             {showTimeTracking && <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <Clock className="w-4 h-4 text-orange-400" />
                                 {t("Actual Time")}
                             </div>}
+                            <div className="flex items-center gap-2 text-sm font-bold text-twhite">
+                                <CircleCheckBig className="w-4 h-4 text-green-400" />
+                                {t("Status")}
+                            </div>
                             <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                                 <ActivityIcon className="w-4 h-4 text-yellow-400" />
                                 {t("Actions")}
@@ -635,5 +661,4 @@ const ListTasks = ({
         </>
     );
 };
-
 export default ListTasks;

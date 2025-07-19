@@ -192,7 +192,7 @@ const TasksView: React.FC = () => {
 
 
           {/* Conditional Rendering */}
-          {mainView === "my-tasks" && (
+          {(
             <TaskToggle
               isTasksByMe={isTasksByMe}
               onToggle={setIsTasksByMe}

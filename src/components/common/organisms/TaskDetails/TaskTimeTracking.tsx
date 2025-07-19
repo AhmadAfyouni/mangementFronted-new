@@ -1,7 +1,8 @@
 import { TimeLogSection } from "@/components/common/atoms/tasks/TimeLogSection";
 import useLanguage from "@/hooks/useLanguage";
 import { TimeLog } from "@/types/Task.type";
-import { Clock, History, Pause, Play, RotateCcw } from "lucide-react";
+import { Clock, History, Pause, Play, RotateCcw, Calendar, Timer } from "lucide-react";
+import { useState } from "react";
 
 interface TaskTimeTrackingProps {
   displayTime: number;
@@ -16,6 +17,59 @@ interface TaskTimeTrackingProps {
   isSubtask?: boolean;
 }
 
+// Helper function to format time logs
+const formatTimeLog = (startTime: string, endTime: string, lang: string) => {
+  const start = new Date(startTime);
+  let end;
+  let isInvalidEnd = false;
+
+  try {
+    end = new Date(endTime);
+    if (isNaN(end.getTime())) {
+      isInvalidEnd = true;
+      end = new Date();
+    }
+  } catch (e) {
+    isInvalidEnd = true;
+    end = new Date();
+  }
+
+  const durationInSeconds = isInvalidEnd ? 0 : Math.floor(
+    (end.getTime() - start.getTime()) / 1000
+  );
+
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  };
+
+  const startFormatted = start.toLocaleDateString(
+    lang === "ar" ? "ar" : "en-US",
+    dateOptions
+  );
+
+  const endFormatted = isInvalidEnd
+    ? "Running..."
+    : end.toLocaleDateString(lang === "ar" ? "ar" : "en-US", dateOptions);
+
+  return {
+    startFormatted,
+    endFormatted,
+    durationFormatted: isInvalidEnd ? "Running..." : formatTime(durationInSeconds),
+    isInvalidEnd
+  };
+};
+
 export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
   displayTime,
   isTaskRunning,
@@ -29,6 +83,7 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
   isSubtask = false,
 }) => {
   const { t, currentLanguage } = useLanguage();
+  const [showAllLogs, setShowAllLogs] = useState(false);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -38,6 +93,12 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
+
+  // Show only first 3 logs by default, or all if expanded
+  // Reverse the order to show latest logs at the top (like a stack)
+  const reversedLogs = timeLogs ? [...timeLogs].reverse() : [];
+  const displayedLogs = showAllLogs ? reversedLogs : reversedLogs.slice(0, 3);
+  const hasMoreLogs = timeLogs && timeLogs.length > 3;
 
   return (
     <div className={`rounded-lg border ${isSubtask
@@ -121,24 +182,97 @@ export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({
           </div>
         )}
 
-        {/* Compact Time Log Section */}
+        {/* Enhanced Compact Time Log Section */}
         {timeLogs && timeLogs.length > 0 && (
-          <div className="bg-dark rounded-lg p-3 border border-gray-700/50">
-            <div className="flex items-center gap-2 mb-3">
-              <History className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-medium text-white">{t("Time Logs")}</span>
-              <span className="text-xs bg-gray-600/20 text-gray-400 px-2 py-1 rounded-full">
-                {timeLogs.length}
-              </span>
+          <div className="bg-dark rounded-lg border border-gray-700/50 overflow-hidden">
+            {/* Header with total summary */}
+            <div className="px-4 py-3 bg-gray-800/30 border-b border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-medium text-white">{t("Time Logs")}</span>
+                  <span className="text-xs bg-gray-600/20 text-gray-400 px-2 py-1 rounded-full">
+                    {timeLogs.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-gray-400">{t("Total")}:</span>
+                  <span className="font-mono font-medium text-green-400">
+                    {formatTime(totalTimeSpent || 0)}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="max-h-[200px] overflow-y-auto">
-              <TimeLogSection
-                timeLogs={timeLogs}
-                totalTime={totalTimeSpent || 0}
-                currentLanguage={currentLanguage}
-                isLightMode={isLightMode}
-              />
+            {/* Compact Logs Table */}
+            <div className="max-h-[300px] overflow-y-auto">
+              <div className="px-4 py-2 bg-gray-800/20 border-b border-gray-700/30">
+                <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-400">
+                  <div className="col-span-1">#</div>
+                  <div className="col-span-4 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {t("Start")}
+                  </div>
+                  <div className="col-span-4 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {t("End")}
+                  </div>
+                  <div className="col-span-3 flex items-center gap-1">
+                    <Timer className="w-3 h-3" />
+                    {t("Duration")}
+                  </div>
+                </div>
+              </div>
+
+              <div className="divide-y divide-gray-700/30">
+                {displayedLogs?.map((log, index) => {
+                  const { startFormatted, endFormatted, durationFormatted, isInvalidEnd } =
+                    formatTimeLog(log.start, log.end, currentLanguage);
+
+                  return (
+                    <div
+                      key={log._id || index}
+                      className="px-4 py-2 hover:bg-gray-800/20 transition-colors duration-150"
+                    >
+                      <div className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-1">
+                          <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div className="col-span-4">
+                          <div className="text-xs font-mono text-blue-300">{startFormatted}</div>
+                        </div>
+                        <div className="col-span-4">
+                          <div className={`text-xs font-mono ${isInvalidEnd ? 'text-yellow-400' : 'text-blue-300'}`}>
+                            {endFormatted}
+                          </div>
+                        </div>
+                        <div className="col-span-3">
+                          <div className={`text-xs font-mono font-medium ${isInvalidEnd ? 'text-yellow-400' : 'text-green-400'}`}>
+                            {durationFormatted}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Show More/Less Button */}
+              {hasMoreLogs && (
+                <div className="px-4 py-2 bg-gray-800/10 border-t border-gray-700/30">
+                  <button
+                    onClick={() => setShowAllLogs(!showAllLogs)}
+                    className="w-full text-xs text-blue-400 hover:text-blue-300 transition-colors duration-150"
+                  >
+                    {showAllLogs
+                      ? `↑ ${t("Show Less")} (${timeLogs.length - 3} ${t("hidden")})`
+                      : `↓ ${t("Show More")} (${timeLogs.length - 3} ${t("more")})`
+                    }
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

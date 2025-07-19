@@ -237,6 +237,13 @@ const TaskHierarchyTree: React.FC<TaskHierarchyTreeProps> = ({
         fitViewOptions={{ padding: 0.2 }}
         className="bg-main"
         proOptions={{ hideAttribution: true }}
+        connectOnClick={false}
+        nodesConnectable={false}
+        edgesUpdatable={false}
+        elementsSelectable={false}
+        onConnectStart={() => { }}
+        onConnectEnd={() => { }}
+        onConnect={() => { }}
       >
         <Background
           gap={20}
