@@ -1,35 +1,22 @@
 // components/layouts/Content.tsx
+import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
-import { logout } from "@/state/slices/userSlice";
-import { AppDispatch } from "@/state/store";
-import { tokenService } from "@/utils/axios/tokenService";
+import { store } from "@/state/store";
+import { CompanySettingsType } from "@/types/CompanySettings.type";
+import { isTrulyAuthenticated } from "@/utils/isTrulyAuthenticated";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import NewHeader from "../common/atoms/NewHeader";
 import Sidebar from "../common/molcules/Sidebar/Sidebar";
 import PullToRefreshWrapper from "../common/molcules/ui/PullToRefreshWrapper";
-import useCustomQuery from "@/hooks/useCustomQuery";
-import { RootState } from "@/state/store";
-import { CompanySettingsType } from "@/types/CompanySettings.type";
-import { isTrulyAuthenticated } from "@/utils/isTrulyAuthenticated";
-import { store } from "@/state/store";
-import Cookies from "js-cookie";
 
 const Content = ({ children }: { children: ReactNode }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  // const { loading, isAuthenticated } = useAuth(); // not used temporarily for testing the refreshtoken validation
-  const accessTokenCookie = tokenService.getAccessToken();
-  const refreshTokenCookie = tokenService.getRefreshToken();
-  const dispatch = useDispatch<AppDispatch>();
   const { getDir } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
   useCustomTheme();
-
-  // Get authentication state from Redux
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
   // Only fetch company settings if NOT on /auth and truly authenticated
   const trulyAuthenticated = isTrulyAuthenticated(store.getState());
