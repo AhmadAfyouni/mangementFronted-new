@@ -18,9 +18,8 @@ import {
   handleAddNumericOwner,
   handleManualSubmit,
 } from "@/services/department.service";
-import { ArrowLeft, Briefcase, Building2, FileText, Save } from "lucide-react";
+import { Briefcase, Building2, FileText, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
 import { useTranslation } from "react-i18next";
 
 const AddDept = () => {
@@ -112,14 +111,6 @@ const AddDept = () => {
   return (
     <GridContainer>
       <div className={`${isLightMode ? "bg-light-droppable-fade" : "bg-droppable-fade"} p-8 rounded-xl shadow-lg w-full col-span-full text-twhite`}>
-        {/* Back button */}
-        <button
-          onClick={handleBack}
-          className="mb-6 flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t("Back to Departments")}
-        </button>
 
         {/* Header with icon */}
         <div className="flex items-center gap-4 mb-8 border-b border-gray-800 pb-6">
@@ -181,7 +172,7 @@ const AddDept = () => {
                   registerName="category"
                   selectOptions={requiredCategoryOptions.map(cat => ({
                     value: cat,
-                    label: cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    label: t(cat)
                   }))}
                   value={watch("category")}
                   onChange={(e) => setValue("category", e.target.value)}

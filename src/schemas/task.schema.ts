@@ -2,6 +2,7 @@ import * as yup from "yup";
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
+const todayISO = today.toISOString().split('T')[0];
 
 export const addTaskSchema = yup.object().shape({
   name: yup.string().required("Task name is required"),
@@ -104,6 +105,7 @@ export const addTaskSchema = yup.object().shape({
     .transform((value, originalValue) =>
       String(originalValue).trim() === "" ? null : value
     ),
+  requiresRating: yup.boolean().optional(),
 });
 
 export const addSubTaskSchema = yup.object().shape({
@@ -115,36 +117,17 @@ export const addSubTaskSchema = yup.object().shape({
     .date()
     .required("Due date is required")
     .typeError("Invalid date format")
-    .min(today, "Due date cannot be in the past"),
+    .min(todayISO, "Due date cannot be in the past"),
   section_id: yup.string().nullable(),
   start_date: yup
     .date()
     .required("Start date is required")
     .typeError("Invalid date format"),
-  actual_end_date: yup
-    .date()
-    .nullable()
-    .typeError("Invalid date format"),
   expected_end_date: yup
     .date()
     .nullable()
     .typeError("Invalid date format"),
-  estimated_hours: yup
-    .number()
-    .nullable()
-    .transform((value, originalValue) =>
-      String(originalValue).trim() === "" ? null : value
-    ),
   files: yup.array().of(yup.string()),
-  recurringEndDate: yup
-    .date()
-    .nullable()
-    .typeError("Invalid date format"),
-  progressCalculationMethod: yup.string().nullable(),
-  end_date: yup
-    .date()
-    .nullable()
-    .typeError("Invalid date format"),
 });
 
 export const addTaskPopupSchema = yup.object().shape({

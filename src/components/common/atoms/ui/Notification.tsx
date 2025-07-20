@@ -3,6 +3,8 @@ import { useCreateMutation } from "@/hooks/useCreateMutation";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMokkBar } from "@/components/Providers/Mokkbar";
 
 // Clean notification icon component
 export const NotificationIcon = () => (
@@ -29,6 +31,8 @@ export interface NotificationType {
   notificationPushDateTime: string;
   isRead: boolean;
   empId: string;
+  titleAr?: string; // Added for Arabic title
+  messageAr?: string; // Added for Arabic message
 }
 
 interface NotificationProps {
@@ -40,10 +44,12 @@ const Notification = ({
   isLightMode,
   onToggleOtherDropdowns,
 }: NotificationProps) => {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const notificationModalRef = useRef<HTMLDivElement>(null);
   const [clickedNotificationId, setClickedNotificationId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { setSnackbarConfig } = useMokkBar();
 
   const { data: notifications = [], isLoading } = useCustomQuery<NotificationType[]>({
     queryKey: ["notifications"],
@@ -110,7 +116,29 @@ const Notification = ({
 
   const markAllAsRead = () => {
     if (unreadCount === 0 || isMarkingAllAsRead) return;
-    markAllAsReadMutation({});
+    markAllAsReadMutation({}, {
+      onSuccess: () => {
+        // Invalidate notifications query for seamless UX
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        setSnackbarConfig({
+          open: true,
+          message: t("All notifications marked as read!"),
+          severity: "success",
+        });
+      }
+    });
+  };
+
+  // Helper to get the correct localized field
+  const getLocalized = (notification: NotificationType, field: string) => {
+    if (currentLanguage === "ar") {
+      return (
+        notification[(field + "Ar") as keyof NotificationType] ||
+        notification[(field + "_ar") as keyof NotificationType] ||
+        notification[field as keyof NotificationType]
+      );
+    }
+    return notification[field as keyof NotificationType];
   };
 
   // Clean date formatting
@@ -142,6 +170,7 @@ const Notification = ({
           ref={notificationModalRef}
           className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-secondary shadow-xl rounded-lg overflow-hidden z-50"
           onClick={(e) => e.stopPropagation()}
+          dir={currentLanguage === "ar" ? "rtl" : "ltr"}
         >
           {/* Clean header */}
           <div className="p-4 flex justify-between items-center border-b border-slate-600/30">
@@ -186,7 +215,7 @@ const Notification = ({
                   <li
                     key={notification._id}
                     className={`
-                      p-4 cursor-pointer transition-colors duration-200 border-b border-slate-600/20 last:border-b-0
+                      p-4 transition-colors duration-200 border-b border-slate-600/20 last:border-b-0
                       ${!notification.isRead ? "bg-slate-700/20" : ""}
                       ${isLightMode
                         ? "hover:bg-slate-100"
@@ -209,10 +238,10 @@ const Notification = ({
 
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-sm mb-1">
-                          {notification.title}
+                          {getLocalized(notification, "title")}
                         </h4>
                         <p className="text-sm text-tmid mb-2 line-clamp-2">
-                          {notification.message}
+                          {getLocalized(notification, "message")}
                         </p>
                         <p className="text-xs text-tbright">
                           {formatDate(notification.notificationPushDateTime)}
@@ -229,7 +258,7 @@ const Notification = ({
           {notifications.length > 0 && (
             <div className="p-3 border-t border-slate-600/20 text-center">
               <p className="text-xs text-tbright">
-                {notifications.length} notification(s) total
+                {notifications.length} {t("notification(s) total")}
               </p>
             </div>
           )}

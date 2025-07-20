@@ -43,9 +43,6 @@ const DynamicSkills: React.FC<DynamicSkillsProps> = ({
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium mb-1">
-        {t("Required Skills")}
-      </label>
 
       <div className="space-y-2 mb-2">
         {skills.map((skill, index) => (

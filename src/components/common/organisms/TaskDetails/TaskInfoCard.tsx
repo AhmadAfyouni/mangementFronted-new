@@ -18,8 +18,11 @@ import {
   XCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
+import TaskStatusConfirmationModal from "../../atoms/modals/TaskStatusConfirmationModal";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 interface TaskInfoCardProps {
   task: ReceiveTaskType;
@@ -70,12 +73,45 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   const isRTL = currentLanguage === "ar";
   const dueDateRef = useRef<HTMLInputElement>(null);
   const expectedEndDateRef = useRef<HTMLInputElement>(null);
+  const [isStatusConfirmationModalOpen, setIsStatusConfirmationModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<"DONE" | "CLOSED" | "CANCELED" | null>(null);
 
-  const statusOptions = ["PENDING", "ONGOING", "ON_TEST", "DONE", "CLOSED", "CANCELED"];
+  // Conditionally show DONE, CLOSED, CANCELED only when task is ON_TEST AND user is the assignee
+  const currentTaskStatus = selectedStatus || task.status;
+  const currentUser = useSelector((state: RootState) => state.user.userInfo);
+  const taskAssignee = task.assignee;
+
+  // Check if current user is the assignee
+  const isAssignee = currentUser?.id === taskAssignee?.id;
+
+
+
+  const statusOptions = currentTaskStatus === "ON_TEST" && isAssignee
+    ? ["PENDING", "ONGOING", "ON_TEST", "DONE", "CLOSED", "CANCELED"]
+    : ["PENDING", "ONGOING", "ON_TEST"];
+
   const priorityOptions: ("LOW" | "MEDIUM" | "HIGH")[] = ["LOW", "MEDIUM", "HIGH"];
 
   const getStatusConfig = (status: string) => {
     return statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
+  };
+
+  const handleStatusChange = (newStatus: string) => {
+    if (["DONE", "CLOSED", "CANCELED"].includes(newStatus)) {
+      setPendingStatusChange(newStatus as "DONE" | "CLOSED" | "CANCELED");
+      setIsStatusConfirmationModalOpen(true);
+      setStatusMenuOpen(false);
+    } else {
+      onStatusChange(newStatus);
+      setStatusMenuOpen(false);
+    }
+  };
+
+  const handleStatusConfirmed = () => {
+    if (pendingStatusChange) {
+      onStatusChange(pendingStatusChange);
+      setPendingStatusChange(null);
+    }
   };
 
   const assignee = task.assignee || task.emp;
@@ -160,7 +196,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
               )}
 
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{t("Progress")}</span>
+                <span className="text-xs text-gray-400">{t("progress")}</span>
                 <div className="flex items-center gap-2">
                   <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
                     <div
@@ -229,8 +265,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
                         <button
                           key={option}
                           onClick={() => {
-                            onStatusChange(option);
-                            setStatusMenuOpen(false);
+                            handleStatusChange(option);
                           }}
                           className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-white transition-all text-xs"
                         >
@@ -399,6 +434,20 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Status Confirmation Modal */}
+      {pendingStatusChange && (
+        <TaskStatusConfirmationModal
+          isOpen={isStatusConfirmationModalOpen}
+          onClose={() => {
+            setIsStatusConfirmationModalOpen(false);
+            setPendingStatusChange(null);
+          }}
+          task={task}
+          newStatus={pendingStatusChange}
+          onStatusConfirmed={handleStatusConfirmed}
+        />
       )}
     </div>
   );

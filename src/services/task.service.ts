@@ -3,6 +3,7 @@ import {
   HandleEditStatusClickProps,
   HandleEditTypeClickProps,
   ReceiveTaskType,
+  TaskRatingRequest
 } from "@/types/Task.type";
 import { apiClient } from "@/utils/axios/usage";
 import { Dispatch, SetStateAction } from "react";
@@ -202,5 +203,18 @@ export const getPriorityDashColor = (priority: string) => {
       return "text-green-500";
     // default:
     //   return "border-slate-600";
+  }
+};
+
+export const rateTask = async (
+  taskId: string,
+  status: "DONE" | "CLOSED" | "CANCELED",
+  data: TaskRatingRequest
+) => {
+  try {
+    return await apiClient.post(`/tasks/rate/${taskId}/${status}`, data);
+  } catch (error) {
+    console.error("Failed to rate task", error);
+    throw error;
   }
 };

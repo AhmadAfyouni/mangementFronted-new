@@ -2,16 +2,17 @@ import { PencilIcon } from "@/assets";
 import { useRolePermissions } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
-import { formatDate, isDueSoon } from "@/services/task.service";
+import { formatDate } from "@/services/task.service";
 import { ProjectType } from "@/types/Project.type";
 import {
   Activity,
   Building,
   Calendar,
-  CalendarDays,
+  Clock,
   Eye,
   FileText,
   Search,
+  TrendingUp,
   Users
 } from "lucide-react";
 import Image from "next/image";
@@ -29,6 +30,26 @@ export const collabColors = [
   "border-2 border-purple-500/50 bg-purple-500/10",
 ];
 
+const getProgressColor = (progress: number) => {
+  if (progress >= 75) return "bg-green-500";
+  if (progress >= 50) return "bg-blue-500";
+  if (progress >= 25) return "bg-yellow-500";
+  return "bg-red-500";
+};
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    case "IN_PROGRESS":
+      return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    case "COMPLETED":
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    default:
+      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  }
+};
+
 const ProjectRowComponent: React.FC<{
   project: ProjectType;
   index: number;
@@ -37,14 +58,20 @@ const ProjectRowComponent: React.FC<{
   handleEditClick: (project: ProjectType, e: React.MouseEvent) => void;
   t: (key: string) => string;
   currentLanguage: string;
-}> = ({ project, isAdmin, isPrimary, handleEditClick, t, currentLanguage }) => {
-
-
+  getDurationDays: (start: string, end: string) => string;
+}> = ({ project, isAdmin, isPrimary, handleEditClick, t, currentLanguage, getDurationDays }) => {
+  // Calculate progress
+  const totalTasks = (project as any).taskDone !== undefined
+    ? (project as any).taskDone + (project as any).taskOnGoing + (project as any).taskOnTest + (project as any).taskPending
+    : 0;
+  const completionPercentage = totalTasks > 0 && (project as any).taskDone !== undefined
+    ? Math.round(((project as any).taskDone / totalTasks) * 100)
+    : 0;
 
   return (
     <div
       style={{ borderLeftColor: project.color }}
-      className={`grid grid-cols-6 px-6 py-3  group border-l-4  hover:bg-secondary/50 transition-all duration-300 bg-dark border-b border-1 border-main`}
+      className={`grid grid-cols-8 px-6 py-3  group border-l-4  hover:bg-secondary/50 transition-all duration-300 bg-dark border-b border-1 border-main`}
     >
       {/* Project ID */}
       <div className="flex items-center">
@@ -95,22 +122,39 @@ const ProjectRowComponent: React.FC<{
         )}
       </div>
 
-      {/* Start Date */}
-      <div className="flex items-center justify-center">
+      {/* Dates (Start - End) */}
+      <div className="flex flex-col items-center justify-center">
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
-          {formatDate(project.startDate, currentLanguage as "en" | "ar")}
+          {formatDate(project.startDate, currentLanguage as "en" | "ar")} - {formatDate(project.endDate, currentLanguage as "en" | "ar")}
         </span>
       </div>
 
-      {/* End Date */}
+      {/* Duration */}
       <div className="flex items-center justify-center">
-        <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${isDueSoon(project.endDate)
-            ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
-            : "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-            }`}
-        >
-          {formatDate(project.endDate, currentLanguage as "en" | "ar")}
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30">
+          {getDurationDays(project.startDate, project.endDate)}
+        </span>
+      </div>
+
+      {/* Progress */}
+      <div className="flex items-center justify-center min-w-[100px]">
+        <div className="relative w-full bg-gray-700 rounded-full h-6">
+          <div
+            className={`h-6 rounded-full ${getProgressColor(completionPercentage)} transition-all duration-300 flex items-center justify-center`}
+            style={{
+              width: `${Math.max(completionPercentage, 1)}%`,
+              minWidth: completionPercentage === 0 ? '20px' : 'auto'
+            }}
+          >
+            <span className="text-xs font-bold text-white">{completionPercentage}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center justify-center">
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(project.status ?? "")}`}>
+          {t(project.status ?? "-")}
         </span>
       </div>
 
@@ -140,8 +184,6 @@ const ProjectRowComponent: React.FC<{
     </div>
   );
 };
-
-
 
 const ProjectsContent = () => {
   const { t, currentLanguage, getDir } = useLanguage();
@@ -183,6 +225,14 @@ const ProjectsContent = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentProjects = filteredProjects.slice(startIndex, endIndex);
 
+  // Move getDurationDays here so it can use t
+  const getDurationDays = (start: string, end: string) => {
+    if (!start || !end) return "-";
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    return `${diff} ${diff === 1 ? t("day") : t("days")}`;
+  };
 
   const handleEditClick = (project: ProjectType, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -228,7 +278,7 @@ const ProjectsContent = () => {
           <>
             {/* Table Header */}
             <div className="bg-secondary/50 border-b border-gray-700">
-              <div className={`grid grid-cols-6 px-6 py-4 ${isRTL ? 'rtl' : 'ltr'}`}>
+              <div className={`grid grid-cols-8 px-6 py-4 ${isRTL ? 'rtl' : 'ltr'}`}>
                 <div className="flex items-center gap-2 text-sm font-bold text-twhite">
                   <FileText className="w-4 h-4 text-blue-400" />
                   {t("Project ID")}
@@ -243,14 +293,21 @@ const ProjectsContent = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
                   <Calendar className="w-4 h-4 text-purple-400" />
-                  {t("Start Date")}
+                  {t("Dates")}
                 </div>
                 <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
-                  <CalendarDays className="w-4 h-4 text-orange-400" />
-                  {t("End Date")}
+                  <Clock className="w-4 h-4 text-blue-400" />
+                  {t("Duration")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
+                  <TrendingUp className="w-4 h-4 text-green-400" />
+                  {t("progress")}
                 </div>
                 <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
                   <Activity className="w-4 h-4 text-yellow-400" />
+                  {t("Status")}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-bold text-twhite justify-center">
                   {t("Actions")}
                 </div>
               </div>
@@ -268,6 +325,7 @@ const ProjectsContent = () => {
                   handleEditClick={handleEditClick}
                   t={t}
                   currentLanguage={currentLanguage}
+                  getDurationDays={getDurationDays}
                 />
               ))}
             </div>

@@ -222,29 +222,16 @@ const AddSubTaskModal: React.FC<{
                 return undefined;
               }
             };
-
-            // Helper function to convert string to number
-            const toNumber = (value: unknown) => {
-              if (value === undefined || value === null || value === "") return undefined;
-              const num = Number(value);
-              return isNaN(num) ? undefined : num;
-            };
-
             const payload = {
               name: data.name,
               description: data.description,
               priority: data.priority,
               files: data.files ?? [],
-              due_date: toISODate(data.due_date),
-              emp: data.emp || undefined,
-              section_id: data.section_id || undefined,
-              // Update with only the fields in CreateSubTaskDto
               start_date: toISODate(data.start_date),
+              due_date: toISODate(data.due_date),
               expected_end_date: toISODate(data.expected_end_date),
-              estimated_hours: toNumber(data.estimated_hours),
-              recurringEndDate: toISODate(data.recurringEndDate),
-              progressCalculationMethod: data.progressCalculationMethod,
-              end_date: toISODate(data.end_date)
+              emp: data.emp || undefined,
+              section_id: data.section_id || undefined
             };
 
             const filteredPayload = Object.fromEntries(
@@ -323,7 +310,7 @@ const AddSubTaskModal: React.FC<{
             <h3 className="font-semibold text-twhite mb-3">{t("Dates & Estimation")}</h3>
             <div className="space-y-4">
               {/* Grid for dates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Start Date Field */}
                 <div>
                   <FormLabel required>
@@ -371,78 +358,9 @@ const AddSubTaskModal: React.FC<{
                     <p className="text-red-500 mt-1 text-sm">{errors.expected_end_date.message}</p>
                   )}
                 </div>
-
-                {/* Estimated Hours Field */}
-                <div>
-                  <FormLabel>
-                    {t("Estimated Hours")}
-                  </FormLabel>
-                  <input
-                    type="number"
-                    {...register("estimated_hours")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.estimated_hours ? "border border-red-500" : ""
-                      }`}
-                  />
-                  {errors.estimated_hours && (
-                    <p className="text-red-500 mt-1 text-sm">{errors.estimated_hours.message}</p>
-                  )}
-                </div>
-
-                {/* Recurring End Date Field */}
-                <div>
-                  <FormLabel required>
-                    {t("Recurring End Date")}
-                  </FormLabel>
-                  <input
-                    type="date"
-                    {...register("recurringEndDate")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.recurringEndDate ? "border border-red-500" : ""
-                      }`}
-                  />
-                  {errors.recurringEndDate && (
-                    <p className="text-red-500 mt-1 text-sm">{errors.recurringEndDate.message}</p>
-                  )}
-                </div>
-
-                {/* Progress Calculation Method Field */}
-                <div>
-                  <FormLabel>
-                    {t("Progress Calculation Method")}
-                  </FormLabel>
-                  <select
-                    {...register("progressCalculationMethod")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.progressCalculationMethod ? "border border-red-500" : ""
-                      }`}
-                  >
-                    <option value="">{t("Select a method")}</option>
-                    <option className="text-tmid" value="time_based">
-                      {t("Time Based")}
-                    </option>
-                    <option className="text-tmid" value="date_based">
-                      {t("Date Based")}
-                    </option>
-                  </select>
-                  {errors.progressCalculationMethod && (
-                    <p className="text-red-500 mt-1 text-sm">{errors.progressCalculationMethod.message}</p>
-                  )}
-                </div>
-
-                {/* End Date Field */}
-                <div>
-                  <FormLabel required>
-                    {t("End Date")}
-                  </FormLabel>
-                  <input
-                    type="date"
-                    {...register("end_date")}
-                    className={`${isLightMode ? "bg-dark" : "bg-secondary"} border-none outline-none w-full px-4 py-2 mt-1 rounded-lg ${errors.end_date ? "border border-red-500" : ""
-                      }`}
-                  />
-                  {errors.end_date && (
-                    <p className="text-red-500 mt-1 text-sm">{errors.end_date.message}</p>
-                  )}
-                </div>
               </div>
+
+
             </div>
           </div>
 

@@ -42,7 +42,9 @@ const JobCategoryRowComponent: React.FC<{
   onShowMoreSkills: (skills: string[]) => void;
 }> = ({ category, isAdmin, hasEditPermission, NavigateButton, t, onShowMoreSkills }) => {
 
-  const getCategoryColor = (name: string) => {
+  const getCategoryColor = (name: string | undefined) => {
+    if (!name) return 'border-l-teal-500'; // Default color for undefined names
+
     const nameLower = name.toLowerCase();
     if (nameLower.includes("technical") || nameLower.includes("developer") || nameLower.includes("engineer")) {
       return 'border-l-purple-500';
@@ -59,7 +61,9 @@ const JobCategoryRowComponent: React.FC<{
     }
   };
 
-  const getEducationBadgeColor = (education: string) => {
+  const getEducationBadgeColor = (education: string | undefined) => {
+    if (!education) return "bg-gray-500/20 text-gray-400 border-gray-500/30"; // Default for undefined
+
     const eduLower = education.toLowerCase();
     if (eduLower.includes("phd") || eduLower.includes("doctorate")) {
       return "bg-purple-500/20 text-purple-400 border-purple-500/30";
@@ -74,7 +78,9 @@ const JobCategoryRowComponent: React.FC<{
     }
   };
 
-  const getExperienceBadgeColor = (experience: string) => {
+  const getExperienceBadgeColor = (experience: string | undefined) => {
+    if (!experience) return "bg-gray-500/20 text-gray-400 border-gray-500/30"; // Default for undefined
+
     const expLower = experience.toLowerCase();
     if (expLower.includes("senior") || expLower.includes("10+") || expLower.includes("expert")) {
       return "bg-red-500/20 text-red-400 border-red-500/30";
@@ -114,11 +120,11 @@ const JobCategoryRowComponent: React.FC<{
       <div className="flex items-center pr-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-semibold text-sm">
-            {category.name.charAt(0).toUpperCase()}
+            {category.name ? category.name.charAt(0).toUpperCase() : '?'}
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium text-twhite group-hover:text-blue-300 transition-colors duration-300 truncate">
-              {category.name}
+              {category.name || t("Unnamed Category")}
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
               <BookOpen className="w-3 h-3 flex-shrink-0" />

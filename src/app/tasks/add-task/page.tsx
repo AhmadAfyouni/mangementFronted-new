@@ -17,6 +17,7 @@ import { TaskTree } from "@/types/trees/Task.tree.type";
 import { useMemo, useState } from "react";
 import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 import { FileText, Users, Calendar, RotateCcw, Paperclip } from "lucide-react";
+import ToggleSwitch from "@/components/common/atoms/ui/ToggleSwitch";
 
 // Define interfaces for API responses
 interface SectionType {
@@ -146,6 +147,19 @@ const AddTaskPage: React.FC = () => {
               errors={errors}
               t={t}
             />
+            {/* Requires Rating Toggle Switch */}
+            <div className="mt-4 flex items-center gap-2">
+              <ToggleSwitch
+                checked={!!watch("requiresRating")}
+                onChange={(val: boolean) => setValue("requiresRating", val)}
+              />
+              <label htmlFor="requiresRating" className="text-sm text-tblack dark:text-twhite">
+                {t("Requires Rating")}
+              </label>
+            </div>
+            {errors.requiresRating && (
+              <p className="text-red-500 mt-1 text-sm">{errors.requiresRating.message}</p>
+            )}
           </CollapsibleCard>
 
           {/* Assignment & Organization */}

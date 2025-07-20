@@ -1,5 +1,6 @@
 "use client";
 
+import { useDashboard } from "@/hooks/useDashboard";
 import useLanguage from "@/hooks/useLanguage";
 import {
     CheckCircle,
@@ -8,14 +9,12 @@ import {
     SquareStack
 } from "lucide-react";
 import CalendarSection from "./CalendarSection";
-import MessagesSection from "./MessagesSectiont";
+import DailyTasks from "./DailyTasks";
 import MyTasks from "./MyTasks";
 import ProjectsSection from "./ProjectsSection";
 import RecentActivity from "./RecentActivity";
 import TaskSummaryCard from "./TaskSummaryCard";
 import TimeTracker from "./TimeTracker";
-import { useDashboard } from "@/hooks/useDashboard";
-import DailyTasks from "./DailyTasks";
 
 const Dashboard = () => {
     const { t } = useLanguage();
@@ -97,22 +96,22 @@ const Dashboard = () => {
                     </div>
 
                     {/* Messages */}
-                    <div className="col-span-1">
+                    {/* <div className="col-span-1">
                         <MessagesSection />
+                    </div> */}
+                    {/* Recent Activity */}
+                    <div className="col-span-1">
+                        <RecentActivity />
                     </div>
                 </div>
 
                 {/* My Tasks and Recent Activity */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                     {/* My Tasks */}
-                    <div className="col-span-1 lg:col-span-2">
+                    <div className="col-span-2 lg:col-span-3">
                         <MyTasks />
                     </div>
 
-                    {/* Recent Activity */}
-                    <div className="col-span-1">
-                        <RecentActivity />
-                    </div>
                 </div>
             </div>
         </div>

@@ -79,6 +79,7 @@ export interface TaskFormInputs {
   parent_task?: string;
   end_date?: string;
   rate?: number;
+  requiresRating?: boolean;
 }
 
 export interface ITaskStatus {
@@ -270,7 +271,7 @@ export type ReceiveTaskType = {
   description: string;
   priority: "LOW" | "MEDIUM" | "HIGH";
   emp?: TaskEmployeeType | null;
-  assignee?: TaskEmployeeType | null;
+  assignee?: (Omit<TaskEmployeeType, "_id"> & { id: string }) | null;
   status: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | "CLOSED" | "CANCELED" | string;
   createdAt: string;
   updatedAt: string;
@@ -343,9 +344,28 @@ export type ReceiveTaskType = {
   over_all_time?: string;
   rate?: number;
   end_date?: string;
+
+  // New field for rating requirement
+  requiresRating?: boolean;
 };
 
 export type ExtendedReceiveTaskType = ReceiveTaskType & {
   section: Section;
   subTasks: ExtendedReceiveTaskType[];
 };
+
+export interface TaskRatingRequest {
+  rating?: number;
+  comment: string;
+}
+
+export interface TaskRatingResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    taskId: string;
+    status: string;
+    rating?: number;
+    comment: string;
+  };
+}

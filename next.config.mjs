@@ -18,6 +18,18 @@ const nextConfig = {
         port: "8011",
         pathname: "/public-files/**",
       },
+      {
+        protocol: "http",
+        hostname: "168.231.110.121",
+        port: "8021",
+        pathname: "/public-files/**",
+      },
+      {
+        protocol: "https",
+        hostname: "168.231.110.121",
+        port: "8021",
+        pathname: "/public-files/**",
+      },
       // Add localhost for development
       {
         protocol: "http",
@@ -29,6 +41,18 @@ const nextConfig = {
         protocol: "http",
         hostname: "127.0.0.1",
         port: "8011",
+        pathname: "/public-files/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8021",
+        pathname: "/public-files/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8021",
         pathname: "/public-files/**",
       },
     ],

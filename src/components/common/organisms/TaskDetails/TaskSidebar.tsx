@@ -14,6 +14,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useRedux } from "@/hooks/useRedux";
+import { useMokkBar } from "@/components/Providers/Mokkbar";
 
 interface TaskSidebarProps {
   task: ReceiveTaskType;
@@ -66,6 +68,8 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
+  const { selector: userInfo } = useRedux((state) => state.user.userInfo);
+  const { setSnackbarConfig } = useMokkBar();
 
   // Ensure subtasks is an array and assignee is always { name: string } | undefined
   const subtasks: Subtask[] = Array.isArray(task.subtasks)
@@ -89,6 +93,21 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
 
   const completedSubtasks = subtasks.filter(sub => sub.status === "DONE").length;
   const totalSubtasks = subtasks.length;
+
+  // Enhanced Add Subtask Handler
+  const handleAddSubtask = () => {
+    const userDeptId = userInfo?.department?.id;
+    const taskDeptId = task?.department?._id;
+    if (userDeptId && taskDeptId && userDeptId !== taskDeptId) {
+      setSnackbarConfig({
+        open: true,
+        message: t("You are not allowed to add a subtask to a task outside your department."),
+        severity: "warning",
+      });
+      return;
+    }
+    onAddSubtask();
+  };
 
   return (
     <div className="space-y-6">
@@ -169,7 +188,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
         <div className="p-6">
           {/* Add Subtask Button */}
           <button
-            onClick={onAddSubtask}
+            onClick={handleAddSubtask}
             className="w-full p-4 bg-dark border-2 border-dashed border-gray-600 rounded-lg 
               text-gray-400 hover:text-purple-400 hover:border-purple-400/50 hover:bg-purple-500/5
               transition-all duration-200 group flex items-center justify-center gap-3"

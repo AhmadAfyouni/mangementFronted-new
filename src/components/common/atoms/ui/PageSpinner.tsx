@@ -8,7 +8,7 @@ interface PageSpinnerProps {
   size?: "small" | "medium" | "large";
 }
 
-const PageSpinner = ({ title, size = "medium" }: PageSpinnerProps) => {
+const PageSpinner = ({ size = "medium" }: PageSpinnerProps) => {
   // For small inline spinners, we'll use a different UI
   if (size === "small") {
     return (
@@ -64,11 +64,11 @@ const PageSpinner = ({ title, size = "medium" }: PageSpinnerProps) => {
           </div>
 
           {/* Text */}
-          {title && (
+          {/* {title && (
             <span className="text-white/90 text-sm font-medium tracking-wide">
               {title}
             </span>
-          )}
+          )} */}
 
           {/* Animation keyframes */}
           <style jsx>{`

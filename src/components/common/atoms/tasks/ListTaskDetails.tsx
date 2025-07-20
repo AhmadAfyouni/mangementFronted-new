@@ -35,6 +35,7 @@ import React, { useRef, useState, useEffect } from "react";
 import AddSubTaskModal from "../modals/AddSubTaskModal";
 import PageSpinner from "../ui/PageSpinner";
 import { TimeLogSection } from "@/components/common/atoms/tasks/TimeLogSection";
+import TaskStatusConfirmationModal from "../modals/TaskStatusConfirmationModal";
 export const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -55,15 +56,15 @@ const ListTaskDetails: React.FC<{
     "HIGH",
   ];
 
-
-  const statusOptions: (string | undefined)[] = [
-    "PENDING",
-    "ONGOING",
-    "ON_TEST",
-    "DONE",
-  ];
+  // Conditionally show DONE, CLOSED, CANCELED only when task is ON_TEST
+  const currentTaskStatus = selectedStatus || task?.status;
+  const statusOptions: (string | undefined)[] = currentTaskStatus === "ON_TEST"
+    ? ["PENDING", "ONGOING", "ON_TEST", "DONE", "CLOSED", "CANCELED"]
+    : ["PENDING", "ONGOING", "ON_TEST"];
 
   const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [isStatusConfirmationModalOpen, setIsStatusConfirmationModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<"DONE" | "CLOSED" | "CANCELED" | null>(null);
 
   const { selector: userId } = useRedux(
     (state: RootState) => state.user.userInfo?.id
@@ -161,11 +162,11 @@ const ListTaskDetails: React.FC<{
 
   // In the status option selection handler, add state updates
   const handleStatusChange = (option) => {
-    if (option == "DONE") {
-      if (userId == task?.assignee._id) {
-        setSelectedStatus(option);
+    if (["DONE", "CLOSED", "CANCELED"].includes(option)) {
+      if (userId == task?.assignee._id || userId == task?.emp?.id) {
+        setPendingStatusChange(option as "DONE" | "CLOSED" | "CANCELED");
+        setIsStatusConfirmationModalOpen(true);
         setStatusMenuOpen(false);
-        setIsRatingOpen(true);
 
         // Immediately update UI to reflect completed state
         if (isRunning) {
@@ -182,6 +183,13 @@ const ListTaskDetails: React.FC<{
     } else {
       setSelectedStatus(option);
       setStatusMenuOpen(false);
+    }
+  };
+
+  const handleStatusConfirmed = () => {
+    if (pendingStatusChange) {
+      setSelectedStatus(pendingStatusChange);
+      setPendingStatusChange(null);
     }
   };
   const { data: allTasks } = useCustomQuery<ReceiveTaskType[]>({
@@ -866,6 +874,19 @@ const ListTaskDetails: React.FC<{
             onClose={() => setIsModalOpen(false)}
           />
         </>
+      )}
+      {/* Status Confirmation Modal */}
+      {pendingStatusChange && (
+        <TaskStatusConfirmationModal
+          isOpen={isStatusConfirmationModalOpen}
+          onClose={() => {
+            setIsStatusConfirmationModalOpen(false);
+            setPendingStatusChange(null);
+          }}
+          task={task!}
+          newStatus={pendingStatusChange}
+          onStatusConfirmed={handleStatusConfirmed}
+        />
       )}
     </>
   );

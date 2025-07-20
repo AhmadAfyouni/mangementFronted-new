@@ -287,7 +287,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                   <div className="flex flex-col">
                     <span className="text-sm text-tdark font-medium mb-1">{t("Description")}</span>
                     <p className="text-twhite text-sm leading-relaxed">
-                      {project.description || t("No description provided")}
+                      {project?.description || t("No description provided")}
                     </p>
                   </div>
 
@@ -296,13 +296,13 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                     <div className="flex flex-col">
                       <span className="text-sm text-tdark font-medium mb-1">{t("Start Date")}</span>
                       <p className="text-twhite text-sm">
-                        {formatDate(project.startDate, currentLanguage as "ar" | "en")}
+                        {formatDate(project?.startDate, currentLanguage as "ar" | "en")}
                       </p>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm text-tdark font-medium mb-1">{t("End Date")}</span>
                       <p className="text-twhite text-sm">
-                        {formatDate(project.endDate, currentLanguage as "ar" | "en")}
+                        {formatDate(project?.endDate, currentLanguage as "ar" | "en")}
                       </p>
                     </div>
                   </div>
@@ -313,7 +313,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                       <span className="text-sm text-tdark font-medium mb-1">{t("Departments")}</span>
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" style={{ color: colorTheme.base }} />
-                        <p className="text-twhite text-sm font-semibold">{project.departments?.length || 0}</p>
+                        <p className="text-twhite text-sm font-semibold">{project?.departments?.length || 0}</p>
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -339,7 +339,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
                 <div className="mt-4 pt-4 border-t border-gray-700/50">
                   <ProjectStatusControls
-                    projectId={project._id}
+                    projectId={project?._id ?? ''}
                     currentStatus={projectStatus}
                     onStatusUpdated={handleStatusUpdate}
                     t={t}
@@ -356,10 +356,10 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 }}
               >
                 <TaskStatusPieChart
-                  taskDone={project.taskDone}
-                  taskOnGoing={project.taskOnGoing}
-                  taskOnTest={project.taskOnTest}
-                  taskPending={project.taskPending}
+                  taskDone={project?.taskDone ?? 0}
+                  taskOnGoing={project?.taskOnGoing ?? 0}
+                  taskOnTest={project?.taskOnTest ?? 0}
+                  taskPending={project?.taskPending ?? 0}
                 />
               </div>
             </div>
@@ -367,7 +367,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
         );
 
       case 'tasks':
-        const allTasks = project.projectTasks || [];
+        const allTasks = project?.projectTasks || [];
         const totalItems = allTasks.length;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -401,14 +401,14 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {paginatedTasks.map((task, idx) => (
-                    <tr key={task.id || idx} className="hover:bg-secondary/30 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold">{task.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{task.assignee?.name || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{task.department?.name || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{task.due_date ? new Date(task.due_date).toLocaleDateString(currentLanguage) : '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{task.estimated_hours ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{task.actual_hours ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getPriorityBadge(task.priority)}</td>
+                    <tr key={task?.id || idx} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap font-semibold">{task?.name ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task?.assignee?.name || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task?.department?.name || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task?.due_date ? new Date(task.due_date).toLocaleDateString(currentLanguage) : '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task?.estimated_hours ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{task?.actual_hours ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getPriorityBadge(task?.priority ?? '')}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           <span className="inline-block text-xs font-semibold">
@@ -486,7 +486,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
         ];
 
         // Use test data if no real data, otherwise use real data
-        const dataToUse = (project.departments && project.departments.length > 0)
+        const dataToUse = (project?.departments && project.departments.length > 0)
           ? project.departments
           : testData;
 
@@ -511,7 +511,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
       case 'team':
         // Use TeamStats type for stats
-        const stats: TeamStats | undefined = project.teamStats;
+        const stats: TeamStats | undefined = project?.teamStats;
         return (
           <div className="p-4 border-t-4" style={{ borderColor: colorTheme.base }}>
             <div className="mb-4 bg-dark rounded-lg p-4 border border-gray-700/50 shadow-md">
@@ -545,7 +545,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 <div className="text-tdark">{t('noTeamStatsAvailable')}</div>
               )}
             </div>
-            <TeamMembersContent team={project.team || project.members || []} t={t} onCountChange={setTeamCount} />
+            <TeamMembersContent team={project?.team || project?.members || []} t={t} onCountChange={setTeamCount} />
           </div>
         );
 
@@ -587,10 +587,10 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-twhite">
-                  {project.name}
+                  {project?.name ?? t("No Project Name")}
                 </h1>
                 <p className="text-tdark text-sm md:text-base">
-                  {t("ID")}: {project._id.slice(-5).toUpperCase()}
+                  {t("ID")}: {(project?._id ?? "").slice(-5).toUpperCase()}
                 </p>
               </div>
             </div>
@@ -613,7 +613,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
 
             <div className="px-4 py-2 rounded-full bg-secondary text-twhite border border-gray-700 text-sm font-medium flex items-center gap-2">
               <Calendar className="w-4 h-4" style={{ color: colorTheme.base }} />
-              {formatDate(project.startDate, currentLanguage as "ar" | "en")} - {formatDate(project.endDate, currentLanguage as "ar" | "en")}
+              {formatDate(project?.startDate, currentLanguage as "ar" | "en")} - {formatDate(project?.endDate, currentLanguage as "ar" | "en")}
             </div>
           </div>
         </div>
