@@ -26,7 +26,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Notification from "./ui/Notification";
@@ -85,8 +85,6 @@ const NewHeader = ({
     setSearchText(searchQueries[activeEntity] || "");
   }, [activeEntity, searchQueries]);
 
-
-
   // Function to close the profile dropdown
   const closeDropdown = () => {
     setIsDropdownOpen(false);
@@ -122,7 +120,7 @@ const NewHeader = ({
 
   // --- Running Task Logic ---
   // Get user's tasks (myTasks is more universal than dailyTasks)
-  const { data: tasksData } = useCustomQuery<{
+  const { data: tasksData, refetch } = useCustomQuery<{
     info: ReceiveTaskType[];
     tree: TaskTree[];
   }>({
@@ -131,16 +129,26 @@ const NewHeader = ({
     enabled: isAuthenticated,
   });
 
-  // Find the first running task (has a timeLog with start and no end)
-  const runningTask = Array.isArray(tasksData?.info)
-    ? tasksData.info.find(
-      (task) =>
-        Array.isArray(task.timeLogs) &&
-        task.timeLogs.some((log) => log.start && !log.end)
-    )
-    : undefined;
+  // Listen for timer update events and refetch tasks instantly
+  useEffect(() => {
+    const handler = () => {
+      refetch();
+    };
+    window.addEventListener("task-timer-updated", handler);
+    return () => window.removeEventListener("task-timer-updated", handler);
+  }, [refetch]);
 
-  // Always call useTaskTimer to avoid conditional hooks
+  // Always recalculate runningTask when tasksData changes
+  const runningTask = useMemo(() => {
+    return Array.isArray(tasksData?.info)
+      ? tasksData.info.find(
+        (task) =>
+          Array.isArray(task.timeLogs) &&
+          task.timeLogs.some((log) => log.start && !log.end)
+      )
+      : undefined;
+  }, [tasksData]);
+
   const timerProps = useTaskTimer(
     runningTask ? runningTask.id : "dummy-id",
     runningTask ? runningTask.timeLogs || [] : []

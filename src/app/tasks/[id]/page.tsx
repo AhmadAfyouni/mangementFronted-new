@@ -26,6 +26,7 @@ import { TaskSidebar } from "@/components/common/organisms/TaskDetails/TaskSideb
 import { TaskTimeTracking } from "@/components/common/organisms/TaskDetails/TaskTimeTracking";
 import { AxiosError } from "axios";
 import TimeTrackingModal from "@/components/common/atoms/tasks/TimeTrackingModal";
+import TaskStatusConfirmationModal from "@/components/common/atoms/modals/TaskStatusConfirmationModal";
 import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 export default function TaskDetailsPage() {
@@ -47,6 +48,7 @@ export default function TaskDetailsPage() {
   });
 
   const [isTimeTrackingOpen, setIsTimeTrackingOpen] = useState(false);
+  const [isStatusConfirmationModalOpen, setIsStatusConfirmationModalOpen] = useState(false);
   const [isPriorityMenuOpen, setPriorityMenuOpen] = useState(false);
   const [isStatusMenuOpen, setStatusMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -57,6 +59,9 @@ export default function TaskDetailsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("TODO");
   const [description, setDescription] = useState<string>("");
   const [taskName, setTaskName] = useState<string>("");
+  const [pendingStatusChange, setPendingStatusChange] = useState<"DONE" | "CLOSED" | "CANCELED" | null>(null);
+  const [isAfterRating, setIsAfterRating] = useState(false);
+  const [ratingData, setRatingData] = useState<{ rating?: number; comment?: string } | undefined>(undefined);
 
   useEffect(() => {
     if (task) {
@@ -159,15 +164,28 @@ export default function TaskDetailsPage() {
   };
 
   const handleStatusChange = (option: string) => {
-    if (option === "DONE") {
+    const finalStatuses = ["DONE", "CLOSED", "CANCELED"];
+
+    if (finalStatuses.includes(option)) {
       setSelectedStatus(option);
       setStatusMenuOpen(false);
-      setIsTimeTrackingOpen(true);
+      setPendingStatusChange(option as "DONE" | "CLOSED" | "CANCELED");
 
+      // Pause timer if running
       if (isRunning) {
         pauseTimer();
       }
+
+      if (task?.requiresRating) {
+        // Show status confirmation modal for tasks that require rating
+        setIsStatusConfirmationModalOpen(true);
+      } else {
+        // Show time tracking modal for tasks that don't require rating
+        setIsAfterRating(false);
+        setIsTimeTrackingOpen(true);
+      }
     } else {
+      // Regular status change for non-final statuses
       setSelectedStatus(option);
       setStatusMenuOpen(false);
     }
@@ -302,16 +320,23 @@ export default function TaskDetailsPage() {
 
   const handleTimeSubmit = async (actualTime: number) => {
     try {
-      await updateTaskData(taskId, {
-        status: "DONE",
+      const statusToUpdate = pendingStatusChange || "DONE";
+      const updateData: any = {
+        status: statusToUpdate,
         actual_hours: actualTime,
-      });
-
-      setSelectedStatus("DONE");
-
+      };
+      if (ratingData) {
+        if (ratingData.rating !== undefined) updateData.rate = ratingData.rating;
+        if (ratingData.comment) updateData.comment = ratingData.comment;
+      }
+      await updateTaskData(taskId, updateData);
+      setSelectedStatus(statusToUpdate);
+      setPendingStatusChange(null);
+      setIsTimeTrackingOpen(false);
+      setIsAfterRating(false);
+      setRatingData(undefined);
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-
       setSnackbarConfig({
         open: true,
         message: t("Task completed and time recorded"),
@@ -324,11 +349,22 @@ export default function TaskDetailsPage() {
         message: t("Failed to update task time"),
         severity: "error",
       });
-
       if (task) {
         setSelectedStatus(task.status);
       }
+      setPendingStatusChange(null);
+      setIsTimeTrackingOpen(false);
+      setIsAfterRating(false);
+      setRatingData(undefined);
     }
+  };
+
+  const handleStatusConfirmed = async (ratingData?: { rating?: number; comment?: string }) => {
+    // For tasks that require rating, after rating, show the time tracking modal (step 2)
+    setIsStatusConfirmationModalOpen(false);
+    setIsAfterRating(true);
+    setIsTimeTrackingOpen(true);
+    setRatingData(ratingData); // Store for later
   };
 
   const showComments = useTasksGuard(["enableComments"]);
@@ -512,17 +548,44 @@ export default function TaskDetailsPage() {
         </>
       )}
 
+      {/* Time Tracking Modal - for direct time entry OR after rating (Step 2) */}
+      {/* Shows directly for non-rating tasks, or after rating submission */}
       {showTimeTracking && (
         <TimeTrackingModal
           isOpen={isTimeTrackingOpen}
           onClose={() => {
             setIsTimeTrackingOpen(false);
-            if (task && selectedStatus === "DONE") {
+            setPendingStatusChange(null);
+            setIsAfterRating(false);
+            setRatingData(undefined);
+            if (task && pendingStatusChange) {
               setSelectedStatus(task.status);
             }
           }}
           onSubmit={handleTimeSubmit}
-          recordedTime={task.totalTimeSpent || 0}
+          recordedTime={task?.totalTimeSpent || 0}
+          taskStatus={pendingStatusChange || "DONE"}
+          isAfterRating={isAfterRating}
+        />
+      )}
+
+      {/* Status Confirmation Modal - for tasks that require rating (Step 1) */}
+      {/* Shows first for rating, then triggers TimeTrackingModal */}
+      {pendingStatusChange && (
+        <TaskStatusConfirmationModal
+          isOpen={isStatusConfirmationModalOpen}
+          onClose={() => {
+            setIsStatusConfirmationModalOpen(false);
+            setPendingStatusChange(null);
+            if (task && pendingStatusChange) {
+              setSelectedStatus(task.status);
+            }
+          }}
+          task={task}
+          newStatus={pendingStatusChange}
+          onStatusConfirmed={handleStatusConfirmed}
+          requiresRating={task?.requiresRating || false}
+          recordedTime={task?.totalTimeSpent || 0}
         />
       )}
     </div>

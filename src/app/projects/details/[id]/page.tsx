@@ -9,8 +9,7 @@ import PageSpinner from "@/components/common/atoms/ui/PageSpinner";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
 import { formatDate } from "@/services/task.service";
-import { EmployeeType } from "@/types/EmployeeType.type";
-import { ProjectDetailsType, ProjectStatus } from "@/types/Project.type";
+import { ProjectDetailsType, ProjectStatus, TeamMember, TeamStats } from "@/types/Project.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import {
   AlertTriangle,
@@ -25,23 +24,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-// Types for team and teamStats based on API response
-interface TeamMember {
-  empInfo: EmployeeType;
-  totalTimeSpent: number;
-  taskCount: number;
-  completedTasks: number;
-  ongoingTasks: number;
-  testingTasks: number;
-  pendingTasks: number;
-}
 
-interface TeamStats {
-  totalMembers: number;
-  totalTeamTime: number;
-  averageTimePerMember: number;
-  mostActiveMembers: TeamMember[];
-}
 
 // Function to calculate text color based on background color
 const getTextColor = (backgroundColor: string): string => {
@@ -97,18 +80,13 @@ const createColorVariants = (baseColor: string) => {
 };
 
 // Custom TeamMembersContent for API compatibility
-const TeamMembersContent = ({ team, t, onCountChange }: { team: (TeamMember | EmployeeType)[], t: (key: string) => string, onCountChange?: (count: number) => void }) => {
-  // Only show project-related fields for each team member
-  const normalized: TeamMember[] = (team || []).map((member) =>
-    (member as TeamMember).empInfo ? (member as TeamMember) : null
-  ).filter(Boolean) as TeamMember[];
-
+const TeamMembersContent = ({ team, t, onCountChange }: { team: TeamMember[], t: (key: string) => string, onCountChange?: (count: number) => void }) => {
   // Notify parent of the count
   useEffect(() => {
-    if (onCountChange) onCountChange(normalized.length);
-  }, [normalized.length, onCountChange]);
+    if (onCountChange) onCountChange(team.length);
+  }, [team.length, onCountChange]);
 
-  if (normalized.length === 0) {
+  if (team.length === 0) {
     return <div className="text-tdark p-4">{t('noTeamMembersFound')}</div>;
   }
 
@@ -117,25 +95,23 @@ const TeamMembersContent = ({ team, t, onCountChange }: { team: (TeamMember | Em
       <table className="min-w-full divide-y divide-gray-700 bg-dark text-twhite">
         <thead>
           <tr>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('NAME')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TOTAL TIME SPENT')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TASK COUNT')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('COMPLETED')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('ONGOING')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('TESTING')}</th>
-            <th className="px-6 py-3 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('PENDING')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('NAME')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Department')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Total Hours Worked')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Total Planned Hours')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Completed Tasks')}</th>
+            <th className="px-4 py-2 text-left rtl:text-right text-xs font-bold uppercase tracking-wider">{t('Incomplete Tasks')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
-          {normalized.map((member, idx) => (
+          {team.map((member, idx) => (
             <tr key={idx} className="hover:bg-secondary/30 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap font-semibold">{member.empInfo.name}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.totalTimeSpent}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.taskCount}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.completedTasks}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.ongoingTasks}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.testingTasks}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{member.pendingTasks}</td>
+              <td className="px-4 py-2 whitespace-nowrap font-semibold">{member.name}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{member.department}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{Math.round(member.totalHoursWorked)}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{Math.round(member.totalPlannedHours)}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{member.completedTasks}</td>
+              <td className="px-4 py-2 whitespace-nowrap">{member.incompleteTasks}</td>
             </tr>
           ))}
         </tbody>
@@ -527,17 +503,17 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-tdark font-semibold">{t('totalTeamTime')}</span>
-                    <span>{stats.totalTeamTime}</span>
+                    <span>{stats ? Math.round(stats.totalTeamTime) : 0}</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-tdark font-semibold">{t('averageTimePerMember')}</span>
-                    <span>{stats.averageTimePerMember}</span>
+                    <span>{stats ? Math.round(stats.averageTimePerMember) : 0}</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-tdark font-semibold">{t('mostActiveMembers')}</span>
                     <span>{stats.mostActiveMembers.length} {t('members')}</span>
                     {stats.mostActiveMembers.length > 0 && (
-                      <span>{t('first')}: {stats.mostActiveMembers[0].empInfo.name}</span>
+                      <span>{t('first')}: {stats.mostActiveMembers[0].name}</span>
                     )}
                   </div>
                 </div>
@@ -545,7 +521,7 @@ const ProjectDetails = ({ params: { id } }: { params: { id: string } }) => {
                 <div className="text-tdark">{t('noTeamStatsAvailable')}</div>
               )}
             </div>
-            <TeamMembersContent team={project?.team || project?.members || []} t={t} onCountChange={setTeamCount} />
+            <TeamMembersContent team={project?.team || []} t={t} onCountChange={setTeamCount} />
           </div>
         );
 

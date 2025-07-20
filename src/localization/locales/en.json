@@ -369,6 +369,10 @@
     "Cancel": "Cancel",
     "Updating...": "Updating...",
     "Creating...": "Creating...",
+    "Work Hours": "Work Hours",
+    "Break Time": "Break Time",
+    "Overtime Hours": "Overtime Hours",
+    "hours": "hours",
     "primary-department": "Primary Department",
     "secondary-department": "Secondary Department",
     "sub-department": "Sub Department",
@@ -941,6 +945,10 @@
     "Task status updated successfully": "Task status updated successfully",
     "Failed to update task status": "Failed to update task status",
     "Updating...": "Updating...",
-    "Confirm": "Confirm"
+    "Confirm": "Confirm",
+    "Actual Hours & Rating": "Actual Hours & Rating",
+    "Actual Time": "Actual Time",
+    "Rating": "Rating",
+    "No comment": "No comment"
   }
 }

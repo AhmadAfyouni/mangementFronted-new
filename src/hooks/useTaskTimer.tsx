@@ -114,6 +114,7 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
     }, [isRunning]);
 
     // API call helper
+    // NOTE: This will always invalidate the ['tasks'] query (and others) after starting or pausing a timer.
     const makeApiCall = useCallback(async (action: 'start' | 'pause') => {
         try {
             const endpoint = action === 'start' ? `/tasks/start/${taskId}` : `/tasks/pause/${taskId}`;
@@ -125,7 +126,10 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
                 queryClient.invalidateQueries({ queryKey: ["task", taskId] }),
                 queryClient.invalidateQueries({ queryKey: ["dashboard"] })
             ]);
-
+            console.log("Forcing refetch of tasks query");
+            await queryClient.refetchQueries({ queryKey: ["tasks"], exact: true });
+            // Broadcast a custom event for instant UI updates
+            window.dispatchEvent(new Event("task-timer-updated"));
             return { success: true };
         } catch (error) {
             console.error(`Error ${action}ing timer:`, error);

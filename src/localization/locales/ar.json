@@ -22,7 +22,10 @@
     "Enable management privileges for this role": "تفعيل صلاحيات الإدارة لهذا المنصب",
     "Not Available": "غير متوفر",
     "at": "في",
-
+    "Work Hours": "ساعات العمل",
+    "Break Time": "وقت الاستراحة",
+    "Overtime Hours": "ساعات العمل الإضافية",
+    "hours": "ساعات",
     "Template": "قالب",
     "File": "ملف",
     "None": "لا شيء",
@@ -1255,6 +1258,11 @@
     "Task status updated successfully": "تم تحديث حالة المهمة بنجاح",
     "Failed to update task status": "فشل في تحديث حالة المهمة",
     "Updating...": "جارٍ التحديث...",
-    "Confirm": "تأكيد"
+    "Confirm": "تأكيد",
+    "Actual Hours & Rating": "الساعات الفعلية والتقييم",
+    "Estimated Hours": "الساعات المقدرة",
+    "Actual Time": "الوقت الفعلي",
+    "Rating": "التقييم",
+    "No comment": "لا يوجد تعليق"
   }
 }

@@ -18,9 +18,8 @@ import {
   XCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
-import TaskStatusConfirmationModal from "../../atoms/modals/TaskStatusConfirmationModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 
@@ -73,10 +72,8 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   const isRTL = currentLanguage === "ar";
   const dueDateRef = useRef<HTMLInputElement>(null);
   const expectedEndDateRef = useRef<HTMLInputElement>(null);
-  const [isStatusConfirmationModalOpen, setIsStatusConfirmationModalOpen] = useState(false);
-  const [pendingStatusChange, setPendingStatusChange] = useState<"DONE" | "CLOSED" | "CANCELED" | null>(null);
 
-  // Conditionally show DONE, CLOSED, CANCELED only when task is ON_TEST AND user is the assignee
+  // Get current user and task assignee for permission checks
   const currentTaskStatus = selectedStatus || task.status;
   const currentUser = useSelector((state: RootState) => state.user.userInfo);
   const taskAssignee = task.assignee;
@@ -84,12 +81,15 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   // Check if current user is the assignee
   const isAssignee = currentUser?.id === taskAssignee?.id;
 
+  // Status options based on current status and user permissions
+  const getStatusOptions = () => {
+    if (currentTaskStatus === "ON_TEST" && isAssignee) {
+      return ["ONGOING", "DONE", "CLOSED", "CANCELED"];
+    }
+    return ["PENDING", "ONGOING", "ON_TEST"];
+  };
 
-
-  const statusOptions = currentTaskStatus === "ON_TEST" && isAssignee
-    ? ["PENDING", "ONGOING", "ON_TEST", "DONE", "CLOSED", "CANCELED"]
-    : ["PENDING", "ONGOING", "ON_TEST"];
-
+  const statusOptions = getStatusOptions();
   const priorityOptions: ("LOW" | "MEDIUM" | "HIGH")[] = ["LOW", "MEDIUM", "HIGH"];
 
   const getStatusConfig = (status: string) => {
@@ -97,21 +97,8 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   };
 
   const handleStatusChange = (newStatus: string) => {
-    if (["DONE", "CLOSED", "CANCELED"].includes(newStatus)) {
-      setPendingStatusChange(newStatus as "DONE" | "CLOSED" | "CANCELED");
-      setIsStatusConfirmationModalOpen(true);
-      setStatusMenuOpen(false);
-    } else {
-      onStatusChange(newStatus);
-      setStatusMenuOpen(false);
-    }
-  };
-
-  const handleStatusConfirmed = () => {
-    if (pendingStatusChange) {
-      onStatusChange(pendingStatusChange);
-      setPendingStatusChange(null);
-    }
+    onStatusChange(newStatus);
+    setStatusMenuOpen(false);
   };
 
   const assignee = task.assignee || task.emp;
@@ -140,6 +127,14 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
 
   const formatDateSafely = (date: string | undefined | null): string => {
     return date ? formatDate(date, currentLanguage as "ar" | "en") : t("Not set");
+  };
+
+  // Helper to format seconds as HH:MM:SS
+  const formatSecondsToHMS = (seconds: number) => {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
   };
 
   const taskTypeInfo = getTaskTypeInfo();
@@ -256,7 +251,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
                   {isEditing && <ChevronDown className={`w-3 h-3 transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`} />}
                 </button>
 
-                {isEditing && isStatusMenuOpen && (
+                {isEditing && isStatusMenuOpen && !["DONE", "CLOSED", "CANCELED"].includes(selectedStatus || task.status) && (
                   <div className={`absolute top-full mt-1 ${isRTL ? 'left-0' : 'right-0'} bg-dark rounded-lg shadow-2xl border border-gray-700 p-1 z-50 min-w-[140px]`}>
                     {statusOptions.map((option) => {
                       const config = getStatusConfig(option);
@@ -264,9 +259,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
                       return (
                         <button
                           key={option}
-                          onClick={() => {
-                            handleStatusChange(option);
-                          }}
+                          onClick={() => handleStatusChange(option)}
                           className="flex items-center gap-2 w-full text-left px-3 py-2 rounded hover:bg-gray-700/50 text-white transition-all text-xs"
                         >
                           <Icon className="w-3 h-3" />
@@ -313,6 +306,17 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
               </div>
             )}
 
+            {/* Rating Requirement */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">{t("Requires Rating")}</span>
+              <div className={`px-2 py-1 rounded text-xs font-medium border ${task.requiresRating
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                }`}>
+                {task.requiresRating ? t("Yes") : t("No")}
+              </div>
+            </div>
+
             {/* Task ID */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-400">{t("Task ID")}</span>
@@ -322,79 +326,122 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
         </div>
 
         {/* Right Column - Dates */}
-        <div className="bg-dark rounded-lg p-4 border border-gray-700/50">
-          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-purple-400" />
-            {t("Timeline")}
-          </h3>
-
-          <div className="space-y-3">
-            {/* Created Date */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">{t("Created")}</span>
-              <span className="text-white text-xs">{formatDate(task.createdAt, currentLanguage as "ar" | "en")}</span>
-            </div>
-
-            {/* Start Date */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">{t("Start")}</span>
-              <span className="text-white text-xs">{formatDate(task.start_date, currentLanguage as "ar" | "en")}</span>
-            </div>
-
-            {/* Due Date */}
-            {showDueDate && (
+        <div className="flex flex-col gap-2">
+          <div className="bg-dark rounded-lg p-4 border border-gray-700/50">
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-purple-400" />
+              {t("Timeline")}
+            </h3>
+            <div className="space-y-3">
+              {/* Start Date */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{t("Due")}</span>
+                <span className="text-xs text-gray-400">{t("Start")}</span>
+                <span className="text-white text-xs">{formatDate(task.start_date, currentLanguage as "ar" | "en")}</span>
+              </div>
+              {/* Due Date */}
+              {showDueDate && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">{t("Due")}</span>
+                  <button
+                    onClick={() => isEditing && dueDateRef.current?.showPicker()}
+                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all ${task.is_over_due
+                      ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                      : 'bg-green-500/20 text-green-400 border-green-500/30'
+                      } ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'}`}
+                  >
+                    {formatDateSafely(due_date)}
+                    {isEditing && <Edit2 className="w-2 h-2 opacity-60" />}
+                  </button>
+                  <input
+                    ref={dueDateRef}
+                    type="date"
+                    value={due_date}
+                    onChange={(e) => onDueDateChange(e.target.value)}
+                    className="absolute opacity-0 pointer-events-none"
+                    disabled={!isEditing}
+                  />
+                </div>
+              )}
+              {/* Expected End */}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">{t("Expected")}</span>
                 <button
-                  onClick={() => isEditing && dueDateRef.current?.showPicker()}
-                  className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all ${task.is_over_due
-                    ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                    : 'bg-green-500/20 text-green-400 border-green-500/30'
-                    } ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'}`}
+                  onClick={() => isEditing && expectedEndDateRef.current?.showPicker()}
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all bg-blue-500/20 text-blue-400 border-blue-500/30 ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'
+                    }`}
                 >
-                  {formatDateSafely(due_date)}
+                  {formatDateSafely(expected_end_date)}
                   {isEditing && <Edit2 className="w-2 h-2 opacity-60" />}
                 </button>
                 <input
-                  ref={dueDateRef}
+                  ref={expectedEndDateRef}
                   type="date"
-                  value={due_date}
-                  onChange={(e) => onDueDateChange(e.target.value)}
+                  value={expected_end_date}
+                  onChange={(e) => onExpectedEndDateChange(e.target.value)}
                   className="absolute opacity-0 pointer-events-none"
                   disabled={!isEditing}
                 />
               </div>
-            )}
-
-            {/* Expected End */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">{t("Expected")}</span>
-              <button
-                onClick={() => isEditing && expectedEndDateRef.current?.showPicker()}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition-all bg-blue-500/20 text-blue-400 border-blue-500/30 ${isEditing ? 'hover:scale-105 cursor-pointer' : 'cursor-default'
-                  }`}
-              >
-                {formatDateSafely(expected_end_date)}
-                {isEditing && <Edit2 className="w-2 h-2 opacity-60" />}
-              </button>
-              <input
-                ref={expectedEndDateRef}
-                type="date"
-                value={expected_end_date}
-                onChange={(e) => onExpectedEndDateChange(e.target.value)}
-                className="absolute opacity-0 pointer-events-none"
-                disabled={!isEditing}
-              />
+              {/* Actual End (if completed) */}
+              {task.actual_end_date && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">{t("Completed")}</span>
+                  <span className="text-green-400 text-xs">{formatDate(task.actual_end_date, currentLanguage as "ar" | "en")}</span>
+                </div>
+              )}
             </div>
-
-            {/* Actual End (if completed) */}
-            {task.actual_end_date && (
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{t("Completed")}</span>
-                <span className="text-green-400 text-xs">{formatDate(task.actual_end_date, currentLanguage as "ar" | "en")}</span>
-              </div>
-            )}
           </div>
+          {/* Actual Hours / Rating / Comment */}
+          {["DONE", "CLOSED", "CANCELED"].includes(task.status) && (
+            <div className="bg-dark rounded-lg p-4 border border-gray-700/50">
+              <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                {t("Actual Hours & Rating")}
+              </h3>
+              <div className="space-y-3">
+                {/* Estimated Hours */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">{t("Estimated Hours")}</span>
+                  <span className="text-white text-xs font-mono">
+                    {task.estimated_hours !== undefined && task.estimated_hours !== null
+                      ? `${task.estimated_hours} ${t("hours")}`
+                      : t("Not set")}
+                  </span>
+                </div>
+                {/* Actual Hours/Time */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">{t("Actual Time")}</span>
+                  <span className="text-white text-xs font-mono">
+                    {task.actual_hours !== undefined && task.actual_hours !== null
+                      ? formatSecondsToHMS(task.actual_hours)
+                      : task.totalTimeSpent
+                        ? new Date(task.totalTimeSpent * 1000).toISOString().substr(11, 8)
+                        : t("Not set")}
+                  </span>
+                </div>
+                {/* Rating */}
+                {task.requiresRating && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">{t("Rating")}</span>
+                    <span className="text-yellow-400 text-xs font-semibold">
+                      {task.rate !== undefined && task.rate !== null
+                        ? `${task.rate} / 5`
+                        : t("Not rated")}
+                    </span>
+                  </div>
+                )}
+                {/* Comment (if requiresRating) */}
+                {task.requiresRating && (
+                  <div className="flex items-start justify-between">
+                    <span className="text-xs text-gray-400 mt-0.5">{t("Comment")}</span>
+                    <span className="text-white text-xs max-w-xs text-right break-words">
+                      {task.comment ? task.comment : t("No comment")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -436,19 +483,7 @@ export const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
         </div>
       )}
 
-      {/* Status Confirmation Modal */}
-      {pendingStatusChange && (
-        <TaskStatusConfirmationModal
-          isOpen={isStatusConfirmationModalOpen}
-          onClose={() => {
-            setIsStatusConfirmationModalOpen(false);
-            setPendingStatusChange(null);
-          }}
-          task={task}
-          newStatus={pendingStatusChange}
-          onStatusConfirmed={handleStatusConfirmed}
-        />
-      )}
+
     </div>
   );
 };

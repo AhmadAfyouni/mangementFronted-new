@@ -311,6 +311,7 @@ export type ReceiveTaskType = {
   parent_task?: string;
   sub_tasks?: string[];
   dependencies?: string[];
+  requiresRating: boolean;
   subtasks?: ReceiveTaskType[];
 
   // Organization
@@ -343,10 +344,8 @@ export type ReceiveTaskType = {
   // Legacy fields
   over_all_time?: string;
   rate?: number;
+  comment?: string;
   end_date?: string;
-
-  // New field for rating requirement
-  requiresRating?: boolean;
 };
 
 export type ExtendedReceiveTaskType = ReceiveTaskType & {

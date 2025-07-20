@@ -1,37 +1,17 @@
-import { XIcon } from "@/assets";
-import { useMokkBar } from "@/components/Providers/Mokkbar";
-import { useTaskRating } from "@/hooks/tasks/useTaskRating";
+import React, { useState } from "react";
+import { Star, Clock, CheckCircle2, XCircle, AlertCircle, X } from "lucide-react";
 import useLanguage from "@/hooks/useLanguage";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 interface TaskStatusConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
     task: ReceiveTaskType;
     newStatus: "DONE" | "CLOSED" | "CANCELED";
-    onStatusConfirmed: () => void;
+    onStatusConfirmed: (ratingData?: { rating?: number; comment?: string }) => Promise<void>;
+    requiresRating?: boolean;
+    recordedTime?: number;
 }
-
-const StarIcon = ({ filled, size }: { filled: boolean; size: number }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill={filled ? "#ffd500" : "none"}
-        stroke={filled ? "#ffd500" : "#d1d5db"}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="transition-all duration-200 cursor-pointer hover:scale-110"
-    >
-        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
-    </svg>
-);
 
 const TaskStatusConfirmationModal: React.FC<TaskStatusConfirmationModalProps> = ({
     isOpen,
@@ -39,212 +19,304 @@ const TaskStatusConfirmationModal: React.FC<TaskStatusConfirmationModalProps> = 
     task,
     newStatus,
     onStatusConfirmed,
+    requiresRating = false,
+    recordedTime = 0,
 }) => {
-    const { t } = useLanguage();
-    const { setSnackbarConfig } = useMokkBar();
-    const modalRef = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useLanguage();
+    const isRTL = currentLanguage === "ar";
 
-    const [comment, setComment] = useState("");
-    const [rating, setRating] = useState(0);
+    const [rating, setRating] = useState<number>(0);
+    const [hoveredRating, setHoveredRating] = useState<number>(0);
+    const [comment, setComment] = useState<string>("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState<{ rating?: string; comment?: string }>({});
 
-    const { rateTask, isRating } = useTaskRating({
-        taskId: task.id,
-        status: newStatus,
-        onSuccess: () => {
-            onStatusConfirmed();
-            onClose();
-        },
-    });
+    if (!isOpen) return null;
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-                onClose();
+    const formatTime = (timeInSeconds: number): string => {
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m ${seconds}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${seconds}s`;
+        } else {
+            return `${seconds}s`;
+        }
+    };
+
+    const validateForm = (): boolean => {
+        const newErrors: { rating?: string; comment?: string } = {};
+
+        // Validation for DONE status with rating requirement
+        if (requiresRating && newStatus === "DONE") {
+            if (rating === 0) {
+                newErrors.rating = t("Please provide a rating");
             }
-        };
-
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
+            if (!comment.trim()) {
+                newErrors.comment = t("Please provide feedback");
+            }
+        } else if (["CLOSED", "CANCELED"].includes(newStatus)) {
+            // Validation for CLOSED/CANCELED status
+            if (!comment.trim()) {
+                newErrors.comment = t("Please provide a reason");
+            }
         }
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen, onClose]);
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) return;
+
+        setIsSubmitting(true);
+
+        try {
+            const ratingData: { rating?: number; comment?: string } = {};
+
+            if (requiresRating && newStatus === "DONE" && rating > 0) {
+                ratingData.rating = rating;
+            }
+
+            if (comment.trim()) {
+                ratingData.comment = comment.trim();
+            }
+
+            await onStatusConfirmed(Object.keys(ratingData).length > 0 ? ratingData : undefined);
+
+            // Reset form
+            setRating(0);
+            setHoveredRating(0);
+            setComment("");
+            setErrors({});
+        } catch (error) {
+            console.error("Error confirming status:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleClose = () => {
+        if (!isSubmitting) {
+            setRating(0);
+            setHoveredRating(0);
+            setComment("");
+            setErrors({});
+            onClose();
+        }
+    };
 
     const getStatusConfig = () => {
         switch (newStatus) {
             case "DONE":
                 return {
                     icon: CheckCircle2,
+                    title: t("Complete Task"),
                     color: "text-green-400",
-                    bgColor: "bg-green-500/20",
-                    title: t("Confirm Task Completion"),
-                    description: t("Are you sure you want to mark this task as completed?"),
-                    requiresRating: true,
+                    bgColor: "bg-green-500/20 border-green-500/30",
+                    description: requiresRating
+                        ? t("Please rate your experience and provide feedback")
+                        : t("Are you sure you want to mark this task as completed?"),
+                    confirmText: t("Complete Task"),
+                    confirmButtonColor: "bg-green-600 hover:bg-green-700 focus:ring-green-500",
                 };
             case "CLOSED":
                 return {
                     icon: XCircle,
+                    title: t("Close Task"),
                     color: "text-red-400",
-                    bgColor: "bg-red-500/20",
-                    title: t("Confirm Task Closure"),
-                    description: t("Are you sure you want to close this task?"),
-                    requiresRating: false,
+                    bgColor: "bg-red-500/20 border-red-500/30",
+                    description: t("Please provide a reason for closing this task"),
+                    confirmText: t("Close Task"),
+                    confirmButtonColor: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
                 };
             case "CANCELED":
                 return {
-                    icon: AlertTriangle,
-                    color: "text-yellow-400",
-                    bgColor: "bg-yellow-500/20",
-                    title: t("Confirm Task Cancellation"),
-                    description: t("Are you sure you want to cancel this task?"),
-                    requiresRating: false,
+                    icon: AlertCircle,
+                    title: t("Cancel Task"),
+                    color: "text-orange-400",
+                    bgColor: "bg-orange-500/20 border-orange-500/30",
+                    description: t("Please provide a reason for canceling this task"),
+                    confirmText: t("Cancel Task"),
+                    confirmButtonColor: "bg-orange-600 hover:bg-orange-700 focus:ring-orange-500",
+                };
+            default:
+                return {
+                    icon: CheckCircle2,
+                    title: t("Update Task"),
+                    color: "text-blue-400",
+                    bgColor: "bg-blue-500/20 border-blue-500/30",
+                    description: t("Please confirm this action"),
+                    confirmText: t("Confirm"),
+                    confirmButtonColor: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
                 };
         }
     };
 
-    const config = getStatusConfig();
-    const Icon = config.icon;
+    const statusConfig = getStatusConfig();
+    const StatusIcon = statusConfig.icon;
+    const shouldShowRating = requiresRating && newStatus === "DONE";
+    const shouldShowComment = requiresRating || ["CLOSED", "CANCELED"].includes(newStatus);
 
-    const handleSubmit = () => {
-        if (!comment.trim()) {
-            setSnackbarConfig({
-                message: t("Please provide a comment"),
-                open: true,
-                severity: "warning",
-            });
-            return;
-        }
-
-        if (newStatus === "DONE" && rating === 0) {
-            setSnackbarConfig({
-                message: t("Please provide a rating"),
-                open: true,
-                severity: "warning",
-            });
-            return;
-        }
-
-        const ratingData = {
-            comment: comment.trim(),
-            ...(newStatus === "DONE" && rating > 0 ? { rating } : {}),
-        };
-
-        rateTask(ratingData);
-    };
-
-    if (!isOpen) return null;
-
-    // Use portal to render modal outside normal DOM hierarchy
-    return createPortal(
-        <div
-            className={`fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-                } transition-opacity duration-300`}
-            onClick={onClose}
-        >
+    return (
+        <div className="fixed inset-0 z-[1002] flex items-center justify-center p-4">
+            {/* Backdrop */}
             <div
-                ref={modalRef}
-                className={`relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all duration-300 ${isOpen ? "scale-100" : "scale-95"
-                    }`}
-                onClick={(e) => e.stopPropagation()}
+                className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+                onClick={handleClose}
+            />
+
+            {/* Modal */}
+            <div
+                className="relative bg-secondary rounded-lg border border-gray-700 w-full max-w-md mx-auto shadow-2xl"
+                dir={isRTL ? 'rtl' : 'ltr'}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-700/50">
+                <div className="flex items-center justify-between p-6 border-b border-gray-700">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${config.bgColor}`}>
-                            <Icon className={`w-6 h-6 ${config.color}`} />
+                        <div className={`p-2 rounded-lg ${statusConfig.bgColor}`}>
+                            <StatusIcon className={`w-5 h-5 ${statusConfig.color}`} />
                         </div>
-                        <h3 className="text-lg font-semibold text-twhite">{config.title}</h3>
+                        <h2 className="text-xl font-semibold text-white">
+                            {statusConfig.title}
+                        </h2>
                     </div>
                     <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
                     >
-                        <Image src={XIcon} alt="close" width={20} height={20} />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 space-y-6">
+                    {/* Description */}
+                    <p className="text-gray-400 text-sm">
+                        {statusConfig.description}
+                    </p>
+
                     {/* Task Info */}
-                    <div className="bg-dark/50 rounded-lg p-4 border border-gray-700/50">
-                        <h4 className="font-medium text-twhite mb-2">{task.name}</h4>
-                        <p className="text-sm text-gray-400">{task.description}</p>
+                    <div className="bg-dark rounded-lg p-4 border border-gray-700/50">
+                        <h3 className="text-white font-medium mb-2 truncate">
+                            {task.name}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{formatTime(recordedTime)}</span>
+                            </div>
+                            <div className={`px-2 py-1 rounded text-xs border ${statusConfig.bgColor}`}>
+                                {t(newStatus)}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-gray-300 text-sm">{config.description}</p>
-
-                    {/* Rating Section (only for DONE) */}
-                    {newStatus === "DONE" && (
+                    {/* Rating Section - Only for DONE status with rating requirement */}
+                    {shouldShowRating && (
                         <div className="space-y-3">
-                            <label className="block text-sm font-medium text-gray-300">
-                                {t("Task Rating")} <span className="text-red-400">*</span>
+                            <label className="block text-white font-medium">
+                                {t("Rate this task")} <span className="text-red-400">*</span>
                             </label>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <button
                                         key={star}
                                         type="button"
-                                        onClick={() => setRating(star)}
-                                        className="transition-transform duration-200 hover:scale-110"
+                                        className="p-1 rounded transition-transform hover:scale-110 disabled:opacity-50"
+                                        onMouseEnter={() => !isSubmitting && setHoveredRating(star)}
+                                        onMouseLeave={() => !isSubmitting && setHoveredRating(0)}
+                                        onClick={() => !isSubmitting && setRating(star)}
+                                        disabled={isSubmitting}
                                     >
-                                        <StarIcon filled={star <= rating} size={32} />
+                                        <Star
+                                            className={`w-8 h-8 transition-colors ${star <= (hoveredRating || rating)
+                                                ? "text-yellow-400 fill-yellow-400"
+                                                : "text-gray-600"
+                                                }`}
+                                        />
                                     </button>
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-400">
-                                {rating > 0
-                                    ? `${t("Your rating:")} ${rating} ${t("of")} 5`
-                                    : t("Select your rating")}
-                            </p>
+                            {rating > 0 && (
+                                <p className="text-sm text-gray-400">
+                                    {rating === 1 && t("Poor")}
+                                    {rating === 2 && t("Fair")}
+                                    {rating === 3 && t("Good")}
+                                    {rating === 4 && t("Very Good")}
+                                    {rating === 5 && t("Excellent")}
+                                </p>
+                            )}
+                            {errors.rating && (
+                                <p className="text-red-400 text-sm">{errors.rating}</p>
+                            )}
                         </div>
                     )}
 
                     {/* Comment Section */}
-                    <div className="space-y-3">
-                        <label className="block text-sm font-medium text-gray-300">
-                            {t("Comment")} <span className="text-red-400">*</span>
-                        </label>
-                        <textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="w-full bg-dark text-twhite px-4 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none resize-none"
-                            rows={4}
-                            placeholder={t("Enter your comment here...")}
-                            required
-                        />
-                    </div>
+                    {shouldShowComment && (
+                        <div className="space-y-3">
+                            <label className="block text-white font-medium">
+                                {newStatus === "DONE"
+                                    ? t("Additional feedback")
+                                    : t("Reason")}
+                                <span className="text-red-400">*</span>
+                            </label>
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                placeholder={
+                                    newStatus === "DONE"
+                                        ? t("Share your thoughts about this task...")
+                                        : newStatus === "CLOSED"
+                                            ? t("Why are you closing this task?")
+                                            : t("Why are you canceling this task?")
+                                }
+                                className={`w-full px-3 py-2 bg-dark border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-colors resize-none ${errors.comment
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "border-gray-600 focus:ring-blue-500"
+                                    }`}
+                                rows={4}
+                                disabled={isSubmitting}
+                            />
+                            {errors.comment && (
+                                <p className="text-red-400 text-sm">{errors.comment}</p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-3 px-6 py-4 bg-dark/30 rounded-b-xl">
+                <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-700">
                     <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                        onClick={handleClose}
+                        disabled={isSubmitting}
+                        className="px-4 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
                     >
                         {t("Cancel")}
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={isRating}
-                        className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${isRating
-                            ? "bg-gray-600 cursor-not-allowed"
-                            : newStatus === "DONE"
-                                ? "bg-green-600 hover:bg-green-700"
-                                : newStatus === "CLOSED"
-                                    ? "bg-red-600 hover:bg-red-700"
-                                    : "bg-yellow-600 hover:bg-yellow-700"
-                            }`}
+                        disabled={isSubmitting}
+                        className={`px-6 py-2 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${statusConfig.confirmButtonColor}`}
                     >
-                        {isRating ? t("Updating...") : t("Confirm")}
+                        {isSubmitting ? (
+                            <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>{t("Processing...")}</span>
+                            </div>
+                        ) : (
+                            statusConfig.confirmText
+                        )}
                     </button>
                 </div>
             </div>
-        </div>,
-        document.body
+        </div>
     );
 };
 
-export default TaskStatusConfirmationModal; 
+export default TaskStatusConfirmationModal;

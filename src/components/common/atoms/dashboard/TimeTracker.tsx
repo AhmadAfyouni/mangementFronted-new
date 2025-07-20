@@ -82,6 +82,30 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({
 
     const monthlyHoursData = generateMonthlyHoursData();
 
+    // Helper to generate time labels
+    function generateTimeLabels(start = "09:00", end = "17:00", intervalMinutes = 120) {
+        const labels = [];
+        const [startHour, startMinute] = start.split(":").map(Number);
+        const [endHour, endMinute] = end.split(":").map(Number);
+
+        let current = new Date();
+        current.setHours(startHour, startMinute, 0, 0);
+
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+
+        while (current <= endTime) {
+            labels.push(current.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+            current = new Date(current.getTime() + intervalMinutes * 60000);
+        }
+
+        return labels;
+    }
+
+    const shiftStart = timelineData?.shiftStart || "09:00";
+    const shiftEnd = timelineData?.shiftEnd || "17:00";
+    const timeLabels = generateTimeLabels(shiftStart, shiftEnd, 120); // 2-hour interval
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
             {/* Time Display and Hours Summary */}
@@ -108,7 +132,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-tmid mb-1">{t('worked_hours')}</p>
                                     <p className="text-xl font-bold text-twhite">
-                                        {timeTracking?.workedHours ? `${timeTracking.workedHours} hours` : "0 hours"}
+                                        {timeTracking?.workedHours ? `${timeTracking.workedHours} ${t("hours")}` : `0 ${t(`hours`)}`}
                                     </p>
                                 </div>
                             </div>
@@ -121,7 +145,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-tmid mb-1">{t('break_time')}</p>
                                     <p className="text-xl font-bold text-twhite">
-                                        {timeTracking?.breakTime ? `${timeTracking.breakTime} hours` : "0 hours"}
+                                        {timeTracking?.breakTime ? `${timeTracking.breakTime} ${t("hours")}` : `0 ${t(`hours`)}`}
                                     </p>
                                 </div>
                             </div>
@@ -134,7 +158,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-tmid mb-1">{t('overtime_hours')}</p>
                                     <p className="text-xl font-bold text-twhite">
-                                        {timeTracking?.overtimeHours ? `${timeTracking.overtimeHours} hours` : "0 hours"}
+                                        {timeTracking?.overtimeHours ? `${timeTracking.overtimeHours} ${t("hours")}` : `0 ${t(`hours`)}`}
                                     </p>
                                 </div>
                             </div>
@@ -263,13 +287,9 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({
 
                         {/* Time markers below the timeline */}
                         <div className="flex justify-between text-sm text-tmid font-medium">
-                            <span>{timelineData?.shiftStart || "09:00"}</span>
-                            <span>11:00</span>
-                            <span>13:00</span>
-                            <span>15:00</span>
-                            <span>17:00</span>
-                            <span>19:00</span>
-                            <span>{timelineData?.shiftEnd || "17:00"}</span>
+                            {timeLabels.map((label, idx) => (
+                                <span key={idx}>{label}</span>
+                            ))}
                         </div>
 
                         {/* Summary statistics */}

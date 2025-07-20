@@ -25,6 +25,23 @@ export type ProjectType = {
   color: string
 };
 
+// Types for team and teamStats based on API response
+export interface TeamMember {
+  name: string;
+  department: string;
+  totalHoursWorked: number;
+  totalPlannedHours: number;
+  completedTasks: number;
+  incompleteTasks: number;
+}
+
+export interface TeamStats {
+  totalMembers: number;
+  totalTeamTime: number;
+  averageTimePerMember: number;
+  mostActiveMembers: TeamMember[];
+}
+
 export type ProjectDetailsType = {
   _id: string;
   name: string;
@@ -41,7 +58,7 @@ export type ProjectDetailsType = {
   taskPending: number;
   status?: ProjectStatus;
   color: string;
-  team?: EmployeeType[];
+  team?: TeamMember[];
   teamStats?: {
     totalMembers: number;
     totalTeamTime: number;
