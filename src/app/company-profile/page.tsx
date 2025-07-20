@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Building2, Upload, Save, Edit3, Mail, Globe, FileText, X } from "lucide-react";
-import useLanguage from "@/hooks/useLanguage";
-import GridContainer from "@/components/common/atoms/ui/GridContainer";
-import useCustomQuery from "@/hooks/useCustomQuery";
-import { useCreateMutation } from "@/hooks/useCreateMutation";
-import { useRolePermissions } from "@/hooks/useCheckPermissions";
-import Image from "next/image";
 import FileUploadWithProgress from "@/components/common/atoms/ui/FileUploadWithProgress";
+import GridContainer from "@/components/common/atoms/ui/GridContainer";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import { useRolePermissions } from "@/hooks/useCheckPermissions";
+import { useCreateMutation } from "@/hooks/useCreateMutation";
+import useCustomQuery from "@/hooks/useCustomQuery";
+import useLanguage from "@/hooks/useLanguage";
+import { Building2, Edit3, FileText, Globe, Mail, Save, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 // Business Types Enum
 enum BusinessType {
@@ -98,10 +98,9 @@ const CompanyProfile = () => {
         termsAndConditionsFiles: []
     });
 
-    const { t, currentLanguage, getDir } = useLanguage();
+    const { t, currentLanguage } = useLanguage();
     const { setSnackbarConfig } = useMokkBar();
     const isAdmin = useRolePermissions("admin");
-    const isRTL = currentLanguage === "ar";
 
     // Get business types from enum
     const businessTypes = Object.values(BusinessType);
