@@ -98,7 +98,7 @@ const CompanyProfile = () => {
         termsAndConditionsFiles: []
     });
 
-    const { t, currentLanguage } = useLanguage();
+    const { t } = useLanguage();
     const { setSnackbarConfig } = useMokkBar();
     const isAdmin = useRolePermissions("admin");
 
