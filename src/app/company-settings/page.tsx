@@ -297,8 +297,8 @@ const CompanySettings = () => {
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     {/* Header */}
                     <div className="bg-secondary rounded-2xl shadow-xl p-6 mb-6">
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-center justify-between `}>
+                            <div className={`flex items-center gap-4 `}>
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                                     <Settings className="w-6 h-6 text-white" />
                                 </div>
@@ -308,7 +308,7 @@ const CompanySettings = () => {
                                 </div>
                             </div>
 
-                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-3 `}>
                                 {isEditing ? (
                                     <>
                                         <button
@@ -341,7 +341,7 @@ const CompanySettings = () => {
 
                     {/* Tabs */}
                     <div className="bg-secondary rounded-xl shadow-lg p-2 mb-6">
-                        <div className={`flex gap-2 overflow-x-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex gap-2 overflow-x-auto `}>
                             {[
                                 { id: "work", icon: Clock, label: "Work Settings" },
                                 { id: "tasks", icon: FileText, label: "Task Settings" },

@@ -143,7 +143,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
 
     // Calculate working hours duration
     const getWorkingDuration = (dayHours: DayWorkingHours): string => {
-        if (!dayHours.startTime || !dayHours.endTime) return '0h';
+        if (!dayHours.startTime || !dayHours.endTime) return `0${t("h")}`;
 
         const [startH, startM] = dayHours.startTime.split(':').map(Number);
         const [endH, endM] = dayHours.endTime.split(':').map(Number);
@@ -155,7 +155,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
         const hours = Math.floor(duration / 60);
         const minutes = duration % 60;
 
-        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+        return minutes > 0 ? `${hours}${t("h")} ${minutes}${t("m")}` : `${hours}${t("h")}`;
     };
 
     // Validate that start time is not after end time
@@ -303,7 +303,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                                         {dayHours.breakTimeMinutes && dayHours.breakTimeMinutes > 0 && (
                                             <div className="flex items-center gap-1">
                                                 <Coffee className="w-3 h-3" />
-                                                <span>{dayHours.breakTimeMinutes}m break</span>
+                                                <span>{dayHours.breakTimeMinutes}{t("m break")}</span>
                                             </div>
                                         )}
                                     </div>
@@ -465,7 +465,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                                                     placeholder="0"
                                                 />
                                                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs font-medium">
-                                                    min
+                                                    {t("min")}
                                                 </div>
                                             </div>
                                         </div>
@@ -493,7 +493,7 @@ export const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
                                 <div className="flex items-center gap-2">
                                     <Coffee className="w-3 h-3 text-orange-400" />
                                     <span>
-                                        {dayWorkingHours.find(d => d.day === hoveredTooltip.day)?.breakTimeMinutes}m {t("break")}
+                                        {dayWorkingHours.find(d => d.day === hoveredTooltip.day)?.breakTimeMinutes}{t("m break")}
                                     </span>
                                 </div>
                             ) : (

@@ -98,7 +98,7 @@ const CompanyProfile = () => {
         termsAndConditionsFiles: []
     });
 
-    const { t, currentLanguage } = useLanguage();
+    const { t, currentLanguage, getDir } = useLanguage();
     const { setSnackbarConfig } = useMokkBar();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
@@ -250,12 +250,12 @@ const CompanyProfile = () => {
 
     return (
         <GridContainer>
-            <div className={`col-span-full min-h-screen bg-main ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`col-span-full min-h-screen bg-main `}>
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     {/* Header */}
-                    <div className="bg-secondary rounded-2xl shadow-xl p-6 mb-6">
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="bg-secondary rounded-2xl shadow-xl p-6 mb-6" >
+                        <div className={`flex items-center justify-between `}>
+                            <div className={`flex items-center gap-4 `}>
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                                     <Building2 className="w-6 h-6 text-white" />
                                 </div>
@@ -265,7 +265,7 @@ const CompanyProfile = () => {
                                 </div>
                             </div>
 
-                            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-3 `}>
                                 {!companyProfile?.isSetupCompleted && companyProfile && (
                                     <button
                                         onClick={handleCompleteSetup}
@@ -322,8 +322,8 @@ const CompanyProfile = () => {
                     </div>
 
                     {/* Tabs */}
-                    <div className="bg-secondary rounded-xl shadow-lg p-2 mb-6">
-                        <div className={`flex gap-2 overflow-x-auto ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="bg-secondary rounded-xl shadow-lg p-2 mb-6" >
+                        <div className={`flex gap-2 overflow-x-auto `}>
                             {[
                                 { id: "basic", icon: Building2, label: "Basic Info" },
                                 { id: "contact", icon: Mail, label: "Contact & Location" },
