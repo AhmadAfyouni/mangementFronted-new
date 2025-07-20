@@ -5,7 +5,6 @@ declare global {
     searchTimeout: ReturnType<typeof setTimeout> | undefined;
   }
 }
-
 import {
   DarkModeIcon,
   LangIcon,
@@ -26,7 +25,7 @@ import { TaskTree } from "@/types/trees/Task.tree.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
@@ -50,6 +49,8 @@ const NewHeader = ({
   const searchQueries = useSelector((state: RootState) => state.globalSearch.queries);
   const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   // Determine current entity based on path
   useEffect(() => {
@@ -127,7 +128,7 @@ const NewHeader = ({
   }>({
     queryKey: ["tasks"],
     url: `/tasks/tree`,
-    // refetchInterval: 2000
+    enabled: isAuthenticated,
   });
 
   // Find the first running task (has a timeLog with start and no end)
@@ -144,6 +145,16 @@ const NewHeader = ({
     runningTask ? runningTask.id : "dummy-id",
     runningTask ? runningTask.timeLogs || [] : []
   );
+
+  // Helper for formatting time (hh:mm:ss)
+  function formatTime(totalSeconds: number) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }
 
   return (
     <>
@@ -367,12 +378,14 @@ const NewHeader = ({
                 href={"/auth"}
                 onClick={() => {
                   dispatch(logout());
-                  queryClient.removeQueries();
+                  queryClient.cancelQueries();
+                  queryClient.clear();
                   setSnackbarConfig({
                     open: true,
                     message: "Logout successful!",
                     severity: "success",
                   });
+                  router.replace("/auth");
                 }}
               >
                 <li
@@ -392,21 +405,9 @@ const NewHeader = ({
             </ul>
           </div>
         )}
-      </div >
-
-      {/* Mobile Search Overlay - removed, as search is replaced by running task box */}
+      </div>
     </>
   );
 };
-
-// Helper for formatting time (hh:mm:ss)
-function formatTime(totalSeconds: number) {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-}
 
 export default NewHeader;

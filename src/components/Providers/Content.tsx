@@ -13,6 +13,9 @@ import PullToRefreshWrapper from "../common/molcules/ui/PullToRefreshWrapper";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import { RootState } from "@/state/store";
 import { CompanySettingsType } from "@/types/CompanySettings.type";
+import { isTrulyAuthenticated } from "@/utils/isTrulyAuthenticated";
+import { store } from "@/state/store";
+import Cookies from "js-cookie";
 
 const Content = ({ children }: { children: ReactNode }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -28,26 +31,19 @@ const Content = ({ children }: { children: ReactNode }) => {
   // Get authentication state from Redux
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
-  // Only fetch company settings if NOT on /auth
-  const shouldFetchCompanySettings = pathname !== "/auth";
+  // Only fetch company settings if NOT on /auth and truly authenticated
+  const trulyAuthenticated = isTrulyAuthenticated(store.getState());
+  const shouldFetchCompanySettings = pathname !== "/auth" && trulyAuthenticated;
   const { data: companySettings, isLoading: isCompanySettingsLoading } = useCustomQuery<CompanySettingsType>({
     queryKey: ["company-settings"],
     url: "/company-settings",
     nestedData: true,
-    enabled: shouldFetchCompanySettings, // Only fetch if not on /auth
+    enabled: shouldFetchCompanySettings,
   });
-
-  // Redirect to /auth if not authenticated
-  useEffect(() => {
-    if ((!accessTokenCookie || !refreshTokenCookie) && pathname !== "/auth") {
-      dispatch(logout());
-      router.replace("/auth");
-    }
-  }, [accessTokenCookie, dispatch, refreshTokenCookie, router, pathname]);
 
   // Onboarding redirect logic
   useEffect(() => {
-    if (!isCompanySettingsLoading && companySettings && isAuthenticated) {
+    if (!isCompanySettingsLoading && companySettings && trulyAuthenticated) {
       // If company needs onboarding, but not already on onboarding or auth, redirect to onboarding
       if (
         companySettings.isFirstTime == true &&
@@ -64,7 +60,7 @@ const Content = ({ children }: { children: ReactNode }) => {
         router.replace("/home");
       }
     }
-  }, [isAuthenticated, companySettings, isCompanySettingsLoading, pathname, router]);
+  }, [trulyAuthenticated, companySettings, isCompanySettingsLoading, pathname, router]);
 
   return (
     <div className="min-h-[100dvh] w-full bg-main">

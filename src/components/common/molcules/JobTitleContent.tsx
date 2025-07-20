@@ -197,6 +197,7 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   // Get search query from Redux
   const searchQuery = useSelector((state: RootState) =>
     state.globalSearch.queries.jobTitles);
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const dispatch = useDispatch();
 
   // Set active entity for global search when component mounts
@@ -205,13 +206,16 @@ const JobTitleContent = ({ selectedOption }: { selectedOption: string }) => {
   }, [dispatch]);
 
   // Use custom query to fetch job titles
-  const { data: jobs, isLoading } = useCustomQuery<JobTitleType[] | { data: JobTitleType[], meta: Record<string, unknown> }>({
-    queryKey: ["jobTitles", selectedOption],
-    url:
-      selectedOption === "view"
-        ? `/job-titles/view`
-        : `/job-titles/get-job-titles`,
-  });
+  const { data: jobs, isLoading } = useCustomQuery<JobTitleType[] | { data: JobTitleType[], meta: Record<string, unknown> }>(
+    {
+      queryKey: ["jobTitles", selectedOption],
+      url:
+        selectedOption === "view"
+          ? `/job-titles/view`
+          : `/job-titles/get-job-titles`,
+      enabled: isAuthenticated,
+    }
+  );
 
   // Ensure we always have a valid array to work with
   const jobsData = Array.isArray(jobs)

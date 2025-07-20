@@ -9,6 +9,8 @@ import { CompanySettingsType, DayWorkingHours, ProgressCalculationMethod, TaskFi
 import { Bell, Building2, Clock, Edit3, FileText, Save, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WorkingHoursTimeline } from "./onboarding/WorkingHoursTimeline";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 const CompanySettings = () => {
     const [activeTab, setActiveTab] = useState("work");
@@ -58,6 +60,7 @@ const CompanySettings = () => {
     const { t, currentLanguage } = useLanguage();
     const isAdmin = useRolePermissions("admin");
     const isRTL = currentLanguage === "ar";
+    const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
     // Get all work days from enum
     const allWorkDays = Object.values(WorkDay);
@@ -67,6 +70,7 @@ const CompanySettings = () => {
         queryKey: ["company-settings"],
         url: "/company-settings",
         nestedData: true,
+        enabled: isAuthenticated,
     });
 
     // Update company settings mutation

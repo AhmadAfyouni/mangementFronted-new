@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import PendingLogic from "@/components/common/atoms/ui/PendingLogic";
 import FormLabel from "@/components/common/atoms/ui/FormLabel";
 import { Loader2, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 // Interface for file upload state
 interface UploadingFile {
@@ -40,6 +42,8 @@ const AddSubTaskModal: React.FC<{
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+
   const {
     register,
     handleSubmit,
@@ -61,12 +65,14 @@ const AddSubTaskModal: React.FC<{
   const { data: employees } = useCustomQuery<{ tree: EmpTree[] }>({
     queryKey: ["employees"],
     url: `/emp/tree`,
+    enabled: isAuthenticated,
   });
 
   // Fetch sections
   const { data: sections } = useCustomQuery<{ id: string, name: string }[]>({
     queryKey: ["sections"],
     url: `/sections`,
+    enabled: isAuthenticated,
   });
 
   const { mutate: addSubTask, isPending } = useCreateMutation({

@@ -21,6 +21,8 @@ import AddProjectModal from "../atoms/modals/AddProjectModal";
 import { Pagination } from "../atoms/Pagination";
 import PageSpinner from "../atoms/ui/PageSpinner";
 import RouteWrapper from "../atoms/ui/RouteWrapper";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 export const collabColors = [
   "border-2 border-blue-500/50 bg-blue-500/10",
@@ -200,6 +202,7 @@ const ProjectsContent = () => {
 
   const isAdmin = useRolePermissions("admin");
   const isPrimary = useRolePermissions("primary_user");
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   const { data: projects, isLoading } = useCustomQuery<ProjectType[]>({
     queryKey: ["projects"],
@@ -209,6 +212,7 @@ const ProjectsContent = () => {
         ? "get-manager-project"
         : "get-emp-project"
       }`,
+    enabled: isAuthenticated,
   });
 
   // Filter projects based on search term

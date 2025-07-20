@@ -3,6 +3,9 @@ import { useMokkBar } from "@/components/Providers/Mokkbar";
 import { apiClient } from "@/utils/axios/usage";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import axios from "axios";
+import { tokenService } from "@/utils/axios/tokenService";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 interface CustomQueryOptions<TData>
   extends Omit<UseQueryOptions<TData, Error, TData>, "queryKey" | "queryFn"> {
@@ -19,6 +22,11 @@ const useCustomQuery = <TData,>({
   ...options
 }: CustomQueryOptions<TData>) => {
   const { setSnackbarConfig } = useMokkBar();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const hasTokens = !!tokenService.getAccessToken() && !!tokenService.getRefreshToken();
+
+  // Hard guard: never run query if not authenticated or tokens missing
+  const enabled = (options.enabled ?? true) && isAuthenticated && hasTokens;
 
   return useQuery<TData>({
     queryKey,
@@ -33,8 +41,7 @@ const useCustomQuery = <TData,>({
         if (axios.isAxiosError(error) && error.response) {
           setSnackbarConfig({
             open: true,
-            message: `Error: ${error.response.data.message || "An error occurred"
-              }`,
+            message: `Error: ${error.response.data.message || "An error occurred"}`,
             severity: "error",
           });
         } else {
@@ -49,6 +56,7 @@ const useCustomQuery = <TData,>({
     },
     retry: 1,
     ...options,
+    enabled,
   });
 };
 

@@ -23,6 +23,8 @@ import useLanguage from "@/hooks/useLanguage";
 import { LangIcon } from "@/assets";
 import Image from "next/image";
 import { CompanySettingsType } from "@/types/CompanySettings.type";
+import { RootState } from "@/state/store";
+import { useSelector } from "react-redux";
 
 type StepConfig = {
   id: number;
@@ -136,15 +138,19 @@ export default function CompanySettingsOnboarding() {
   ];
 
   const router = useRouter();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+
   const { data: companySettings } = useCustomQuery<CompanySettingsType>({
     queryKey: ["company-settings"],
     url: "/company-settings",
     nestedData: true,
+    enabled: isAuthenticated
   });
   const { data: companyProfile } = useCustomQuery<CompanyProfile>({
     queryKey: ["company-profile"],
     url: "/company-profile",
     nestedData: true,
+    enabled: isAuthenticated
   });
 
   const { mutateAsync: upsertCompanySettings, } = useCreateMutation({

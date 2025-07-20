@@ -14,9 +14,9 @@ export function useTaskFieldSettings(): CompanySettingsType['taskFieldSettings']
 }
 
 /**
- * Guard hook: returns true if ALL the given features are enabled in task field settings.
- * @param features Array of TaskFieldSettings keys
- */
+* Guard hook: returns true if ALL the given features are enabled in task field settings.
+* @param features Array of TaskFieldSettings keys
+*/
 export function useTasksGuard(features: (keyof CompanySettingsType['taskFieldSettings'])[]): boolean {
     const settings = useTaskFieldSettings();
     if (!settings) return false; // or true if you want to show by default while loading

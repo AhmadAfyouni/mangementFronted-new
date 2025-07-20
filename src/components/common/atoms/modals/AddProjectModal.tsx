@@ -24,6 +24,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import ColorPicker from "../ColorPicker";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 interface AddProjectModalProps {
   isOpen: boolean;
@@ -56,12 +58,14 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ isOpen, onClose, proj
   });
   const { getDir } = useLanguage()
   const isRTL = getDir() === "rtl"
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   const { data: departments, isError: isDeptError } = useCustomQuery<
     DeptTree[]
   >({
     queryKey: ["departments"],
     url: `/department/get-level-one`,
+    enabled: isAuthenticated,
   });
 
   const { mutate: addOrUpdateProject, isPending } = useCreateMutation({

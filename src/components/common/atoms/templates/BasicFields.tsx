@@ -9,6 +9,8 @@ import { CustomInput } from "../ui/CustomInput";
 import CustomReactSelect from "../ui/CustomReactSelect";
 import { CustomTextarea } from "../ui/CustomTextarea";
 import DynamicToggle from "../ui/DynamicToggle";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 // Helper function to get department employees
 const getDepartmentEmployees = (
@@ -71,12 +73,15 @@ const BasicFields: React.FC<{
 }> = ({ formData, setFormData }) => {
   const { t } = useLanguage();
 
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+
   const { data: departments } = useCustomQuery<{
     info: DepartmentType[];
     tree: DeptTree[];
   }>({
     queryKey: ["departments"],
     url: `/department/tree`,
+    enabled: isAuthenticated,
   });
 
   const handleTypeChange = (newValue: SingleValue<Option>) => {

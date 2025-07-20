@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import Modal from "react-modal";
 import CreateTaskStatus from "../molcules/CreateTaskStatus";
 import CreateTaskType from "../molcules/CreateTaskType";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 const CreateTask: React.FC<CreateTaskProps> = ({
   isOpen,
@@ -29,6 +31,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const { setSnackbarConfig } = useMokkBar();
   const { t } = useTranslation();
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   const {
     register,
@@ -55,11 +58,13 @@ const CreateTask: React.FC<CreateTaskProps> = ({
   const { data: departments } = useCustomQuery<DepartmentType[]>({
     queryKey: ["departments"],
     url: `/department/get-departments`,
+    enabled: isAuthenticated,
   });
 
   const { data: employees } = useCustomQuery<EmployeeType[]>({
     queryKey: ["employees"],
     url: `/emp/get-all-emps`,
+    enabled: isAuthenticated,
   });
 
   const { mutate: addTask, isPending } = useCreateMutation({

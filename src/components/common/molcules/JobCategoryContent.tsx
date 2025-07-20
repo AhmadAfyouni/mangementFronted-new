@@ -190,6 +190,7 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
   const { t, currentLanguage } = useLanguage();
   const isAdmin = useRolePermissions("admin");
   const hasEditPermission = usePermissions(["job_title_category_update"]);
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const {
     data: categories,
     isLoading,
@@ -197,6 +198,7 @@ const JobCategoryContent: React.FC<JobCategoryContentProps> = ({ pagination }) =
   } = useCustomQuery<JobCategoryType[]>({
     queryKey: ["jobTitles"],
     url: `/job-categories`,
+    enabled: isAuthenticated,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<string[]>([]);

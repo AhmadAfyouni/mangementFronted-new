@@ -5,6 +5,8 @@ import useLanguage from "@/hooks/useLanguage";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 // Clean notification icon component
 export const NotificationIcon = () => (
@@ -50,10 +52,12 @@ const Notification = ({
   const [clickedNotificationId, setClickedNotificationId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { setSnackbarConfig } = useMokkBar();
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
 
   const { data: notifications = [], isLoading } = useCustomQuery<NotificationType[]>({
     queryKey: ["notifications"],
     url: `/notifications/get-my-notifications`,
+    enabled: isAuthenticated,
   });
 
   const { mutate: markAsReadMutation, isPending } = useCreateMutation({
