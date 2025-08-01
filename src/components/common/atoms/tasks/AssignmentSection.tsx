@@ -7,12 +7,10 @@ import { ProjectType } from "@/types/Project.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import { EmpTree } from "@/types/trees/Emp.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
+import { SectionType } from "@/types/Section.type";
 
 // Define interfaces for API responses
-interface SectionType {
-    _id: string;
-    name: string;
-}
+
 
 interface AssignmentSectionProps {
     register: UseFormRegister<TaskFormInputs>;

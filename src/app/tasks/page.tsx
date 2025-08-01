@@ -17,9 +17,9 @@ import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
-import { TaskTree } from "@/types/trees/Task.tree.type";
 import { Building2, ChevronDown, FolderOpen, Plus, Users } from "lucide-react";
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
+
 
 // Enhanced Toggle Component
 const TaskToggle: React.FC<{
@@ -146,6 +146,8 @@ const TasksView: React.FC = () => {
     url: `/projects/${isAdmin ? "get-all-projects" : "get-manager-project"}`,
   });
 
+
+
   const { data: deptTree } = useCustomQuery<{ tree: DeptTree[] }>({
     queryKey: ["deptTree", selectedProj ?? "three"],
     url: `/${selectedProj
@@ -239,19 +241,35 @@ const TasksView: React.FC = () => {
     } else if (mainView === "department-tasks") {
       // For department tasks, show all tasks in the selected department
       // No section type filtering, only department filtering
+      console.log("🔍 DEBUGGING - Department tasks view - no assignee filtering applied");
     } else if (mainView === "project-tasks") {
       // For project tasks, show all tasks in the selected project
       // No section type filtering, only project filtering
+      console.log("🔍 DEBUGGING - Project tasks view - no assignee filtering applied");
     }
 
     // Filter by project if selected
     if (selectedProj) {
-      filtered = filtered.filter(task => task.project?._id === selectedProj);
+      console.log("🔍 DEBUGGING - Filtering by project:", selectedProj);
+      filtered = filtered.filter(task => {
+        const matches = task.project?._id === selectedProj;
+        console.log(`🔍 DEBUGGING - Task ${task.name} project match: ${matches} (task.project._id: ${task.project?._id}, selectedProj: ${selectedProj})`);
+        return matches;
+      });
     }
 
     // Filter by department if selected
     if (selectedDept) {
-      filtered = filtered.filter(task => task.department?._id === selectedDept);
+      console.log("🔍 DEBUGGING - Filtering by department:", selectedDept);
+      // Find the department name from the selected ID
+      const selectedDeptName = deptTree?.tree?.find(dept => dept.id === selectedDept)?.name;
+      console.log("🔍 DEBUGGING - Selected department name:", selectedDeptName);
+
+      filtered = filtered.filter(task => {
+        const matches = task.department?.name === selectedDeptName;
+        console.log(`🔍 DEBUGGING - Task ${task.name} department match: ${matches} (task.department.name: ${task.department?.name}, selectedDeptName: ${selectedDeptName})`);
+        return matches;
+      });
     }
 
     console.log("🔍 DEBUGGING - Final filtered tasks length:", filtered.length);
@@ -271,7 +289,7 @@ const TasksView: React.FC = () => {
 
   const mainSelectOptions = [
     { value: "all-tasks", label: t("All Tasks") },
-    { value: "my-tasks", label: t("My Tasks") },
+    // { value: "my-tasks", label: t("My Tasks") },
     { value: "department-tasks", label: t("Department Tasks") },
     { value: "project-tasks", label: t("Project Tasks") },
   ];
@@ -322,20 +340,21 @@ const TasksView: React.FC = () => {
 
           {mainView === "project-tasks" && (
             <>
-              <EnhancedSelect
-                options={projectOptions}
-                value={selectedProj}
-                onChange={setSelectedProj}
-                placeholder={t("Select Project")}
-                icon={<FolderOpen className="h-4 w-4" />}
-                className="min-w-[200px]"
-              />
+
               <EnhancedSelect
                 options={filteredDepartmentOptions}
                 value={selectedDept}
                 onChange={setSelectedDept}
                 placeholder={t("Select Department")}
                 icon={<Building2 className="h-4 w-4" />}
+                className="min-w-[200px]"
+              />
+              <EnhancedSelect
+                options={projectOptions}
+                value={selectedProj}
+                onChange={setSelectedProj}
+                placeholder={t("Select Project")}
+                icon={<FolderOpen className="h-4 w-4" />}
                 className="min-w-[200px]"
               />
             </>

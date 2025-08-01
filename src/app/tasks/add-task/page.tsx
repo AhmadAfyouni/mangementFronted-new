@@ -20,10 +20,7 @@ import { FileText, Users, Calendar, RotateCcw, Paperclip } from "lucide-react";
 import ToggleSwitch from "@/components/common/atoms/ui/ToggleSwitch";
 
 // Define interfaces for API responses
-interface SectionType {
-  _id: string;
-  name: string;
-}
+import { SectionType } from "@/types/Section.type";
 
 const AddTaskPage: React.FC = () => {
   const [openSections, setOpenSections] = useState({

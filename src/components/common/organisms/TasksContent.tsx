@@ -56,8 +56,8 @@ const TasksContent = ({
       tasksData.forEach(task => {
         let taskSection;
         if (isTasksByMe) {
-          // "Tasks By Me" - use managerSection
-          taskSection = task.managerSection;
+          // "Tasks By Me" - use manager_section
+          taskSection = task.manager_section;
           console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} using managerSection:`, taskSection);
         } else {
           // "Tasks For Me" - use section

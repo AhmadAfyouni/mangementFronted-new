@@ -429,7 +429,6 @@ const ListTasks = ({
 
                     {/* Table Body */}
                     <div>
-                        {console.log("🔍 TASKLIST DEBUGGING - Rendering condition:", { paginatedTasks: !!paginatedTasks, length: paginatedTasks?.length })}
                         {paginatedTasks && paginatedTasks.length > 0 ? (
                             paginatedTasks.map((task, index) => {
                                 const sectionName = taskSectionMap.get(task.id) || t("Unknown Section");
