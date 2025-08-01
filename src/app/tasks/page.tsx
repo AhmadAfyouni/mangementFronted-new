@@ -17,6 +17,7 @@ import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
+import { TaskTree } from "@/types/trees/Task.tree.type";
 import { Building2, ChevronDown, FolderOpen, Plus, Users } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
@@ -294,6 +295,21 @@ const TasksView: React.FC = () => {
     { value: "project-tasks", label: t("Project Tasks") },
   ];
 
+  // Transform tasks data for tree view
+  const treeData = useMemo(() => {
+    if (!filteredTasksData) return [];
+
+    return filteredTasksData.map(task => ({
+      id: task.id,
+      name: task.name,
+      parentId: task.parent_task || null,
+      status: task.status,
+      priority: task.priority,
+      assignee: task.assignee ? { name: task.assignee.name } : undefined,
+      is_over_due: task.is_over_due,
+    }));
+  }, [filteredTasksData]);
+
   // Filtered Department Options for Project Tasks
   const filteredDepartmentOptions = mainView === "project-tasks" && selectedProj
     ? (deptTree?.tree || []).map(dept => ({ value: dept.id, label: dept.name }))
@@ -413,8 +429,8 @@ const TasksView: React.FC = () => {
           </GridContainer>
         )}
 
-        {activeTab === "tree" && tasksData && (
-          <TaskHierarchyTree data={[]} width="100%" />
+        {activeTab === "tree" && treeData && (
+          <TaskHierarchyTree data={treeData} width="100%" />
         )}
       </div>
     </GridContainer>
