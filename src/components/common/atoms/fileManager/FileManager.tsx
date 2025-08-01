@@ -44,8 +44,6 @@ const FileManager: React.FC<FileManagerProps> = ({
   // Track last upload time to force refreshes
   const [lastUploadTime, setLastUploadTime] = useState<number>(Date.now());
 
-  // Console log for debugging
-  console.log(`FileManager initialized - entityType: ${entityType}, entityId: ${entityId}, fileType: ${fileType}, inputId: ${inputId}`);
 
   // Selected file for viewing details
   const [selectedFile, setSelectedFile] = useState<FileEntity | null>(null);
@@ -90,13 +88,12 @@ const FileManager: React.FC<FileManagerProps> = ({
       onUploadComplete(fileId, fileUrl);
     }
 
-    // Console log for debugging
-    console.log(`File uploaded: ${fileId} for entityType: ${entityType}, entityId: ${entityId}, fileType: ${fileType || 'not specified'}`);
+
 
     // Force an immediate refetch of all related queries
     setTimeout(() => {
       queryClient.invalidateQueries({ type: 'all' });
-      console.log('Forced refetch of all queries');
+
     }, 500);
   };
 

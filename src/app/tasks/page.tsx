@@ -123,7 +123,6 @@ const TasksView: React.FC = () => {
   const [selectedProj, setSelectedProj] = useState("");
   const [isTasksByMe, setIsTasksByMe] = useState(false); // true = My Tasks, false = For Me Tasks
 
-  console.log("🔍 TASKS VIEW DEBUGGING - isTasksByMe state:", isTasksByMe);
 
   const { t } = useLanguage();
   const isAdmin = useRolePermissions("admin");
@@ -140,7 +139,7 @@ const TasksView: React.FC = () => {
     nestedData: true,
   });
 
-  console.log("🔍 TASKS PAGE DEBUGGING - Raw tasksData:", tasksData);
+
 
   const { data: projects } = useCustomQuery<ProjectType[]>({
     queryKey: ["projects"],
@@ -166,114 +165,105 @@ const TasksView: React.FC = () => {
 
   // Filter sections based on type_section (FOR_ME vs BY_ME)
   const filteredSections = useMemo(() => {
-    console.log("🔍 TASKS PAGE DEBUGGING - sections:", sections);
-    console.log("🔍 TASKS PAGE DEBUGGING - isTasksByMe:", isTasksByMe);
+
 
     if (!sections) return [];
 
     const filtered = sections.filter(section => {
-      console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: type_section = ${section.type_section}`);
+
       if (isTasksByMe) {
         // "Tasks By Me" - show sections with type_section "BY_ME"
         const shouldInclude = section.type_section === "BY_ME";
-        console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: isTasksByMe=${isTasksByMe}, shouldInclude=${shouldInclude}`);
+
         return shouldInclude;
       } else {
         // "Tasks For Me" - show sections with type_section "FOR_ME"
         const shouldInclude = section.type_section === "FOR_ME";
-        console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: isTasksByMe=${isTasksByMe}, shouldInclude=${shouldInclude}`);
+
         return shouldInclude;
       }
     });
 
-    console.log("🔍 TASKS PAGE DEBUGGING - filteredSections:", filtered);
+
     return filtered;
   }, [sections, isTasksByMe]);
 
   // Frontend filtering logic for tasks
   const filteredTasksData = useMemo(() => {
-    console.log("🔍 DEBUGGING - tasksData:", tasksData);
-    console.log("🔍 DEBUGGING - tasksData?.data:", tasksData?.data);
-    console.log("🔍 DEBUGGING - tasksData?.data?.length:", tasksData?.data?.length);
+
 
     // Handle both nested data structure and direct array
     const tasksArray = tasksData?.data || tasksData;
 
     if (!tasksArray || !Array.isArray(tasksArray)) {
-      console.log("🔍 DEBUGGING - No valid tasks array, returning empty array");
+
       return [];
     }
 
-    console.log("🔍 DEBUGGING - Using tasksArray:", tasksArray);
-    console.log("🔍 DEBUGGING - tasksArray length:", tasksArray.length);
+
 
     let filtered = tasksArray;
 
     // Filter by main view type
     if (mainView === "all-tasks" || mainView === "my-tasks") {
-      console.log("🔍 DEBUGGING - Filtering tasks by assignee. isTasksByMe:", isTasksByMe);
-      console.log("🔍 DEBUGGING - Current user ID:", userInfo?.id);
+
 
       // Filter tasks based on assignee relationship to current user
       filtered = filtered.filter((task) => {
-        console.log(`🔍 DEBUGGING - Processing task: ${task.name}`);
-        console.log(`🔍 DEBUGGING - Task assignee:`, task.assignee);
-        console.log(`🔍 DEBUGGING - Task assignee ID:`, task.assignee?.id);
-        console.log(`🔍 DEBUGGING - Current user ID:`, userInfo?.id);
+
 
         // Check if task has an assignee
         if (!task.assignee) {
-          console.log(`🔍 DEBUGGING - Task ${task.name} has no assignee, excluding`);
+
           return false;
         }
 
         if (isTasksByMe) {
           // "Tasks By Me" - I am the assignee (I created/assigned this task to myself)
           const isAssignedToMe = task.assignee.id === userInfo?.id;
-          console.log(`🔍 DEBUGGING - Task ${task.name} isAssignedToMe: ${isAssignedToMe}`);
+
           return isAssignedToMe;
         } else {
           // "Tasks For Me" - I am NOT the assignee (assigned to someone else)
           const isAssignedToSomeoneElse = task.assignee.id !== userInfo?.id;
-          console.log(`🔍 DEBUGGING - Task ${task.name} isAssignedToSomeoneElse: ${isAssignedToSomeoneElse}`);
+
           return isAssignedToSomeoneElse;
         }
       });
     } else if (mainView === "department-tasks") {
       // For department tasks, show all tasks in the selected department
       // No section type filtering, only department filtering
-      console.log("🔍 DEBUGGING - Department tasks view - no assignee filtering applied");
+
     } else if (mainView === "project-tasks") {
       // For project tasks, show all tasks in the selected project
       // No section type filtering, only project filtering
-      console.log("🔍 DEBUGGING - Project tasks view - no assignee filtering applied");
+
     }
 
     // Filter by project if selected
     if (selectedProj) {
-      console.log("🔍 DEBUGGING - Filtering by project:", selectedProj);
+
       filtered = filtered.filter(task => {
         const matches = task.project?._id === selectedProj;
-        console.log(`🔍 DEBUGGING - Task ${task.name} project match: ${matches} (task.project._id: ${task.project?._id}, selectedProj: ${selectedProj})`);
+
         return matches;
       });
     }
 
     // Filter by department if selected
     if (selectedDept) {
-      console.log("🔍 DEBUGGING - Filtering by department:", selectedDept);
+
       // Find the department name from the selected ID
       const selectedDeptName = deptTree?.tree?.find(dept => dept.id === selectedDept)?.name;
-      console.log("🔍 DEBUGGING - Selected department name:", selectedDeptName);
 
       filtered = filtered.filter(task => {
         const matches = task.department?.name === selectedDeptName;
-        console.log(`🔍 DEBUGGING - Task ${task.name} department match: ${matches} (task.department.name: ${task.department?.name}, selectedDeptName: ${selectedDeptName})`);
+
         return matches;
       });
     }
 
-    console.log("🔍 DEBUGGING - Final filtered tasks length:", filtered.length);
+
     return filtered;
   }, [tasksData, mainView, isTasksByMe, selectedProj, selectedDept, userInfo?.id]);
 
@@ -336,7 +326,7 @@ const TasksView: React.FC = () => {
             <TaskToggle
               isTasksByMe={isTasksByMe}
               onToggle={(value) => {
-                console.log("🔍 TASKS VIEW DEBUGGING - Toggle changed from", isTasksByMe, "to", value);
+
                 setIsTasksByMe(value);
               }}
               t={t}
@@ -347,7 +337,7 @@ const TasksView: React.FC = () => {
             <TaskToggle
               isTasksByMe={isTasksByMe}
               onToggle={(value) => {
-                console.log("🔍 TASKS VIEW DEBUGGING - Toggle changed from", isTasksByMe, "to", value);
+
                 setIsTasksByMe(value);
               }}
               t={t}

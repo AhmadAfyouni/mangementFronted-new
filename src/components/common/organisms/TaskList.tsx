@@ -264,16 +264,12 @@ const ListTasks = ({
 
     // Use tasks directly without section categorization
     const getAllTasks = () => {
-        console.log("🔍 TASKLIST DEBUGGING - tasksData received:", tasksData);
-        console.log("🔍 TASKLIST DEBUGGING - tasksData length:", tasksData?.length || 0);
         return tasksData || [];
     };
 
     const allTasks = getAllTasks();
-    console.log("🔍 TASKLIST DEBUGGING - allTasks length:", allTasks.length);
 
     const organizedTasks = organizeTasksByHierarchy(allTasks);
-    console.log("🔍 TASKLIST DEBUGGING - organizedTasks length:", organizedTasks.length);
 
     // Calculate total time spent across all tasks (including subtasks)
     const calculateTotalTimeSpent = () => {
@@ -301,14 +297,7 @@ const ListTasks = ({
     const endIndex = startIndex + itemsPerPage;
     const paginatedTasks = organizedTasks.slice(startIndex, endIndex);
 
-    console.log("🔍 TASKLIST DEBUGGING - Pagination info:");
-    console.log("  - totalItems:", totalItems);
-    console.log("  - totalPages:", totalPages);
-    console.log("  - currentPage:", currentPage);
-    console.log("  - itemsPerPage:", itemsPerPage);
-    console.log("  - startIndex:", startIndex);
-    console.log("  - endIndex:", endIndex);
-    console.log("  - paginatedTasks length:", paginatedTasks.length);
+
 
     // Create a map to get section name for each task
     const taskSectionMap = new Map<string, string>();
@@ -317,33 +306,13 @@ const ListTasks = ({
         if (isTasksByMe) {
             // "Tasks By Me" - use managerSection
             sectionName = (task as any).managerSection?.name || task.section?.name || t("No Section");
-            console.log(`🔍 TASKLIST DEBUGGING - Task "${task.name}" (isTasksByMe=true):`);
-            console.log(`  - managerSection:`, (task as any).managerSection);
-            console.log(`  - section:`, task.section);
-            console.log(`  - final sectionName:`, sectionName);
 
-            // Special debugging for "Build of backend" task
-            if (task.name.toLowerCase().includes('build') && task.name.toLowerCase().includes('backend')) {
-                console.log(`🔍 SPECIAL DEBUGGING - "Build of backend" task found!`);
-                console.log(`  - Task ID:`, task.id);
-                console.log(`  - Task name:`, task.name);
-                console.log(`  - isTasksByMe:`, isTasksByMe);
-                console.log(`  - managerSection:`, (task as any).managerSection);
-                console.log(`  - managerSection name:`, (task as any).managerSection?.name);
-                console.log(`  - section:`, task.section);
-                console.log(`  - section name:`, task.section?.name);
-                console.log(`  - final sectionName:`, sectionName);
-                console.log(`  - FULL TASK OBJECT:`, JSON.stringify(task, null, 2));
-                console.log(`  - manager_section_id:`, (task as any).manager_section_id);
-                console.log(`  - section_id:`, (task as any).section_id);
-            }
+
         } else {
             // "Tasks For Me" - use section
             sectionName = task.section?.name || (task as any).managerSection?.name || t("No Section");
-            console.log(`🔍 TASKLIST DEBUGGING - Task "${task.name}" (isTasksByMe=false):`);
-            console.log(`  - section:`, task.section);
-            console.log(`  - managerSection:`, (task as any).managerSection);
-            console.log(`  - final sectionName:`, sectionName);
+
+
         }
         taskSectionMap.set(task.id, sectionName);
     });

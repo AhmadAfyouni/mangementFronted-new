@@ -36,8 +36,6 @@ const FileList: React.FC<FileListProps> = ({
     error
   } = useFilesByEntity(entityType, entityId, fileType);
 
-  // Console log for debugging
-  console.log(`FileList for ${entityType}/${entityId}/${fileType} - Files count: ${filesData?.data?.files?.length || 0}`);
 
   // Handle file selection
   const handleFileClick = (file: FileEntity) => {

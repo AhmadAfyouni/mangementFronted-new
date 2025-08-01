@@ -35,9 +35,7 @@ const TasksContent = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("🔍 TASKSCONTENT DEBUGGING - tasksData:", tasksData);
-    console.log("🔍 TASKSCONTENT DEBUGGING - sections:", sections);
-    console.log("🔍 TASKSCONTENT DEBUGGING - isTasksByMe:", isTasksByMe);
+
 
     if (tasksData && sections) {
       // Group tasks by section id, using different section attributes based on filter
@@ -50,7 +48,7 @@ const TasksContent = ({
 
       // Find the "Recently Assigned" section for fallback
       const recentlyAssignedSection = sections.find(section => section.name === "Recently Assigned");
-      console.log("🔍 TASKSCONTENT DEBUGGING - Recently Assigned section found:", recentlyAssignedSection);
+
 
       // Process each task
       tasksData.forEach(task => {
@@ -58,15 +56,15 @@ const TasksContent = ({
         if (isTasksByMe) {
           // "Tasks By Me" - use managerSection
           taskSection = (task as any).managerSection;
-          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} using managerSection:`, taskSection);
+
         } else {
           // "Tasks For Me" - use section
           taskSection = task.section;
-          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} using section:`, taskSection);
+
         }
 
         if (!taskSection) {
-          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} has no ${isTasksByMe ? 'managerSection' : 'section'}, will place in Recently Assigned`);
+
           // Place in Recently Assigned if no section
           if (recentlyAssignedSection) {
             grouped[recentlyAssignedSection._id].push(task);
@@ -82,11 +80,11 @@ const TasksContent = ({
           // For "Recently Assigned" sections, match by name (global)
           if (section.name === "Recently Assigned") {
             matches = taskSection.name === "Recently Assigned";
-            console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} matches "Recently Assigned" by name: ${matches}`);
+
           } else {
             // For other sections, match by ID (private)
             matches = taskSection._id === section._id;
-            console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} matches section ${section.name} by ID: ${matches}`);
+
           }
 
           if (matches) {
@@ -97,24 +95,20 @@ const TasksContent = ({
 
         if (matchedSection) {
           // Task matched a specific section
-          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} placed in section: ${matchedSection.name}`);
+
           grouped[matchedSection._id].push(task);
         } else {
           // Task didn't match any section, place in Recently Assigned
-          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} didn't match any section, placing in Recently Assigned`);
+
           if (recentlyAssignedSection) {
             grouped[recentlyAssignedSection._id].push(task);
           }
         }
       });
 
-      // Log the final grouping
-      Object.keys(grouped).forEach(sectionId => {
-        const section = sections.find(s => s._id === sectionId);
-        console.log(`🔍 TASKSCONTENT DEBUGGING - Section ${section?.name}:`, grouped[sectionId].length, "tasks");
-      });
 
-      console.log("🔍 TASKSCONTENT DEBUGGING - Final grouped tasks:", grouped);
+
+
       setTasks(grouped);
     }
   }, [tasksData, sections, isTasksByMe]);
