@@ -18,7 +18,8 @@ const EnhancedTaskRowComponent: React.FC<{
     index: number;
     formatTime: (seconds: number) => string;
     getStatusBadge: (status: string) => JSX.Element;
-}> = ({ task, level, formatTime, getStatusBadge }) => {
+    isTasksByMe: boolean;
+}> = ({ task, level, sectionName, formatTime, getStatusBadge }) => {
 
     const { t } = useLanguage();
     const { setSnackbarConfig } = useMokkBar();
@@ -86,7 +87,7 @@ const EnhancedTaskRowComponent: React.FC<{
             {/* Department */}
             <div className="flex items-center">
                 <span className="text-sm text-gray-400">
-                    {task.department?.name || task.section?.name || t("No Department")}
+                    {task.department?.name || sectionName || t("No Department")}
                 </span>
             </div>
 
@@ -242,9 +243,11 @@ const EnhancedTaskRowComponent: React.FC<{
 const ListTasks = ({
     tasksData,
     sections,
+    isTasksByMe,
 }: {
     tasksData: ReceiveTaskType[] | undefined;
     sections: SectionType[] | undefined;
+    isTasksByMe: boolean;
 }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -310,7 +313,38 @@ const ListTasks = ({
     // Create a map to get section name for each task
     const taskSectionMap = new Map<string, string>();
     allTasks.forEach((task) => {
-        const sectionName = task.section?.name || task.manager_section?.name || t("No Section");
+        let sectionName;
+        if (isTasksByMe) {
+            // "Tasks By Me" - use managerSection
+            sectionName = (task as any).managerSection?.name || task.section?.name || t("No Section");
+            console.log(`🔍 TASKLIST DEBUGGING - Task "${task.name}" (isTasksByMe=true):`);
+            console.log(`  - managerSection:`, (task as any).managerSection);
+            console.log(`  - section:`, task.section);
+            console.log(`  - final sectionName:`, sectionName);
+
+            // Special debugging for "Build of backend" task
+            if (task.name.toLowerCase().includes('build') && task.name.toLowerCase().includes('backend')) {
+                console.log(`🔍 SPECIAL DEBUGGING - "Build of backend" task found!`);
+                console.log(`  - Task ID:`, task.id);
+                console.log(`  - Task name:`, task.name);
+                console.log(`  - isTasksByMe:`, isTasksByMe);
+                console.log(`  - managerSection:`, (task as any).managerSection);
+                console.log(`  - managerSection name:`, (task as any).managerSection?.name);
+                console.log(`  - section:`, task.section);
+                console.log(`  - section name:`, task.section?.name);
+                console.log(`  - final sectionName:`, sectionName);
+                console.log(`  - FULL TASK OBJECT:`, JSON.stringify(task, null, 2));
+                console.log(`  - manager_section_id:`, (task as any).manager_section_id);
+                console.log(`  - section_id:`, (task as any).section_id);
+            }
+        } else {
+            // "Tasks For Me" - use section
+            sectionName = task.section?.name || (task as any).managerSection?.name || t("No Section");
+            console.log(`🔍 TASKLIST DEBUGGING - Task "${task.name}" (isTasksByMe=false):`);
+            console.log(`  - section:`, task.section);
+            console.log(`  - managerSection:`, (task as any).managerSection);
+            console.log(`  - final sectionName:`, sectionName);
+        }
         taskSectionMap.set(task.id, sectionName);
     });
 
@@ -341,7 +375,8 @@ const ListTasks = ({
         task: ExtendedReceiveTaskType,
         level: number,
         sectionName: string,
-        index: number
+        index: number,
+        isTasksByMe: boolean
     ) => {
         const getStatusBadge = (status: string) => {
             const statusConfig = {
@@ -371,12 +406,13 @@ const ListTasks = ({
                     index={startIndex + index} // Adjust index for pagination
                     formatTime={formatTime}
                     getStatusBadge={getStatusBadge}
+                    isTasksByMe={isTasksByMe}
                 />
 
                 {/* Render subtasks */}
                 {task.subTasks && task.subTasks.map((subTask, subIndex) => (
                     <div key={subTask.id} className="transition-colors duration-150">
-                        {renderEnhancedTaskRow(subTask, level + 1, sectionName, subIndex)}
+                        {renderEnhancedTaskRow(subTask, level + 1, sectionName, subIndex, isTasksByMe)}
                     </div>
                 ))}
             </React.Fragment>
@@ -434,7 +470,7 @@ const ListTasks = ({
                                 const sectionName = taskSectionMap.get(task.id) || t("Unknown Section");
                                 return (
                                     <div key={task.id}>
-                                        {renderEnhancedTaskRow(task, 0, sectionName, index)}
+                                        {renderEnhancedTaskRow(task, 0, sectionName, index, isTasksByMe)}
                                     </div>
                                 );
                             })

@@ -404,7 +404,7 @@ const TasksView: React.FC = () => {
         />
 
         {activeTab === "list" && filteredTasksData && (
-          <TaskList tasksData={filteredTasksData} sections={filteredSections} />
+          <TaskList tasksData={filteredTasksData} sections={filteredSections} isTasksByMe={isTasksByMe} />
         )}
 
         {activeTab === "board" && filteredTasksData && (
