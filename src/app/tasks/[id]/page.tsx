@@ -108,7 +108,7 @@ export default function TaskDetailsPage() {
       return;
     }
     await startTimer();
-    queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
   };
 
   const handlePause = async () => {
@@ -129,7 +129,7 @@ export default function TaskDetailsPage() {
       await updateTaskData(taskId, updateData);
 
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
 
       setIsEditing(false);
 
@@ -192,7 +192,7 @@ export default function TaskDetailsPage() {
   };
 
   const { data: allTasks } = useCustomQuery<ReceiveTaskType[]>({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", "get-all"],
     url: `/tasks/get-all-tasks`,
     nestedData: true,
   });
@@ -336,7 +336,7 @@ export default function TaskDetailsPage() {
       setIsAfterRating(false);
       setRatingData(undefined);
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
       setSnackbarConfig({
         open: true,
         message: t("Task completed and time recorded"),

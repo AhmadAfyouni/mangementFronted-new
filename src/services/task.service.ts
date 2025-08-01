@@ -141,9 +141,16 @@ export const onDragEnd = async ({
     });
 
     try {
-      await updateTaskData(movedTask.id, {
-        section_id: destination.droppableId,
-      });
+      // Determine which section field to update based on section type
+      const destinationSection = Object.values(tasks).flat().find(task =>
+        task.section?._id === destination.droppableId || task.manager_section?._id === destination.droppableId
+      );
+
+      const updateData = destinationSection?.section?._id === destination.droppableId
+        ? { section_id: destination.droppableId }
+        : { manager_section_id: destination.droppableId };
+
+      await updateTaskData(movedTask.id, updateData);
     } catch (error) {
       console.error("Error updating task section:", error);
       setMessage(error + "");

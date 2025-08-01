@@ -59,7 +59,8 @@ export interface TaskFormInputs {
   emp?: string;
   department_id?: string;
   project_id?: string;
-  section_id?: string;
+  section_id?: string; // For FOR_ME tasks
+  manager_section_id?: string; // For BY_ME tasks
   status?: string;
   assignee?: string;
   due_date: string;
@@ -227,6 +228,8 @@ type Section = {
   _id: string;
   name: string;
   department: string;
+  emp?: string;
+  type_section?: "BY_ME" | "FOR_ME";
   createdAt: string; // ISO date format
   updatedAt: string; // ISO date format
   __v: number;
@@ -315,7 +318,8 @@ export type ReceiveTaskType = {
   subtasks?: ReceiveTaskType[];
 
   // Organization
-  section?: Section;
+  section?: Section; // For FOR_ME tasks
+  manager_section?: Section; // For BY_ME tasks
   department?: {
     _id: string,
     name: string,

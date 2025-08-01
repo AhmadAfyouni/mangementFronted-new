@@ -126,7 +126,7 @@ const ListTaskDetails: React.FC<{
       }).then(() => {
         queryClient
           .invalidateQueries({
-            queryKey: ["tasks"],
+            queryKey: ["tasks", "get-all"],
           })
           .then(() => {
             console.log("done invalidating queries");
@@ -193,7 +193,7 @@ const ListTaskDetails: React.FC<{
     }
   };
   const { data: allTasks } = useCustomQuery<ReceiveTaskType[]>({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", "get-all"],
     url: `/tasks/get-all-tasks`,
     nestedData: true,
   });
@@ -243,7 +243,7 @@ const ListTaskDetails: React.FC<{
                   description: descriptionRef.current!.value,
                   due_date: calendar!,
                 }).then(() => {
-                  queryClient.invalidateQueries({ queryKey: ["tasks"] });
+                  queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
                   setSnackbarConfig({
                     message: t("Changes saved successfully"),
                     open: true,

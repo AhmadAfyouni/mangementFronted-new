@@ -12,13 +12,14 @@ import {
 } from "@/hooks/useCheckPermissions";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useLanguage from "@/hooks/useLanguage";
+import { useRedux } from "@/hooks/useRedux";
 import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
 import { TaskTree } from "@/types/trees/Task.tree.type";
 import { Building2, ChevronDown, FolderOpen, Plus, Users } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 // Enhanced Toggle Component
 const TaskToggle: React.FC<{
@@ -116,22 +117,29 @@ const AddTaskButton: React.FC<{ t: (key: string) => string }> = ({ t }) => {
 
 const TasksView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("list");
-  const [mainView, setMainView] = useState("my-tasks");
+  const [mainView, setMainView] = useState("all-tasks");
   const [selectedDept, setSelectedDept] = useState("");
   const [selectedProj, setSelectedProj] = useState("");
-  const [isTasksByMe, setIsTasksByMe] = useState(true); // true = My Tasks, false = For Me Tasks
+  const [isTasksByMe, setIsTasksByMe] = useState(false); // true = My Tasks, false = For Me Tasks
+
+  console.log("🔍 TASKS VIEW DEBUGGING - isTasksByMe state:", isTasksByMe);
 
   const { t } = useLanguage();
   const isAdmin = useRolePermissions("admin");
   const isPrimary = useRolePermissions("primary_user");
+  const { selector: userInfo } = useRedux((state) => state.user.userInfo);
 
   const { data: tasksData, isLoading: isTasksLoading } = useCustomQuery<{
-    info: ReceiveTaskType[];
-    tree: TaskTree[];
+    status: boolean;
+    message: string;
+    data: ReceiveTaskType[];
   }>({
-    queryKey: ["tasks", selectedProj, isTasksByMe + ""],
-    url: `/tasks/tree?tasks-by-me=${isTasksByMe}${selectedProj ? `&projectId=${selectedProj}&departmentId=${selectedDept}` : selectedDept ? `&departmentId=${selectedDept}` : ""}`,
+    queryKey: ["tasks", "get-all"],
+    url: `/tasks/get-all-tasks`,
+    nestedData: true,
   });
+
+  console.log("🔍 TASKS PAGE DEBUGGING - Raw tasksData:", tasksData);
 
   const { data: projects } = useCustomQuery<ProjectType[]>({
     queryKey: ["projects"],
@@ -153,6 +161,103 @@ const TasksView: React.FC = () => {
     url: `/sections`
   });
 
+  // Filter sections based on type_section (FOR_ME vs BY_ME)
+  const filteredSections = useMemo(() => {
+    console.log("🔍 TASKS PAGE DEBUGGING - sections:", sections);
+    console.log("🔍 TASKS PAGE DEBUGGING - isTasksByMe:", isTasksByMe);
+
+    if (!sections) return [];
+
+    const filtered = sections.filter(section => {
+      console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: type_section = ${section.type_section}`);
+      if (isTasksByMe) {
+        // "Tasks By Me" - show sections with type_section "BY_ME"
+        const shouldInclude = section.type_section === "BY_ME";
+        console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: isTasksByMe=${isTasksByMe}, shouldInclude=${shouldInclude}`);
+        return shouldInclude;
+      } else {
+        // "Tasks For Me" - show sections with type_section "FOR_ME"
+        const shouldInclude = section.type_section === "FOR_ME";
+        console.log(`🔍 TASKS PAGE DEBUGGING - Section ${section.name}: isTasksByMe=${isTasksByMe}, shouldInclude=${shouldInclude}`);
+        return shouldInclude;
+      }
+    });
+
+    console.log("🔍 TASKS PAGE DEBUGGING - filteredSections:", filtered);
+    return filtered;
+  }, [sections, isTasksByMe]);
+
+  // Frontend filtering logic for tasks
+  const filteredTasksData = useMemo(() => {
+    console.log("🔍 DEBUGGING - tasksData:", tasksData);
+    console.log("🔍 DEBUGGING - tasksData?.data:", tasksData?.data);
+    console.log("🔍 DEBUGGING - tasksData?.data?.length:", tasksData?.data?.length);
+
+    // Handle both nested data structure and direct array
+    const tasksArray = tasksData?.data || tasksData;
+
+    if (!tasksArray || !Array.isArray(tasksArray)) {
+      console.log("🔍 DEBUGGING - No valid tasks array, returning empty array");
+      return [];
+    }
+
+    console.log("🔍 DEBUGGING - Using tasksArray:", tasksArray);
+    console.log("🔍 DEBUGGING - tasksArray length:", tasksArray.length);
+
+    let filtered = tasksArray;
+
+    // Filter by main view type
+    if (mainView === "all-tasks" || mainView === "my-tasks") {
+      console.log("🔍 DEBUGGING - Filtering tasks by assignee. isTasksByMe:", isTasksByMe);
+      console.log("🔍 DEBUGGING - Current user ID:", userInfo?.id);
+
+      // Filter tasks based on assignee relationship to current user
+      filtered = filtered.filter((task) => {
+        console.log(`🔍 DEBUGGING - Processing task: ${task.name}`);
+        console.log(`🔍 DEBUGGING - Task assignee:`, task.assignee);
+        console.log(`🔍 DEBUGGING - Task assignee ID:`, task.assignee?.id);
+        console.log(`🔍 DEBUGGING - Current user ID:`, userInfo?.id);
+
+        // Check if task has an assignee
+        if (!task.assignee) {
+          console.log(`🔍 DEBUGGING - Task ${task.name} has no assignee, excluding`);
+          return false;
+        }
+
+        if (isTasksByMe) {
+          // "Tasks By Me" - I am the assignee (I created/assigned this task to myself)
+          const isAssignedToMe = task.assignee.id === userInfo?.id;
+          console.log(`🔍 DEBUGGING - Task ${task.name} isAssignedToMe: ${isAssignedToMe}`);
+          return isAssignedToMe;
+        } else {
+          // "Tasks For Me" - I am NOT the assignee (assigned to someone else)
+          const isAssignedToSomeoneElse = task.assignee.id !== userInfo?.id;
+          console.log(`🔍 DEBUGGING - Task ${task.name} isAssignedToSomeoneElse: ${isAssignedToSomeoneElse}`);
+          return isAssignedToSomeoneElse;
+        }
+      });
+    } else if (mainView === "department-tasks") {
+      // For department tasks, show all tasks in the selected department
+      // No section type filtering, only department filtering
+    } else if (mainView === "project-tasks") {
+      // For project tasks, show all tasks in the selected project
+      // No section type filtering, only project filtering
+    }
+
+    // Filter by project if selected
+    if (selectedProj) {
+      filtered = filtered.filter(task => task.project?._id === selectedProj);
+    }
+
+    // Filter by department if selected
+    if (selectedDept) {
+      filtered = filtered.filter(task => task.department?._id === selectedDept);
+    }
+
+    console.log("🔍 DEBUGGING - Final filtered tasks length:", filtered.length);
+    return filtered;
+  }, [tasksData, mainView, isTasksByMe, selectedProj, selectedDept, userInfo?.id]);
+
   // Prepare dropdown options
   const departmentOptions = deptTree?.tree?.map(dept => ({
     value: dept.id,
@@ -165,6 +270,7 @@ const TasksView: React.FC = () => {
   })) || [];
 
   const mainSelectOptions = [
+    { value: "all-tasks", label: t("All Tasks") },
     { value: "my-tasks", label: t("My Tasks") },
     { value: "department-tasks", label: t("Department Tasks") },
     { value: "project-tasks", label: t("Project Tasks") },
@@ -192,10 +298,24 @@ const TasksView: React.FC = () => {
 
 
           {/* Conditional Rendering */}
-          {(
+          {mainView === "all-tasks" && (
             <TaskToggle
               isTasksByMe={isTasksByMe}
-              onToggle={setIsTasksByMe}
+              onToggle={(value) => {
+                console.log("🔍 TASKS VIEW DEBUGGING - Toggle changed from", isTasksByMe, "to", value);
+                setIsTasksByMe(value);
+              }}
+              t={t}
+            />
+          )}
+
+          {mainView === "my-tasks" && (
+            <TaskToggle
+              isTasksByMe={isTasksByMe}
+              onToggle={(value) => {
+                console.log("🔍 TASKS VIEW DEBUGGING - Toggle changed from", isTasksByMe, "to", value);
+                setIsTasksByMe(value);
+              }}
               t={t}
             />
           )}
@@ -264,18 +384,18 @@ const TasksView: React.FC = () => {
           setActiveTab={setActiveTab}
         />
 
-        {activeTab === "list" && tasksData?.info && (
-          <TaskList tasksData={tasksData.info} sections={sections} />
+        {activeTab === "list" && filteredTasksData && (
+          <TaskList tasksData={filteredTasksData} sections={filteredSections} />
         )}
 
-        {activeTab === "board" && tasksData?.info && (
+        {activeTab === "board" && filteredTasksData && (
           <GridContainer extraStyle=" !pl-0 ">
-            <TasksContent tasksData={tasksData.info} sections={sections} />
+            <TasksContent tasksData={filteredTasksData} sections={filteredSections} isTasksByMe={isTasksByMe} />
           </GridContainer>
         )}
 
         {activeTab === "tree" && tasksData && (
-          <TaskHierarchyTree data={tasksData.tree} width="100%" />
+          <TaskHierarchyTree data={[]} width="100%" />
         )}
       </div>
     </GridContainer>

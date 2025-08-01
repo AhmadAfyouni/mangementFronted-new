@@ -122,12 +122,12 @@ const useTaskTimer = (taskId: string, timeLogs: TimeLog[] = []): UseTaskTimerRet
 
             // Invalidate all relevant queries for perfect sync
             await Promise.all([
-                queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+                queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] }),
                 queryClient.invalidateQueries({ queryKey: ["task", taskId] }),
                 queryClient.invalidateQueries({ queryKey: ["dashboard"] })
             ]);
             console.log("Forcing refetch of tasks query");
-            await queryClient.refetchQueries({ queryKey: ["tasks"], exact: true });
+            await queryClient.refetchQueries({ queryKey: ["tasks", "get-all"], exact: true });
             // Broadcast a custom event for instant UI updates
             window.dispatchEvent(new Event("task-timer-updated"));
             return { success: true };

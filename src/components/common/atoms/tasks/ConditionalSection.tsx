@@ -104,7 +104,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
 
       <div>
         <label className="block text-tmid text-sm font-medium">
-          {t("Section")}
+          {t("Section")} ({t("FOR ME")})
         </label>
         <select
           {...register("section_id")}
@@ -115,7 +115,7 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
           <option className="" value="">
             {t("Select a section")}
           </option>
-          {sections?.map((section) => (
+          {sections?.filter(section => section.type_section === "FOR_ME").map((section) => (
             <option className="" key={section._id} value={section._id}>
               {section.name}
             </option>
@@ -124,6 +124,32 @@ export const ConditionalSection: React.FC<ConditionalSectionProps> = ({
         {errors.section_id && (
           <p className="text-red-500 mt-1 text-sm">
             {errors.section_id.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-tmid text-sm font-medium">
+          {t("Manager Section")} ({t("BY ME")})
+        </label>
+        <select
+          {...register("manager_section_id")}
+          className={`${isLightMode ? "bg-dark" : "bg-secondary"
+            } border-none outline-none w-full px-4 py-2 mt-1 rounded-lg border ${errors.manager_section_id ? "border-red-500" : "border-gray-300"
+            }`}
+        >
+          <option className="" value="">
+            {t("Select a section")}
+          </option>
+          {sections?.filter(section => section.type_section === "BY_ME").map((section) => (
+            <option className="" key={section._id} value={section._id}>
+              {section.name}
+            </option>
+          ))}
+        </select>
+        {errors.manager_section_id && (
+          <p className="text-red-500 mt-1 text-sm">
+            {errors.manager_section_id.message}
           </p>
         )}
       </div>

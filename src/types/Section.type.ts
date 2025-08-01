@@ -1,5 +1,6 @@
 export interface SectionType {
   _id: string;
-  name: "PENDING" | "ONGOING" | "ON_TEST" | "DONE" | string;
+  name: string;
   department: string;
+  type_section?: "BY_ME" | "FOR_ME"; // Section type
 }

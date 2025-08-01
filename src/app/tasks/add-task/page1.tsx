@@ -69,12 +69,12 @@ const AddTask: React.FC = () => {
 
     // Fetch tasks for parent task selection
     const { data: tasks = [] } = useQuery({
-        queryKey: ["tasks"],
+        queryKey: ["tasks", "get-all"],
         queryFn: async () => {
             try {
-                const response = await apiClient.get<any>("/tasks");
+                const response = await apiClient.get<any>("/tasks/get-all-tasks");
                 // Return the tasks array from the response data
-                return response.data?.tasks || [];
+                return response.data?.info || [];
             } catch (error) {
                 console.error("Error fetching tasks:", error);
                 return [];

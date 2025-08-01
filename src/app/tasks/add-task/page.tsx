@@ -82,8 +82,8 @@ const AddTaskPage: React.FC = () => {
     info: ReceiveTaskType[];
     tree: TaskTree[];
   }>({
-    url: "/tasks/tree",
-    queryKey: ["tasks"],
+    url: "/tasks/get-all-tasks",
+    queryKey: ["tasks", "get-all"],
   })
 
   const sections = sectionsResponse || [];

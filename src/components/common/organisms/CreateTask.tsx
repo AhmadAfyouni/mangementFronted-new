@@ -70,7 +70,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
   const { mutate: addTask, isPending } = useCreateMutation({
     endpoint: taskData ? `/tasks/update/${taskData.id}` : `/tasks/create`,
     onSuccessMessage: "Task added successfully!",
-    invalidateQueryKeys: ["tasks"],
+    invalidateQueryKeys: ["tasks", "get-all"],
     onSuccessFn() {
       setSnackbarConfig({
         open: true,

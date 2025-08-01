@@ -259,28 +259,18 @@ const ListTasks = ({
         setCurrentPage(1);
     }, [itemsPerPage]);
 
-    // Flatten all tasks with their section information
-    const getAllTasksWithSections = () => {
-        const allTasks: Array<{ task: ReceiveTaskType; sectionName: string }> = [];
-
-        if (sections && tasksData) {
-            sections.forEach((section) => {
-                // Find tasks whose section name matches the section's name
-                const sectionTasks = tasksData.filter(task => task.section && task.section.name === section.name);
-                sectionTasks.forEach((task) => {
-                    allTasks.push({
-                        task,
-                        sectionName: section.name
-                    });
-                });
-            });
-        }
-
-        return allTasks;
+    // Use tasks directly without section categorization
+    const getAllTasks = () => {
+        console.log("🔍 TASKLIST DEBUGGING - tasksData received:", tasksData);
+        console.log("🔍 TASKLIST DEBUGGING - tasksData length:", tasksData?.length || 0);
+        return tasksData || [];
     };
 
-    const allTasksWithSections = getAllTasksWithSections();
-    const organizedTasks = organizeTasksByHierarchy(allTasksWithSections.map(item => item.task));
+    const allTasks = getAllTasks();
+    console.log("🔍 TASKLIST DEBUGGING - allTasks length:", allTasks.length);
+
+    const organizedTasks = organizeTasksByHierarchy(allTasks);
+    console.log("🔍 TASKLIST DEBUGGING - organizedTasks length:", organizedTasks.length);
 
     // Calculate total time spent across all tasks (including subtasks)
     const calculateTotalTimeSpent = () => {
@@ -308,9 +298,19 @@ const ListTasks = ({
     const endIndex = startIndex + itemsPerPage;
     const paginatedTasks = organizedTasks.slice(startIndex, endIndex);
 
+    console.log("🔍 TASKLIST DEBUGGING - Pagination info:");
+    console.log("  - totalItems:", totalItems);
+    console.log("  - totalPages:", totalPages);
+    console.log("  - currentPage:", currentPage);
+    console.log("  - itemsPerPage:", itemsPerPage);
+    console.log("  - startIndex:", startIndex);
+    console.log("  - endIndex:", endIndex);
+    console.log("  - paginatedTasks length:", paginatedTasks.length);
+
     // Create a map to get section name for each task
     const taskSectionMap = new Map<string, string>();
-    allTasksWithSections.forEach(({ task, sectionName }) => {
+    allTasks.forEach((task) => {
+        const sectionName = task.section?.name || task.manager_section?.name || t("No Section");
         taskSectionMap.set(task.id, sectionName);
     });
 
@@ -429,6 +429,7 @@ const ListTasks = ({
 
                     {/* Table Body */}
                     <div>
+                        {console.log("🔍 TASKLIST DEBUGGING - Rendering condition:", { paginatedTasks: !!paginatedTasks, length: paginatedTasks?.length })}
                         {paginatedTasks && paginatedTasks.length > 0 ? (
                             paginatedTasks.map((task, index) => {
                                 const sectionName = taskSectionMap.get(task.id) || t("Unknown Section");
@@ -443,6 +444,18 @@ const ListTasks = ({
                                 <ListChecks className="w-16 h-16 mb-4 text-gray-600" />
                                 <p className="text-lg font-medium mb-2">{t("No tasks available")}</p>
                                 <p className="text-sm">{t("Create tasks to see them here")}</p>
+                                {sections && sections.length > 0 && (
+                                    <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+                                        <p className="text-sm text-gray-300 mb-2">{t("Available sections:")}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {sections.map(section => (
+                                                <span key={section._id} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
+                                                    {section.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -644,6 +657,18 @@ const ListTasks = ({
                             <ListChecks className="w-16 h-16 mb-4 text-gray-600" />
                             <p className="text-lg font-medium mb-2 text-center">{t("No tasks available")}</p>
                             <p className="text-sm text-center">{t("Create tasks to see them here")}</p>
+                            {sections && sections.length > 0 && (
+                                <div className="mt-4 p-4 bg-secondary/30 rounded-lg w-full">
+                                    <p className="text-sm text-gray-300 mb-2 text-center">{t("Available sections:")}</p>
+                                    <div className="flex flex-wrap gap-2 justify-center">
+                                        {sections.map(section => (
+                                            <span key={section._id} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
+                                                {section.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

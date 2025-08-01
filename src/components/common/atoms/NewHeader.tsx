@@ -124,8 +124,8 @@ const NewHeader = ({
     info: ReceiveTaskType[];
     tree: TaskTree[];
   }>({
-    queryKey: ["tasks"],
-    url: `/tasks/tree`,
+    queryKey: ["tasks", "get-all"],
+    url: `/tasks/get-all-tasks`,
     enabled: isAuthenticated,
   });
 

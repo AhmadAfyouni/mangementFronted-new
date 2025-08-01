@@ -11,7 +11,8 @@ export const addTaskSchema = yup.object().shape({
   emp: yup.string().nullable(),
   department_id: yup.string().nullable(),
   project_id: yup.string().nullable(),
-  section_id: yup.string().nullable(),
+  section_id: yup.string().nullable(), // For FOR_ME tasks
+  manager_section_id: yup.string().nullable(), // For BY_ME tasks
   status: yup.string().nullable(),
   assignee: yup.string().nullable(),
   due_date: yup

@@ -31,7 +31,7 @@ export const useTaskRating = ({
             });
 
             // Invalidate relevant queries
-            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
             queryClient.invalidateQueries({ queryKey: ["task", taskId] });
             queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 

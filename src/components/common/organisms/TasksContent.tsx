@@ -17,9 +17,11 @@ import PageSpinner from "../atoms/ui/PageSpinner";
 const TasksContent = ({
   tasksData,
   sections,
+  isTasksByMe,
 }: {
   sections: SectionType[] | undefined;
   tasksData: ReceiveTaskType[] | undefined;
+  isTasksByMe: boolean;
 }) => {
   const { setSnackbarConfig } = useMokkBar();
   const queryClient = useQueryClient();
@@ -33,22 +35,96 @@ const TasksContent = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    console.log("🔍 TASKSCONTENT DEBUGGING - tasksData:", tasksData);
+    console.log("🔍 TASKSCONTENT DEBUGGING - sections:", sections);
+    console.log("🔍 TASKSCONTENT DEBUGGING - isTasksByMe:", isTasksByMe);
+
     if (tasksData && sections) {
-      // Group tasks by section name instead of section id
+      // Group tasks by section id, using different section attributes based on filter
       const grouped: { [key: string]: ReceiveTaskType[] } = {};
+
+      // Initialize all sections with empty arrays
       sections.forEach(section => {
-        grouped[section._id] = tasksData.filter(task => task.section && task.section.name === section.name);
+        grouped[section._id] = [];
       });
+
+      // Find the "Recently Assigned" section for fallback
+      const recentlyAssignedSection = sections.find(section => section.name === "Recently Assigned");
+      console.log("🔍 TASKSCONTENT DEBUGGING - Recently Assigned section found:", recentlyAssignedSection);
+
+      // Process each task
+      tasksData.forEach(task => {
+        let taskSection;
+        if (isTasksByMe) {
+          // "Tasks By Me" - use managerSection
+          taskSection = task.managerSection;
+          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} using managerSection:`, taskSection);
+        } else {
+          // "Tasks For Me" - use section
+          taskSection = task.section;
+          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} using section:`, taskSection);
+        }
+
+        if (!taskSection) {
+          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} has no ${isTasksByMe ? 'managerSection' : 'section'}, will place in Recently Assigned`);
+          // Place in Recently Assigned if no section
+          if (recentlyAssignedSection) {
+            grouped[recentlyAssignedSection._id].push(task);
+          }
+          return;
+        }
+
+        // Try to find a matching section
+        let matchedSection = null;
+        for (const section of sections) {
+          let matches = false;
+
+          // For "Recently Assigned" sections, match by name (global)
+          if (section.name === "Recently Assigned") {
+            matches = taskSection.name === "Recently Assigned";
+            console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} matches "Recently Assigned" by name: ${matches}`);
+          } else {
+            // For other sections, match by ID (private)
+            matches = taskSection._id === section._id;
+            console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} matches section ${section.name} by ID: ${matches}`);
+          }
+
+          if (matches) {
+            matchedSection = section;
+            break;
+          }
+        }
+
+        if (matchedSection) {
+          // Task matched a specific section
+          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} placed in section: ${matchedSection.name}`);
+          grouped[matchedSection._id].push(task);
+        } else {
+          // Task didn't match any section, place in Recently Assigned
+          console.log(`🔍 TASKSCONTENT DEBUGGING - Task ${task.name} didn't match any section, placing in Recently Assigned`);
+          if (recentlyAssignedSection) {
+            grouped[recentlyAssignedSection._id].push(task);
+          }
+        }
+      });
+
+      // Log the final grouping
+      Object.keys(grouped).forEach(sectionId => {
+        const section = sections.find(s => s._id === sectionId);
+        console.log(`🔍 TASKSCONTENT DEBUGGING - Section ${section?.name}:`, grouped[sectionId].length, "tasks");
+      });
+
+      console.log("🔍 TASKSCONTENT DEBUGGING - Final grouped tasks:", grouped);
       setTasks(grouped);
     }
-  }, [tasksData, sections]);
+  }, [tasksData, sections, isTasksByMe]);
 
-  if (!tasksData || tasksData.length === 0) {
+  if (!sections || sections.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-5 text-twhite min-h-[400px]">
         <div className="text-center mb-8">
-          <p className="text-lg font-medium mb-2">{t("No Tasks")}</p>
-          <p className="text-sm text-gray-400">{t("Create tasks to see them here")}</p>
+          <p className="text-lg font-medium mb-2">{t("No Sections")}</p>
+          <p className="text-sm text-gray-400">{t("Create sections to organize your tasks")}</p>
         </div>
 
         {/* Add Section Button for empty state */}
@@ -99,7 +175,7 @@ const TasksContent = ({
               },
             });
 
-            await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            await queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
           } catch (error) {
             console.error("Error during drag operation:", error);
 
