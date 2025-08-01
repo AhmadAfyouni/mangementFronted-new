@@ -13,6 +13,7 @@ import {
   SearchIcon,
 } from "@/assets";
 import { useMokkBar } from "@/components/Providers/Mokkbar";
+import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 import useCustomQuery from "@/hooks/useCustomQuery";
 import useCustomTheme from "@/hooks/useCustomTheme";
 import useLanguage from "@/hooks/useLanguage";
@@ -21,17 +22,15 @@ import { setSearchQuery } from "@/state/slices/searchSlice";
 import { logout } from "@/state/slices/userSlice";
 import { AppDispatch, RootState } from "@/state/store";
 import { ReceiveTaskType } from "@/types/Task.type";
-import { TaskTree } from "@/types/trees/Task.tree.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useRef, useState, useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Notification from "./ui/Notification";
 import RouteWrapper from "./ui/RouteWrapper";
-import { useTasksGuard } from "@/hooks/tasks/useTaskFieldSettings";
 
 const NewHeader = ({
   setIsExpanded,
@@ -121,8 +120,9 @@ const NewHeader = ({
   // --- Running Task Logic ---
   // Get user's tasks (myTasks is more universal than dailyTasks)
   const { data: tasksData, refetch } = useCustomQuery<{
-    info: ReceiveTaskType[];
-    tree: TaskTree[];
+    status: boolean;
+    message: string;
+    data: ReceiveTaskType[];
   }>({
     queryKey: ["tasks", "get-all"],
     url: `/tasks/get-all-tasks`,
@@ -140,19 +140,24 @@ const NewHeader = ({
 
   // Always recalculate runningTask when tasksData changes
   const runningTask = useMemo(() => {
-    return Array.isArray(tasksData?.info)
-      ? tasksData.info.find(
-        (task) =>
-          Array.isArray(task.timeLogs) &&
-          task.timeLogs.some((log) => log.start && !log.end)
-      )
-      : undefined;
+    if (!Array.isArray(tasksData?.data)) {
+      return undefined;
+    }
+
+    const found = tasksData.data.find(
+      (task) =>
+        Array.isArray(task.timeLogs) &&
+        task.timeLogs.some((log) => log.start && !log.end)
+    );
+
+    return found;
   }, [tasksData]);
 
   const timerProps = useTaskTimer(
     runningTask ? runningTask.id : "dummy-id",
     runningTask ? runningTask.timeLogs || [] : []
   );
+
 
   // Helper for formatting time (hh:mm:ss)
   function formatTime(totalSeconds: number) {
@@ -189,7 +194,7 @@ const NewHeader = ({
 
           {/* Running Task Box (replaces search box) */}
           <div className="flex-1 flex justify-center">
-            {runningTask && timerProps && (
+            {runningTask && (
               <div
                 className="flex items-center bg-secondary rounded-lg shadow-sm min-w-[250px] border-l-4 border-l-orange-300 pl-4"
                 style={{ minHeight: 32 }}
@@ -208,24 +213,26 @@ const NewHeader = ({
                         letterSpacing: '0.1em'
                       }}
                     >
-                      {formatTime(timerProps.elapsedTime)}
+                      {timerProps ? formatTime(timerProps.elapsedTime) : "00:00:00"}
                     </span>
                   </div>
                 </div>
 
-                {/* Pause button */}
-                {showTimeTracking && <button
-                  className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/50 hover:border-green-500/50"
-                  onClick={timerProps.pauseTimer}
-                  disabled={timerProps.isLoading}
-                  aria-label="Pause"
-                  style={{ outline: "none" }}
-                >
-                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
-                    <rect x="6" y="4" width="4" height="16" rx="2" fill="white" />
-                    <rect x="14" y="4" width="4" height="16" rx="2" fill="white" />
-                  </svg>
-                </button>}
+                {/* Pause button - only show if time tracking is enabled and timer props exist */}
+                {showTimeTracking && timerProps && (
+                  <button
+                    className=" mx-1 inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all duration-200 border border-gray-600/50 hover:border-green-500/50"
+                    onClick={timerProps.pauseTimer}
+                    disabled={timerProps.isLoading}
+                    aria-label="Pause"
+                    style={{ outline: "none" }}
+                  >
+                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+                      <rect x="6" y="4" width="4" height="16" rx="2" fill="white" />
+                      <rect x="14" y="4" width="4" height="16" rx="2" fill="white" />
+                    </svg>
+                  </button>
+                )}
 
                 <RouteWrapper
                   href={`/tasks/${runningTask.id}`}

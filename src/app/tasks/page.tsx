@@ -17,7 +17,6 @@ import { ProjectType } from "@/types/Project.type";
 import { SectionType } from "@/types/Section.type";
 import { ReceiveTaskType } from "@/types/Task.type";
 import { DeptTree } from "@/types/trees/Department.tree.type";
-import { TaskTree } from "@/types/trees/Task.tree.type";
 import { Building2, ChevronDown, FolderOpen, Plus, Users } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
