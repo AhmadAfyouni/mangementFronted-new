@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, GitBranch, Layers, Users } from "lucide-react";
+import { Building2, FolderOpen, GitBranch, Users } from "lucide-react";
 import { UseFormRegister } from "react-hook-form";
 import { TaskFormInputs } from "@/types/Task.type";
 import { DepartmentType } from "@/types/DepartmentType.type";
@@ -37,7 +37,6 @@ const AssignmentSection: React.FC<AssignmentSectionProps> = ({
     employees,
     departments,
     projects,
-    sections,
     tasks,
     isEmployeeDisabled,
     isDepartmentDisabled,
