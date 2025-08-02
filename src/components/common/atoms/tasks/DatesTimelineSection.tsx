@@ -75,7 +75,6 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
         return () => subscription.unsubscribe();
     }, [watch, isExpectedEndDisabled]);
 
-    const startDateRef = useRef<HTMLInputElement | null>(null);
     const dueDateRef = useRef<HTMLInputElement | null>(null);
 
     // Enhanced date picker opening function
@@ -125,48 +124,6 @@ const DatesTimelineSection: React.FC<DatesTimelineSectionProps> = ({
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Start Date */}
-                <div>
-                    <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-green-400" />
-                        {t("Start Date")} <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                        <div
-                            className="relative cursor-pointer"
-                            onClick={() => openDatePicker(startDateRef)}
-                        >
-                            <input
-                                {...register("start_date")}
-                                ref={e => {
-                                    register("start_date").ref(e);
-                                    startDateRef.current = e;
-                                }}
-                                type="date"
-                                min={dateConstraints.min}
-                                max={dateConstraints.max}
-                                className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDatePicker(startDateRef);
-                                }}
-                            />
-                            {/* Overlay to make entire area clickable */}
-                            <div className="absolute inset-0 cursor-pointer" />
-                        </div>
-                    </div>
-                    {errors.start_date && (
-                        <p className="text-red-400 mt-1.5 text-sm flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            {errors.start_date.message}
-                        </p>
-                    )}
-                    {dateConstraints.min && (
-                        <p className="text-green-400 mt-1 text-xs">
-                            {t("Must be between")} {new Date(dateConstraints.min).toLocaleDateString()} - {dateConstraints.max ? new Date(dateConstraints.max).toLocaleDateString() : t("Project end")}
-                        </p>
-                    )}
-                </div>
 
                 {/* Due Date */}
                 {showDueDate && (

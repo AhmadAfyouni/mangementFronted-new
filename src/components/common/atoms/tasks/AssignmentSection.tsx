@@ -129,57 +129,7 @@ const AssignmentSection: React.FC<AssignmentSectionProps> = ({
                 </div>
             </div>
 
-            {/* Section */}
-            <div>
-                <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-green-400" />
-                    {t("Section")} ({t("FOR ME")})
-                </label>
-                <div className="relative">
-                    <select
-                        {...register("section_id")}
-                        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-green-500 focus:ring focus:ring-green-500/20 focus:outline-none transition-colors appearance-none"
-                    >
-                        <option value="">{t("Select Section")}</option>
-                        {sections?.filter(section => section.type_section === "FOR_ME").map((section: SectionType) => (
-                            <option key={section._id} value={section._id}>
-                                {section.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
 
-            {/* Manager Section */}
-            <div>
-                <label className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-orange-400" />
-                    {t("Manager Section")} ({t("BY ME")})
-                </label>
-                <div className="relative">
-                    <select
-                        {...register("manager_section_id")}
-                        className="w-full px-4 py-3.5 rounded-lg bg-dark text-twhite border border-gray-700 focus:border-orange-500 focus:ring focus:ring-orange-500/20 focus:outline-none transition-colors appearance-none"
-                    >
-                        <option value="">{t("Select Section")}</option>
-                        {sections?.filter(section => section.type_section === "BY_ME").map((section: SectionType) => (
-                            <option key={section._id} value={section._id}>
-                                {section.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
 
             {/* Parent Task */}
             <div className="lg:col-span-2">
