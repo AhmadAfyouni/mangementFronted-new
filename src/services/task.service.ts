@@ -79,6 +79,7 @@ export const onDragEnd = async ({
   setTasks,
   tasks,
   setMessage,
+  isTasksByMe,
 }: {
   result: DropResult;
   tasks: {
@@ -90,6 +91,7 @@ export const onDragEnd = async ({
     }>
   >;
   setMessage: (msg: string) => void;
+  isTasksByMe: boolean;
 }) => {
   const { destination, source } = result;
   if (!destination) return;
@@ -141,14 +143,10 @@ export const onDragEnd = async ({
     });
 
     try {
-      // Determine which section field to update based on section type
-      const destinationSection = Object.values(tasks).flat().find(task =>
-        task.section?._id === destination.droppableId || task.manager_section?._id === destination.droppableId
-      );
-
-      const updateData = destinationSection?.section?._id === destination.droppableId
-        ? { section_id: destination.droppableId }
-        : { manager_section_id: destination.droppableId };
+      // Use the correct section field based on the filter
+      const updateData = isTasksByMe
+        ? { manager_section_id: destination.droppableId }
+        : { section_id: destination.droppableId };
 
       await updateTaskData(movedTask.id, updateData);
     } catch (error) {

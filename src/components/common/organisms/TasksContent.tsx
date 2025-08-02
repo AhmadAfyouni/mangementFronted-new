@@ -167,6 +167,7 @@ const TasksContent = ({
                   severity: "error",
                 });
               },
+              isTasksByMe,
             });
 
             await queryClient.invalidateQueries({ queryKey: ["tasks", "get-all"] });
